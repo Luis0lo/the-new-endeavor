@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from '@/components/DashboardLayout';
+import { Database } from '@/integrations/supabase/types';
 
 interface GardenActivity {
   id: string;
@@ -77,12 +78,24 @@ const Dashboard = () => {
     e.preventDefault();
     
     try {
+      // Get user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to create activities",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const { error } = await supabase
         .from('garden_activities')
         .insert({
           title,
           description,
-          scheduled_date: format(date, 'yyyy-MM-dd')
+          scheduled_date: format(date, 'yyyy-MM-dd'),
+          user_id: session.user.id
         });
         
       if (error) throw error;
@@ -137,7 +150,9 @@ const Dashboard = () => {
   
   // Handle date change
   useEffect(() => {
-    fetchActivities();
+    if (supabase.auth.getSession) {
+      fetchActivities();
+    }
   }, [date]);
 
   return (

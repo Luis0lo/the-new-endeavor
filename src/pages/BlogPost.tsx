@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
+import { Database } from '@/integrations/supabase/types';
 
 interface BlogPost {
   id: string;

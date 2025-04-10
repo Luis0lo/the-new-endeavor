@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import MainLayout from '@/components/MainLayout';
+import { Database } from '@/integrations/supabase/types';
 
 interface BlogPost {
   id: string;
