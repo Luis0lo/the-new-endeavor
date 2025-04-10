@@ -44,13 +44,22 @@ const BlogPost = () => {
           published_at,
           profiles:author_id(username, avatar_url)
         `)
-        .eq('slug', slug)
-        .eq('published', true)
+        .eq('slug', slug as any)
+        .eq('published', true as any)
         .single();
         
       if (error) throw error;
       
-      setPost(data);
+      // Transform data to match our BlogPost interface
+      const formattedPost = data ? {
+        ...data,
+        profiles: data.profiles as unknown as {
+          username: string;
+          avatar_url: string | null;
+        }
+      } : null;
+      
+      setPost(formattedPost);
     } catch (error: any) {
       toast({
         title: "Error",

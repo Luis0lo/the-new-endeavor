@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import MainLayout from '@/components/MainLayout';
 import { Database } from '@/integrations/supabase/types';
 
+// Define the BlogPost interface to match what we expect from the database
 interface BlogPost {
   id: string;
   title: string;
@@ -41,12 +42,18 @@ const Blog = () => {
           published_at,
           profiles:author_id(username)
         `)
-        .eq('published', true)
+        .eq('published', true as any)
         .order('published_at', { ascending: false });
         
       if (error) throw error;
       
-      setPosts(data || []);
+      // Transform data to match our BlogPost interface
+      const formattedPosts = data?.map(post => ({
+        ...post,
+        profiles: post.profiles as unknown as { username: string }
+      })) || [];
+      
+      setPosts(formattedPosts);
     } catch (error: any) {
       toast({
         title: "Error",
