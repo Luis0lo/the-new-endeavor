@@ -55,21 +55,26 @@ const Dashboard = () => {
       const { data: activities, error } = await supabase
         .from('garden_activities')
         .select('*')
-        .eq('scheduled_date', format(date, 'yyyy-MM-dd') as any)
+        .eq('scheduled_date', format(date, 'yyyy-MM-dd'))
         .order('created_at', { ascending: false });
         
       if (error) throw error;
       
-      // Type assertion to match our interface
-      const typedActivities = activities?.map(activity => ({
-        id: activity.id,
-        title: activity.title,
-        description: activity.description,
-        scheduled_date: activity.scheduled_date,
-        completed: activity.completed
-      })) || [];
-      
-      setActivities(typedActivities);
+      // Type assertion with safety checks
+      if (activities) {
+        // Transform to match our interface
+        const typedActivities: GardenActivity[] = activities.map(activity => ({
+          id: activity.id,
+          title: activity.title,
+          description: activity.description,
+          scheduled_date: activity.scheduled_date,
+          completed: activity.completed
+        }));
+        
+        setActivities(typedActivities);
+      } else {
+        setActivities([]);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -97,17 +102,16 @@ const Dashboard = () => {
         return;
       }
       
-      // Cast the insert data to any to bypass TypeScript's strict checking
-      const activityData = {
-        title,
-        description,
-        scheduled_date: format(date, 'yyyy-MM-dd'),
-        user_id: session.user.id
-      };
-      
+      // Use type assertion with an object that matches the expected schema
       const { error } = await supabase
         .from('garden_activities')
-        .insert(activityData as any);
+        .insert({
+          title,
+          description,
+          scheduled_date: format(date, 'yyyy-MM-dd'),
+          user_id: session.user.id,
+          completed: false
+        } as any);
         
       if (error) throw error;
       
@@ -134,11 +138,12 @@ const Dashboard = () => {
   // Toggle activity completion status
   const toggleActivityStatus = async (id: string, currentStatus: boolean | null) => {
     try {
-      // Cast the update data to any to bypass TypeScript's strict checking
       const { error } = await supabase
         .from('garden_activities')
-        .update({ completed: !currentStatus } as any)
-        .eq('id', id as any);
+        .update({
+          completed: !currentStatus
+        } as any)
+        .eq('id', id);
         
       if (error) throw error;
       

@@ -26,8 +26,16 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    storage: localStorage,
-    // Add redirect to the current URL with /auth path
-    redirectTo: `${getBaseUrl()}/auth`
+    storage: localStorage
+  },
+  global: {
+    // Add redirect to the current URL with /auth path in the global options instead
+    fetch: (url, options) => {
+      const customHeaders = {
+        ...options?.headers,
+        'X-Supabase-Auth-Redirect': `${getBaseUrl()}/auth`
+      };
+      return fetch(url, { ...options, headers: customHeaders });
+    }
   }
 });

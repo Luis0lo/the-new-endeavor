@@ -44,22 +44,28 @@ const BlogPost = () => {
           published_at,
           profiles:author_id(username, avatar_url)
         `)
-        .eq('slug', slug as any)
-        .eq('published', true as any)
+        .eq('slug', slug)
+        .eq('published', true)
         .single();
         
       if (error) throw error;
       
-      // Transform data to match our BlogPost interface
-      const formattedPost = data ? {
-        ...data,
-        profiles: data.profiles as unknown as {
-          username: string;
-          avatar_url: string | null;
-        }
-      } : null;
-      
-      setPost(formattedPost);
+      // Transform with type safety
+      if (data) {
+        const formattedPost: BlogPost = {
+          id: data.id,
+          title: data.title,
+          content: data.content,
+          featured_image: data.featured_image,
+          published_at: data.published_at,
+          profiles: {
+            username: (data.profiles as any)?.username || "Unknown",
+            avatar_url: (data.profiles as any)?.avatar_url
+          }
+        };
+        
+        setPost(formattedPost);
+      }
     } catch (error: any) {
       toast({
         title: "Error",

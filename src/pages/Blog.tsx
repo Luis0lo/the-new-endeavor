@@ -42,18 +42,31 @@ const Blog = () => {
           published_at,
           profiles:author_id(username)
         `)
-        .eq('published', true as any)
+        .eq('published', true)
         .order('published_at', { ascending: false });
         
       if (error) throw error;
       
-      // Transform data to match our BlogPost interface
-      const formattedPosts = data?.map(post => ({
-        ...post,
-        profiles: post.profiles as unknown as { username: string }
-      })) || [];
-      
-      setPosts(formattedPosts);
+      // Transform data to match our BlogPost interface with type safety
+      if (data) {
+        const formattedPosts = data.map(post => {
+          // Make sure profiles exists and has the expected shape
+          const profileData = post.profiles || { username: "Unknown" };
+          return {
+            id: post.id,
+            title: post.title,
+            excerpt: post.excerpt,
+            slug: post.slug,
+            featured_image: post.featured_image,
+            published_at: post.published_at,
+            profiles: {
+              username: (profileData as any).username || "Unknown"
+            }
+          } as BlogPost;
+        });
+        
+        setPosts(formattedPosts);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
