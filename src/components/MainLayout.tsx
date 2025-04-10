@@ -1,0 +1,118 @@
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import Footer from '@/components/Footer';
+import { User } from '@supabase/supabase-js';
+
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      {/* Header/Navbar */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center">
+          <div className="mr-4 hidden md:flex">
+            <Link to="/" className="mr-6 flex items-center space-x-2">
+              <span className="text-xl font-bold">GardenApp</span>
+            </Link>
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+              <Link to="/" className="transition-colors hover:text-foreground/80">Home</Link>
+              <Link to="/blog" className="transition-colors hover:text-foreground/80">Blog</Link>
+              {user && <Link to="/dashboard" className="transition-colors hover:text-foreground/80">Dashboard</Link>}
+            </nav>
+          </div>
+
+          <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+            <div className="w-full flex-1 md:w-auto md:flex-none">
+              <button
+                className="inline-flex items-center justify-center md:hidden"
+                onClick={() => setMenuOpen(!menuOpen)}
+              >
+                {menuOpen ? "✕" : "☰"}
+              </button>
+            </div>
+            <nav className="flex items-center">
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">Account</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/auth">
+                  <Button size="sm">Sign In</Button>
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="container md:hidden">
+            <nav className="flex flex-col space-y-3 pb-3 text-sm font-medium">
+              <Link to="/" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
+                Home
+              </Link>
+              <Link to="/blog" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
+                Blog
+              </Link>
+              {user && (
+                <Link to="/dashboard" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
+                  Dashboard
+                </Link>
+              )}
+            </nav>
+          </div>
+        )}
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+};
+
+export default MainLayout;
