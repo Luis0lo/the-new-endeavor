@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,24 +8,61 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Check if user is already logged in
   useEffect(() => {
+    // Special case for handling email confirmation
+    const handleEmailConfirmation = async () => {
+      // If the URL contains access_token or refresh_token, it's likely a redirect from email verification
+      if (location.hash && (location.hash.includes('access_token') || location.hash.includes('refresh_token'))) {
+        setVerifying(true);
+        try {
+          // The PKCE flow will automatically exchange the code for a session
+          const { error } = await supabase.auth.getSession();
+          
+          if (error) throw error;
+          
+          toast({
+            title: "Email verified!",
+            description: "Your account has been verified successfully.",
+          });
+          
+          navigate('/dashboard');
+        } catch (error: any) {
+          toast({
+            title: "Verification error",
+            description: error.message || "Failed to verify your email",
+            variant: "destructive"
+          });
+        } finally {
+          setVerifying(false);
+        }
+      }
+    };
+
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         navigate('/dashboard');
+      } else {
+        // Try to handle email confirmation
+        handleEmailConfirmation();
       }
     };
+    
     checkSession();
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +86,11 @@ const Auth = () => {
         description: "Please check your email for verification.",
       });
       
-      if (data.user) {
-        navigate('/dashboard');
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        toast({
+          title: "Account already exists",
+          description: "Please sign in instead.",
+        });
       }
     } catch (error: any) {
       toast({
@@ -88,6 +128,23 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  // Show a loading state if we're processing an email verification
+  if (verifying) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Verifying your email</CardTitle>
+            <CardDescription className="text-center">Please wait while we verify your email address</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-6">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
@@ -170,6 +227,11 @@ const Auth = () => {
                     required 
                   />
                 </div>
+                <Alert>
+                  <AlertDescription>
+                    After registration, you'll need to verify your email address before logging in.
+                  </AlertDescription>
+                </Alert>
               </CardContent>
               <CardFooter>
                 <Button type="submit" className="w-full" disabled={loading}>
