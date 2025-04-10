@@ -26,7 +26,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    // Use the redirectUrl property inside the auth options configuration
-    storage: localStorage
+    storage: localStorage,
+    // Add redirect to the current URL with /auth path
+    redirectTo: `${getBaseUrl()}/auth`
   }
 });

@@ -17,6 +17,7 @@ const Auth = () => {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -24,22 +25,34 @@ const Auth = () => {
   useEffect(() => {
     // Special case for handling email confirmation
     const handleEmailConfirmation = async () => {
-      // If the URL contains access_token or refresh_token, it's likely a redirect from email verification
-      if (location.hash && (location.hash.includes('access_token') || location.hash.includes('refresh_token'))) {
+      // Handle both code in query params and access_token in hash
+      const hasCode = location.search.includes('code=');
+      const hasToken = location.hash && (location.hash.includes('access_token') || location.hash.includes('refresh_token'));
+      
+      if (hasCode || hasToken) {
         setVerifying(true);
+        setVerificationError(null);
+        
         try {
           // The PKCE flow will automatically exchange the code for a session
-          const { error } = await supabase.auth.getSession();
+          const { data, error } = await supabase.auth.getSession();
           
           if (error) throw error;
           
-          toast({
-            title: "Email verified!",
-            description: "Your account has been verified successfully.",
-          });
-          
-          navigate('/dashboard');
+          if (data.session) {
+            toast({
+              title: "Authentication successful!",
+              description: "Your account has been verified successfully.",
+            });
+            
+            navigate('/dashboard');
+          } else {
+            throw new Error("No session found after verification");
+          }
         } catch (error: any) {
+          console.error("Verification error:", error);
+          setVerificationError(error.message || "Failed to verify your email");
+          
           toast({
             title: "Verification error",
             description: error.message || "Failed to verify your email",
@@ -141,6 +154,31 @@ const Auth = () => {
           <CardContent className="flex justify-center py-6">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show verification error if any
+  if (verificationError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center text-destructive">Verification Failed</CardTitle>
+            <CardDescription className="text-center">There was a problem verifying your email</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive">
+              <AlertDescription>{verificationError}</AlertDescription>
+            </Alert>
+            <p className="mt-4 text-center">
+              This may be due to an expired or invalid verification link.
+            </p>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button onClick={() => navigate('/auth')}>Return to Login</Button>
+          </CardFooter>
         </Card>
       </div>
     );
