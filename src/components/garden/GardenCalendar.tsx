@@ -1,16 +1,17 @@
-
 import React, { useState, useEffect } from "react";
 import { format, parseISO } from 'date-fns';
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { GardenActivity, ViewType } from "@/types/garden";
-import CalendarHeader from "./CalendarHeader";
+import { User } from '@supabase/supabase-js';
+import { ChevronLeft, ChevronRight, Plus, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DayView from "./DayView";
 import WeekView from "./WeekView";
 import MonthView from "./MonthView";
 import YearView from "./YearView";
 import ActivityForm from "./ActivityForm";
-import { User } from '@supabase/supabase-js';
 
 interface GardenCalendarProps {
   sampleData?: GardenActivity[] | null;
@@ -463,23 +464,6 @@ const GardenCalendar: React.FC<GardenCalendarProps> = ({ sampleData = null, read
 
   const handleViewChange = (newView: ViewType) => {
     setView(newView);
-    
-    // Save user's preferred view
-    if (userId) {
-      try {
-        supabase
-          .from('profiles')
-          .update({ calendar_default_view: newView })
-          .eq('id', userId)
-          .then(({ error }) => {
-            if (error) {
-              console.error("Failed to save view preference:", error);
-            }
-          });
-      } catch (error) {
-        console.error("Failed to save view preference:", error);
-      }
-    }
   };
 
   const handleDateChange = (newDate: Date) => {
@@ -494,6 +478,38 @@ const GardenCalendar: React.FC<GardenCalendarProps> = ({ sampleData = null, read
   const handleSelectMonth = (month: Date) => {
     setDate(month);
     setView("month");
+  };
+
+  const handlePreviousMonth = () => {
+    const newDate = new Date(date);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setDate(newDate);
+  };
+
+  const handleNextMonth = () => {
+    const newDate = new Date(date);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setDate(newDate);
+  };
+
+  const goToToday = () => {
+    setDate(new Date());
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign out",
+        variant: "destructive"
+      });
+    }
   };
 
   const renderView = () => {
@@ -540,13 +556,76 @@ const GardenCalendar: React.FC<GardenCalendarProps> = ({ sampleData = null, read
 
   return (
     <div className="flex flex-col h-full">
-      <CalendarHeader
-        date={date}
-        view={view}
-        onViewChange={handleViewChange}
-        onDateChange={handleDateChange}
-        onAddActivity={!readOnly ? handleAddActivity : undefined}
-      />
+      {/* Calendar header */}
+      <div className="flex justify-between items-center p-4 border-b">
+        <div>
+          <h1 className="text-2xl font-bold">Garden Calendar</h1>
+          <p className="text-muted-foreground">Track your garden activities and events</p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {user && (
+            <>
+              <div className="text-sm text-muted-foreground">
+                Logged in as: {user.email}
+              </div>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+      
+      {/* Calendar toolbar */}
+      <div className="flex justify-between items-center p-4">
+        <div className="flex items-center gap-2">
+          <Button onClick={goToToday} variant="outline" size="sm">
+            Today
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handlePreviousMonth}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleNextMonth}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <h2 className="text-xl font-semibold ml-2">
+            {format(date, 'MMMM yyyy')}
+          </h2>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Select value={view} onValueChange={(v: ViewType) => handleViewChange(v)}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="View" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="month">Month</SelectItem>
+              <SelectItem value="week">Week</SelectItem>
+              <SelectItem value="day">Day</SelectItem>
+              <SelectItem value="year">Year</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {!readOnly && (
+            <Button onClick={() => handleAddActivity(date)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Activity
+            </Button>
+          )}
+        </div>
+      </div>
+      
+      {/* Calendar content */}
       <div className="flex-1 p-4 overflow-auto">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -556,6 +635,7 @@ const GardenCalendar: React.FC<GardenCalendarProps> = ({ sampleData = null, read
           renderView()
         )}
       </div>
+      
       <ActivityForm
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}

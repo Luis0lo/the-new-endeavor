@@ -1,48 +1,30 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { 
-  LayoutDashboard, 
+  Home, 
   Calendar, 
-  Flower2, 
-  Book, 
-  Settings, 
+  Settings,
   LogOut,
-  ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar
-} from '@/components/ui/sidebar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// Create a separate component for the actual sidebar content
-const DashboardSidebar = () => {
-  const [user, setUser] = React.useState<User | null>(null);
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = useSidebar();
   
-  React.useEffect(() => {
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
@@ -84,141 +66,97 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b p-2">
-        <Link to="/" className="flex items-center gap-2 px-2">
-          <Flower2 className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold">Garden App</span>
-        </Link>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={isActive('/dashboard')}
-                  tooltip="Dashboard"
-                  asChild
-                >
-                  <Link to="/dashboard">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={isActive('/dashboard/calendar')}
-                  tooltip="Calendar"
-                  asChild
-                >
-                  <Link to="/dashboard/calendar">
-                    <Calendar className="h-5 w-5" />
-                    <span>Calendar</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={isActive('/dashboard/plants')}
-                  tooltip="My Plants"
-                  asChild
-                >
-                  <Link to="/dashboard/plants">
-                    <Flower2 className="h-5 w-5" />
-                    <span>My Plants</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        <SidebarGroup>
-          <SidebarGroupLabel>Other</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={isActive('/blog')}
-                  tooltip="Blog"
-                  asChild
-                >
-                  <Link to="/blog">
-                    <Book className="h-5 w-5" />
-                    <span>Blog</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={isActive('/dashboard/settings')}
-                  tooltip="Settings"
-                  asChild
-                >
-                  <Link to="/dashboard/settings">
-                    <Settings className="h-5 w-5" />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      
-      <SidebarFooter className="border-t p-2">
-        <Button
-          variant="outline"
-          className="w-full justify-start"
-          onClick={handleSignOut}
-        >
-          <LogOut className="mr-2 h-5 w-5" />
-          <span>Sign Out</span>
-        </Button>
-      </SidebarFooter>
-    </Sidebar>
-  );
-};
+    <div className="flex min-h-screen w-full bg-background">
+      {/* Sidebar */}
+      <div 
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ${
+          sidebarCollapsed ? "w-[60px]" : "w-[250px]"
+        }`}
+      >
+        {/* Sidebar header */}
+        <div className="flex h-16 items-center border-b px-4">
+          <Link 
+            to="/" 
+            className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
+          >
+            <span className="text-primary text-xl font-bold">
+              {sidebarCollapsed ? "GA" : "Garden App"}
+            </span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          >
+            {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </Button>
+        </div>
 
-// Sidebar collapse toggle button
-const SidebarCollapseButton = () => {
-  const { toggleSidebar, state } = useSidebar();
-  
-  return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="fixed bottom-4 left-4 z-50 md:static md:bottom-auto md:left-auto"
-      onClick={toggleSidebar}
-    >
-      {state === 'collapsed' ? (
-        <ChevronRight className="h-4 w-4" />
-      ) : (
-        <ChevronLeft className="h-4 w-4" />
-      )}
-    </Button>
-  );
-};
-
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <DashboardSidebar />
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1">
-            <div className="container p-4">
-              {children}
-            </div>
+        {/* Navigation */}
+        <div className="flex-1 overflow-auto py-4">
+          <div className="mb-4 px-4">
+            {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>}
+            <nav className="flex flex-col gap-1">
+              <Link
+                to="/dashboard"
+                className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                  isActive("/dashboard") && !isActive("/dashboard/calendar")
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
+                }`}
+              >
+                <Home size={18} />
+                {!sidebarCollapsed && <span>Home</span>}
+              </Link>
+              <Link
+                to="/dashboard/calendar"
+                className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                  isActive("/dashboard/calendar")
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
+                }`}
+              >
+                <Calendar size={18} />
+                {!sidebarCollapsed && <span>Calendar</span>}
+              </Link>
+              <Link
+                to="/dashboard/settings"
+                className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                  isActive("/dashboard/settings")
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
+                }`}
+              >
+                <Settings size={18} />
+                {!sidebarCollapsed && <span>Account Settings</span>}
+              </Link>
+            </nav>
           </div>
         </div>
-        <SidebarCollapseButton />
+
+        {/* Sidebar footer */}
+        <div className="border-t p-4">
+          <Button
+            variant="outline"
+            className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
+            onClick={handleSignOut}
+          >
+            <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
+            {!sidebarCollapsed && <span>Logout</span>}
+          </Button>
+        </div>
       </div>
-    </SidebarProvider>
+
+      {/* Main content */}
+      <div 
+        className={`flex-1 transition-all ${
+          sidebarCollapsed ? "ml-[60px]" : "ml-[250px]"
+        }`}
+      >
+        {children}
+      </div>
+    </div>
   );
 };
 

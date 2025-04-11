@@ -1,7 +1,9 @@
 
 import React from 'react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addDays } from 'date-fns';
+import { Button } from '@/components/ui/button';
 import { GardenActivity } from '@/types/garden';
+import { Plus } from 'lucide-react';
 
 interface MonthViewProps {
   date: Date;
@@ -16,83 +18,112 @@ const MonthView: React.FC<MonthViewProps> = ({
   onAddActivity,
   onSelectDay
 }) => {
-  const monthStart = startOfMonth(date);
-  const monthEnd = endOfMonth(date);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  
-  const days = eachDayOfInterval({ start: startDate, end: endDate });
-
-  // Group days into weeks
-  const weeks: Date[][] = [];
-  let week: Date[] = [];
-  days.forEach((day) => {
-    week.push(day);
-    if (week.length === 7) {
-      weeks.push(week);
-      week = [];
+  // Get days of month for the calendar grid
+  const getDaysInMonth = () => {
+    const monthStart = startOfMonth(date);
+    const monthEnd = endOfMonth(date);
+    const startDate = new Date(monthStart);
+    startDate.setDate(startDate.getDate() - startDate.getDay()); // Start from Sunday
+    
+    const endDate = new Date(monthEnd);
+    const daysToAdd = 6 - endDate.getDay(); // End on Saturday
+    endDate.setDate(endDate.getDate() + daysToAdd);
+    
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    
+    // Group days into weeks
+    const weeks = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
     }
-  });
+    
+    return weeks;
+  };
+
+  const getActivitiesForDay = (day: Date) => {
+    return activities.filter(activity => {
+      const activityDate = new Date(activity.date);
+      return isSameDay(activityDate, day);
+    });
+  };
+
+  const weeks = getDaysInMonth();
+  const today = new Date();
 
   return (
-    <div className="border rounded-md">
-      <div className="grid grid-cols-7 text-center py-2 border-b bg-muted">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-          <div key={day} className="text-sm font-medium">
+    <div className="w-full h-full">
+      <div className="grid grid-cols-7 text-center">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          <div key={day} className="py-2 font-semibold text-sm">
             {day}
           </div>
         ))}
       </div>
       
-      <div>
-        {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0">
-            {week.map((day) => {
-              const isCurrentMonth = isSameMonth(day, date);
-              const isToday = isSameDay(day, new Date());
+      <div className="grid grid-cols-7 gap-1 h-[calc(100%-2rem)]">
+        {weeks.flat().map((day, index) => {
+          const isCurrentMonth = isSameMonth(day, date);
+          const isToday = isSameDay(day, today);
+          const dayActivities = getActivitiesForDay(day);
+          const hasActivities = dayActivities.length > 0;
+          
+          return (
+            <div 
+              key={index}
+              className={`relative flex flex-col p-1 min-h-[80px] border rounded-md ${
+                isCurrentMonth 
+                  ? 'bg-card' 
+                  : 'bg-muted/20 text-muted-foreground'
+              } ${
+                isToday 
+                  ? 'border-primary' 
+                  : 'border-border'
+              } hover:bg-accent/10 cursor-pointer transition-colors`}
+              onClick={() => onSelectDay(day)}
+            >
+              <div className={`text-right p-1 ${
+                isToday ? 'font-bold text-primary' : ''
+              }`}>
+                {format(day, 'd')}
+              </div>
               
-              // Filter activities for this day
-              const dayActivities = activities.filter(activity => {
-                const activityDate = new Date(activity.date);
-                return isSameDay(activityDate, day);
-              });
-              
-              return (
-                <div 
-                  key={day.toString()}
-                  className={`min-h-[80px] p-1 border-r last:border-r-0 ${
-                    !isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''
-                  } ${isToday ? 'bg-blue-50' : ''}`}
-                  onClick={() => onSelectDay(day)}
-                >
-                  <div className={`text-right p-1 ${
-                    isToday ? 'bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center ml-auto' : ''
-                  }`}>
-                    {format(day, 'd')}
-                  </div>
-                  
-                  <div className="mt-1">
-                    {dayActivities.slice(0, 2).map((activity) => (
+              <div className="flex-1 overflow-hidden">
+                {hasActivities && isCurrentMonth && (
+                  <div className="space-y-1 text-xs">
+                    {dayActivities.slice(0, 2).map(activity => (
                       <div 
                         key={activity.id}
-                        className="text-xs p-1 mb-1 bg-background rounded truncate"
+                        className="truncate px-1 py-0.5 rounded bg-primary/10 text-primary-foreground"
                         title={activity.title}
                       >
                         {activity.title}
                       </div>
                     ))}
-                    
                     {dayActivities.length > 2 && (
-                      <div className="text-xs text-center text-muted-foreground">
-                        + {dayActivities.length - 2} more
+                      <div className="text-xs text-muted-foreground pl-1">
+                        +{dayActivities.length - 2} more
                       </div>
                     )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                )}
+              </div>
+              
+              {isCurrentMonth && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute bottom-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddActivity(day);
+                  }}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
