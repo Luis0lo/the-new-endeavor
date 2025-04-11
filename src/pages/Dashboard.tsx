@@ -1,18 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from '@/components/ui/calendar';
-import { CheckCircle, Circle, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from '@/components/DashboardLayout';
-import { Database } from '@/integrations/supabase/types';
+
+// Import our new components
+import DashboardCalendar from '@/components/dashboard/DashboardCalendar';
+import ActivityList from '@/components/dashboard/ActivityList';
+import ActivityFormDialog from '@/components/dashboard/ActivityFormDialog';
 
 interface GardenActivity {
   id: string;
@@ -60,7 +57,6 @@ const Dashboard = () => {
         
       if (error) throw error;
       
-      // Type assertion with safety checks
       if (activities) {
         // Transform to match our interface
         const typedActivities: GardenActivity[] = activities.map(activity => ({
@@ -102,7 +98,6 @@ const Dashboard = () => {
         return;
       }
       
-      // Use type assertion with an object that matches the expected schema
       const { error } = await supabase
         .from('garden_activities')
         .insert({
@@ -177,115 +172,27 @@ const Dashboard = () => {
       <div className="flex-1 space-y-4 p-4 md:p-8">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Garden Dashboard</h2>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus size={16} />
-                <span>Add Activity</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Schedule Garden Activity</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={createActivity} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Activity Title</Label>
-                  <Input 
-                    id="title" 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)} 
-                    placeholder="E.g., Water tomatoes" 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea 
-                    id="description" 
-                    value={description} 
-                    onChange={(e) => setDescription(e.target.value)} 
-                    placeholder="Add notes or instructions..." 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Scheduled Date</Label>
-                  <div className="border rounded-md p-2">
-                    <Calendar 
-                      mode="single"
-                      selected={date}
-                      onSelect={(date) => date && setDate(date)} 
-                      className="mx-auto"
-                    />
-                  </div>
-                </div>
-                <Button type="submit" className="w-full">Schedule Activity</Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <ActivityFormDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            date={date}
+            onSubmit={createActivity}
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            setDate={setDate}
+          />
         </div>
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle>Calendar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Calendar 
-                mode="single"
-                selected={date}
-                onSelect={(date) => date && setDate(date)}
-                className="mx-auto"
-              />
-            </CardContent>
-          </Card>
-          
-          <Card className="col-span-1 md:col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle>
-                Activities for {format(date, 'MMMM d, yyyy')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-8">Loading activities...</div>
-              ) : activities.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No activities scheduled for this day.</p>
-                  <p className="text-sm mt-2">Click "Add Activity" to schedule something.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {activities.map((activity) => (
-                    <div key={activity.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => toggleActivityStatus(activity.id, activity.completed)}
-                        className="h-8 w-8 shrink-0"
-                      >
-                        {activity.completed ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </Button>
-                      <div className="flex-1">
-                        <h4 className={`font-medium ${activity.completed ? 'line-through text-muted-foreground' : ''}`}>
-                          {activity.title}
-                        </h4>
-                        {activity.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {activity.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <DashboardCalendar date={date} setDate={setDate} />
+          <ActivityList 
+            activities={activities} 
+            date={date} 
+            loading={loading}
+            onToggleActivityStatus={toggleActivityStatus}
+          />
         </div>
       </div>
     </DashboardLayout>
