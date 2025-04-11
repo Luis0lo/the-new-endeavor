@@ -26,15 +26,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    storage: localStorage
+    storage: typeof window !== 'undefined' ? localStorage : undefined
   },
   global: {
-    fetch: (url, options) => {
-      const customHeaders = {
-        ...options?.headers,
-        'X-Supabase-Auth-Redirect': `${getBaseUrl()}/auth`
-      };
-      return fetch(url, { ...options, headers: customHeaders });
+    headers: {
+      'X-Supabase-Auth-Redirect': `${getBaseUrl()}/auth`
     }
   }
 });
