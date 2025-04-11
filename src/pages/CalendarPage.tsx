@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addDays, subDays, parse, parseISO, addMonths, subMonths, addYears, subYears } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -481,9 +480,9 @@ const CalendarPage = () => {
             onMonthChange={setCurrentDate}
             className="mx-auto pointer-events-auto"
             components={{
-              Day: (props) => {
+              Day: ({ date, ...props }: any) => {
                 // Check if the day has activities
-                const formattedDate = format(props.date, 'yyyy-MM-dd');
+                const formattedDate = format(date, 'yyyy-MM-dd');
                 const hasActivities = activities.some(a => a.scheduled_date === formattedDate);
                 
                 return (
