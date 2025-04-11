@@ -29,7 +29,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage
   },
   global: {
-    // Add redirect to the current URL with /auth path in the global options instead
     fetch: (url, options) => {
       const customHeaders = {
         ...options?.headers,

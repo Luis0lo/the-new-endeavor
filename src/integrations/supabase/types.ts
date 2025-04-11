@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string
@@ -61,6 +85,8 @@ export type Database = {
       }
       garden_activities: {
         Row: {
+          activity_time: string | null
+          category_id: string | null
           completed: boolean | null
           created_at: string
           description: string | null
@@ -71,6 +97,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_time?: string | null
+          category_id?: string | null
           completed?: boolean | null
           created_at?: string
           description?: string | null
@@ -81,6 +109,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_time?: string | null
+          category_id?: string | null
           completed?: boolean | null
           created_at?: string
           description?: string | null
@@ -91,6 +121,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "garden_activities_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "activity_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "garden_activities_user_id_fkey"
             columns: ["user_id"]
@@ -140,6 +177,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          calendar_default_view: string
           created_at: string
           id: string
           location: string | null
@@ -149,6 +187,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          calendar_default_view?: string
           created_at?: string
           id: string
           location?: string | null
@@ -158,6 +197,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          calendar_default_view?: string
           created_at?: string
           id?: string
           location?: string | null
