@@ -574,40 +574,14 @@ const CalendarPage = () => {
           <h1 className="text-3xl font-bold">Calendar</h1>
           
           <div className="flex items-center mt-4 sm:mt-0">
-            <TabsList>
-              <TabsTrigger 
-                value="day" 
-                onClick={() => handleViewChange('day')}
-                data-active={activeView === 'day'}
-                className={activeView === 'day' ? 'bg-primary text-primary-foreground' : ''}
-              >
-                Day
-              </TabsTrigger>
-              <TabsTrigger 
-                value="week" 
-                onClick={() => handleViewChange('week')}
-                data-active={activeView === 'week'}
-                className={activeView === 'week' ? 'bg-primary text-primary-foreground' : ''}
-              >
-                Week
-              </TabsTrigger>
-              <TabsTrigger 
-                value="month" 
-                onClick={() => handleViewChange('month')}
-                data-active={activeView === 'month'}
-                className={activeView === 'month' ? 'bg-primary text-primary-foreground' : ''}
-              >
-                Month
-              </TabsTrigger>
-              <TabsTrigger 
-                value="year" 
-                onClick={() => handleViewChange('year')}
-                data-active={activeView === 'year'}
-                className={activeView === 'year' ? 'bg-primary text-primary-foreground' : ''}
-              >
-                Year
-              </TabsTrigger>
-            </TabsList>
+            <Tabs defaultValue={activeView} onValueChange={(value) => handleViewChange(value)}>
+              <TabsList>
+                <TabsTrigger value="day">Day</TabsTrigger>
+                <TabsTrigger value="week">Week</TabsTrigger>
+                <TabsTrigger value="month">Month</TabsTrigger>
+                <TabsTrigger value="year">Year</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
         
