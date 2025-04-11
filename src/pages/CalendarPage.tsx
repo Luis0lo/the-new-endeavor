@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import DashboardLayout from '@/components/DashboardLayout';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GardenActivity } from '@/types/garden';
@@ -48,7 +48,18 @@ const CalendarPage = () => {
           .eq('user_id', user.id);
           
         if (!error && data) {
-          setActivities(data as GardenActivity[]);
+          // Transform the data to match the GardenActivity type
+          const formattedActivities: GardenActivity[] = data.map(item => ({
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            date: item.scheduled_date, // Map scheduled_date to date
+            activity_time: item.activity_time,
+            completed: item.completed,
+            category_id: item.category_id
+          }));
+          
+          setActivities(formattedActivities);
         }
       }
     };
