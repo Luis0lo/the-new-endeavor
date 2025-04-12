@@ -77,15 +77,11 @@ const MonthView: React.FC<MonthViewProps> = ({
               return (
                 <div 
                   key={day.toString()}
-                  className={`relative flex flex-col p-1 min-h-[100px] ${
-                    isCurrentMonth 
-                      ? 'bg-transparent' 
-                      : 'bg-muted/20 text-muted-foreground'
-                  } ${
-                    isToday 
-                      ? 'ring-2 ring-primary rounded-md' 
-                      : ''
-                  } hover:bg-muted/10 hover:ring-1 hover:ring-primary hover:rounded-md hover:shadow-sm cursor-pointer transition-all`}
+                  className={`relative flex flex-col p-1 min-h-[100px] 
+                    ${isCurrentMonth ? 'bg-transparent' : 'bg-muted/20 text-muted-foreground'}
+                    ${isToday ? 'ring-2 ring-primary rounded-md' : ''}
+                    hover:bg-muted/10 hover:ring-1 hover:ring-primary hover:rounded-md 
+                    hover:shadow-sm cursor-pointer transition-all m-0.5`}
                   onClick={() => onSelectDay(day)}
                 >
                   <div className={`text-right p-1 ${
@@ -100,9 +96,8 @@ const MonthView: React.FC<MonthViewProps> = ({
                         {dayActivities.slice(0, 2).map(activity => (
                           <div 
                             key={activity.id}
-                            className={`truncate px-1 py-0.5 rounded bg-primary/10 text-primary-foreground ${
-                              activity.completed ? 'line-through opacity-50' : ''
-                            }`}
+                            className={`truncate px-1 py-0.5 rounded-sm bg-primary/20 text-primary-foreground/90 font-medium
+                              ${activity.completed ? 'line-through opacity-50' : ''}`}
                             title={activity.title}
                           >
                             {activity.title}

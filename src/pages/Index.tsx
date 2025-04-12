@@ -123,8 +123,8 @@ const Index = () => {
               </p>
             </div>
           </div>
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
-            {/* These would ideally be populated from the database, but for now we'll use placeholders */}
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Blog Card 1 */}
             <Link to="/blog" className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary">
               <div className="aspect-video overflow-hidden rounded-lg">
                 <img
@@ -140,6 +140,8 @@ const Index = () => {
                 </p>
               </div>
             </Link>
+            
+            {/* Blog Card 2 */}
             <Link to="/blog" className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary">
               <div className="aspect-video overflow-hidden rounded-lg">
                 <img
@@ -155,6 +157,8 @@ const Index = () => {
                 </p>
               </div>
             </Link>
+            
+            {/* Blog Card 3 */}
             <Link to="/blog" className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary">
               <div className="aspect-video overflow-hidden rounded-lg">
                 <img

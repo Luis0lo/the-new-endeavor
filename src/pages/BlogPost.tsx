@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Share2, Copy, Twitter, Facebook, Smartphone } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
 import { 
@@ -124,32 +123,50 @@ const BlogPost = () => {
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share && post) {
-      navigator.share({
-        title: post.title,
-        text: `Check out this garden article: ${post.title}`,
-        url: window.location.href,
-      })
-      .then(() => {
+  const handleShare = async () => {
+    try {
+      // Check if navigator.share is available and supported
+      if (navigator.share && post) {
+        await navigator.share({
+          title: post.title,
+          text: `Check out this garden article: ${post.title}`,
+          url: window.location.href,
+        });
+        
         toast({
           title: "Shared successfully",
           description: "Thanks for sharing this article!"
         });
-      })
-      .catch((error) => {
+      } else {
+        // Fallback for browsers that don't support navigator.share
+        await navigator.clipboard.writeText(window.location.href);
         toast({
-          title: "Sharing failed",
-          description: error.message,
-          variant: "destructive"
+          title: "Link copied!",
+          description: "Article link copied to clipboard"
         });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Sharing failed",
+        description: error.message || "Unable to share content",
+        variant: "destructive"
       });
-    } else {
-      // Fallback for browsers that don't support navigator.share
-      navigator.clipboard.writeText(window.location.href);
+      console.error("Sharing failed:", error);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
       toast({
         title: "Link copied!",
         description: "Article link copied to clipboard"
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Unable to copy to clipboard",
+        variant: "destructive"
       });
     }
   };
@@ -198,7 +215,7 @@ const BlogPost = () => {
             <article className="max-w-3xl mx-auto">
               {/* Hero Image */}
               {post.featured_image && (
-                <div className="w-full mb-8">
+                <div className="w-full mb-6">
                   <img 
                     src={post.featured_image} 
                     alt={post.title}
@@ -256,9 +273,10 @@ const BlogPost = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="justify-start"
-                          onClick={handleShare}
+                          className="justify-start gap-2"
+                          onClick={handleCopyLink}
                         >
+                          <Copy className="h-4 w-4" />
                           Copy link
                         </Button>
                         <a 
@@ -267,7 +285,8 @@ const BlogPost = () => {
                           rel="noopener noreferrer"
                           className="w-full"
                         >
-                          <Button variant="ghost" size="sm" className="w-full justify-start">
+                          <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                            <Twitter className="h-4 w-4" />
                             Share on Twitter
                           </Button>
                         </a>
@@ -277,8 +296,20 @@ const BlogPost = () => {
                           rel="noopener noreferrer"
                           className="w-full"
                         >
-                          <Button variant="ghost" size="sm" className="w-full justify-start">
+                          <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                            <Facebook className="h-4 w-4" />
                             Share on Facebook
+                          </Button>
+                        </a>
+                        <a 
+                          href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${post.title} - ${window.location.href}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full"
+                        >
+                          <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                            <Smartphone className="h-4 w-4" />
+                            Share on WhatsApp
                           </Button>
                         </a>
                       </div>
