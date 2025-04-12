@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -48,7 +47,18 @@ const CalendarPage = () => {
           .eq('user_id', user.id);
           
         if (!error && data) {
-          setActivities(data as GardenActivity[]);
+          // Map the Supabase data to match our GardenActivity type
+          const mappedActivities: GardenActivity[] = data.map(activity => ({
+            id: activity.id,
+            title: activity.title,
+            description: activity.description,
+            date: activity.scheduled_date, // Map scheduled_date to date
+            activity_time: activity.activity_time,
+            completed: activity.completed,
+            category_id: activity.category_id
+          }));
+          
+          setActivities(mappedActivities);
         }
       }
     };
