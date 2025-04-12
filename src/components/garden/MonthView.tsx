@@ -59,9 +59,9 @@ const MonthView: React.FC<MonthViewProps> = ({
         </Button>
       </div>
       
-      <div className="grid grid-cols-7 text-center border rounded-lg overflow-hidden">
+      <div className="grid grid-cols-7 text-center">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <div key={day} className="py-2 font-semibold text-sm bg-gray-50">
+          <div key={day} className="py-2 font-semibold text-sm">
             {day}
           </div>
         ))}
@@ -77,15 +77,15 @@ const MonthView: React.FC<MonthViewProps> = ({
               return (
                 <div 
                   key={day.toString()}
-                  className={`relative flex flex-col p-1 min-h-[100px] border ${
+                  className={`relative flex flex-col p-1 min-h-[100px] ${
                     isCurrentMonth 
                       ? 'bg-card' 
                       : 'bg-muted/20 text-muted-foreground'
                   } ${
                     isToday 
-                      ? 'border-primary' 
-                      : 'border-border'
-                  } hover:bg-accent/10 cursor-pointer transition-colors`}
+                      ? 'ring-2 ring-primary rounded-lg' 
+                      : ''
+                  } hover:ring-1 hover:ring-primary hover:rounded-lg hover:shadow-sm cursor-pointer transition-all`}
                   onClick={() => onSelectDay(day)}
                 >
                   <div className={`text-right p-1 ${
