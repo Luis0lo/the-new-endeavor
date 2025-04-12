@@ -93,8 +93,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
     form.reset();
   };
 
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{initialActivity ? "Edit Garden Activity" : "Add Garden Activity"}</DialogTitle>

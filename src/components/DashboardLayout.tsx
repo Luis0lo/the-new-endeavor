@@ -9,9 +9,16 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { User } from '@supabase/supabase-js';
 
 interface DashboardLayoutProps {
@@ -66,97 +73,121 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      {/* Sidebar */}
-      <div 
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ${
-          sidebarCollapsed ? "w-[60px]" : "w-[250px]"
-        }`}
-      >
-        {/* Sidebar header */}
-        <div className="flex h-16 items-center border-b px-4">
-          <Link 
-            to="/" 
-            className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
-          >
-            <span className="text-primary text-xl font-bold">
-              {sidebarCollapsed ? "GA" : "Garden App"}
-            </span>
-          </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          >
-            {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </Button>
-        </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="flex min-h-screen w-full bg-background">
+        {/* Sidebar */}
+        <div 
+          className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ${
+            sidebarCollapsed ? "w-[60px]" : "w-[250px]"
+          }`}
+        >
+          {/* Sidebar header */}
+          <div className="flex h-16 items-center border-b px-4">
+            <Link 
+              to="/" 
+              className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
+            >
+              <span className="text-primary text-xl font-bold">
+                {sidebarCollapsed ? "GA" : "Garden App"}
+              </span>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            </Button>
+          </div>
 
-        {/* Navigation */}
-        <div className="flex-1 overflow-auto py-4">
-          <div className="mb-4 px-4">
-            {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>}
-            <nav className="flex flex-col gap-1">
-              <Link
-                to="/dashboard"
-                className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
-                  isActive("/dashboard") && !isActive("/dashboard/calendar")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-              >
-                <Home size={18} />
-                {!sidebarCollapsed && <span>Home</span>}
-              </Link>
-              <Link
-                to="/dashboard/calendar"
-                className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
-                  isActive("/dashboard/calendar")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-              >
-                <Calendar size={18} />
-                {!sidebarCollapsed && <span>Calendar</span>}
-              </Link>
-              <Link
-                to="/dashboard/settings"
-                className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
-                  isActive("/dashboard/settings")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-              >
-                <Settings size={18} />
-                {!sidebarCollapsed && <span>Account Settings</span>}
-              </Link>
-            </nav>
+          {/* Navigation */}
+          <div className="flex-1 overflow-auto py-4">
+            <div className="mb-4 px-4">
+              {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>}
+              <nav className="flex flex-col gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard") && !isActive("/dashboard/calendar")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Home size={18} />
+                      {!sidebarCollapsed && <span>Home</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Home</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard/calendar"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard/calendar")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Calendar size={18} />
+                      {!sidebarCollapsed && <span>Calendar</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Calendar</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard/settings"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard/settings")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Settings size={18} />
+                      {!sidebarCollapsed && <span>Account Settings</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Account Settings</TooltipContent>}
+                </Tooltip>
+              </nav>
+            </div>
+          </div>
+
+          {/* Sidebar footer */}
+          <div className="border-t p-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
+                  onClick={handleSignOut}
+                >
+                  <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
+                  {!sidebarCollapsed && <span>Logout</span>}
+                </Button>
+              </TooltipTrigger>
+              {sidebarCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
+            </Tooltip>
           </div>
         </div>
 
-        {/* Sidebar footer */}
-        <div className="border-t p-4">
-          <Button
-            variant="outline"
-            className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
-            onClick={handleSignOut}
-          >
-            <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
-            {!sidebarCollapsed && <span>Logout</span>}
-          </Button>
+        {/* Main content */}
+        <div 
+          className={`flex-1 transition-all ${
+            sidebarCollapsed ? "ml-[60px]" : "ml-[250px]"
+          }`}
+        >
+          {children}
         </div>
       </div>
-
-      {/* Main content */}
-      <div 
-        className={`flex-1 transition-all ${
-          sidebarCollapsed ? "ml-[60px]" : "ml-[250px]"
-        }`}
-      >
-        {children}
-      </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
