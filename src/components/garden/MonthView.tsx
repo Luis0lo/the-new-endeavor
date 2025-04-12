@@ -79,13 +79,13 @@ const MonthView: React.FC<MonthViewProps> = ({
                   key={day.toString()}
                   className={`relative flex flex-col p-1 min-h-[100px] ${
                     isCurrentMonth 
-                      ? 'bg-card' 
+                      ? 'bg-transparent' 
                       : 'bg-muted/20 text-muted-foreground'
                   } ${
                     isToday 
-                      ? 'ring-2 ring-primary rounded-lg' 
+                      ? 'ring-2 ring-primary rounded-md' 
                       : ''
-                  } hover:ring-1 hover:ring-primary hover:rounded-lg hover:shadow-sm cursor-pointer transition-all`}
+                  } hover:bg-muted/10 hover:ring-1 hover:ring-primary hover:rounded-md hover:shadow-sm cursor-pointer transition-all`}
                   onClick={() => onSelectDay(day)}
                 >
                   <div className={`text-right p-1 ${

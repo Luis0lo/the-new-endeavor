@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { Database } from '@/integrations/supabase/types';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
 
 interface BlogPost {
   id: string;
@@ -120,6 +124,36 @@ const BlogPost = () => {
     }
   };
 
+  const handleShare = () => {
+    if (navigator.share && post) {
+      navigator.share({
+        title: post.title,
+        text: `Check out this garden article: ${post.title}`,
+        url: window.location.href,
+      })
+      .then(() => {
+        toast({
+          title: "Shared successfully",
+          description: "Thanks for sharing this article!"
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: "Sharing failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      });
+    } else {
+      // Fallback for browsers that don't support navigator.share
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied!",
+        description: "Article link copied to clipboard"
+      });
+    }
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
@@ -134,56 +168,51 @@ const BlogPost = () => {
           <div className="text-center py-12">Loading blog post...</div>
         ) : post ? (
           <>
-            {post.featured_image && (
-              <div className="w-full h-[50vh] relative mb-12">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background opacity-80"></div>
-                <img 
-                  src={post.featured_image} 
-                  alt={post.title}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                <div className="absolute bottom-0 left-0 w-full p-6">
-                  <div className="max-w-3xl mx-auto">
-                    <h1 className="font-bold text-3xl md:text-4xl mb-4 text-foreground">{post.title}</h1>
-                    
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="rounded-full overflow-hidden h-10 w-10 bg-muted">
-                        {post.profiles?.avatar_url ? (
-                          <img 
-                            src={post.profiles.avatar_url} 
-                            alt={post.profiles.username} 
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-primary/20 flex items-center justify-center text-sm font-medium text-primary">
-                            {post.profiles?.username?.charAt(0).toUpperCase() || '?'}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground">{post.profiles?.username || "Unknown"}</div>
-                        {post.published_at && (
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(post.published_at).toLocaleDateString('en-US', { 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+            {/* Post navigation buttons - Hidden on mobile, shown on desktop */}
+            {prevPost && (
+              <div className="hidden md:block fixed left-4 top-1/2 transform -translate-y-1/2 z-10">
+                <Link to={`/blog/${prevPost.slug}`} className="group relative">
+                  <Button variant="outline" size="icon" className="rounded-full transition-all duration-300 group-hover:bg-primary/10">
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <div className="absolute left-full ml-2 px-3 py-1 bg-background border rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                    {prevPost.title}
                   </div>
-                </div>
+                </Link>
+              </div>
+            )}
+            
+            {nextPost && (
+              <div className="hidden md:block fixed right-4 top-1/2 transform -translate-y-1/2 z-10">
+                <Link to={`/blog/${nextPost.slug}`} className="group relative">
+                  <Button variant="outline" size="icon" className="rounded-full transition-all duration-300 group-hover:bg-primary/10">
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                  <div className="absolute right-full mr-2 px-3 py-1 bg-background border rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                    {nextPost.title}
+                  </div>
+                </Link>
               </div>
             )}
             
             <article className="max-w-3xl mx-auto">
-              {!post.featured_image && (
-                <>
-                  <h1 className="font-bold text-3xl md:text-4xl mb-4">{post.title}</h1>
-                  
-                  <div className="flex items-center gap-3 mb-8">
+              {/* Hero Image */}
+              {post.featured_image && (
+                <div className="w-full mb-8">
+                  <img 
+                    src={post.featured_image} 
+                    alt={post.title}
+                    className="w-full h-auto object-cover rounded-lg shadow-md"
+                  />
+                </div>
+              )}
+              
+              {/* Article Header */}
+              <header className="mb-8">
+                <h1 className="font-bold text-3xl md:text-4xl mb-4">{post.title}</h1>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <div className="rounded-full overflow-hidden h-10 w-10 bg-muted">
                       {post.profiles?.avatar_url ? (
                         <img 
@@ -200,25 +229,71 @@ const BlogPost = () => {
                     <div>
                       <div className="font-medium">{post.profiles?.username || "Unknown"}</div>
                       {post.published_at && (
-                        <div className="text-sm text-muted-foreground">
+                        <time 
+                          dateTime={post.published_at}
+                          className="text-sm text-muted-foreground"
+                        >
                           {new Date(post.published_at).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'long', 
                             day: 'numeric' 
                           })}
-                        </div>
+                        </time>
                       )}
                     </div>
                   </div>
-                </>
-              )}
+                  
+                  {/* Share Button */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-1">
+                        <Share2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Share</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2" align="end">
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start"
+                          onClick={handleShare}
+                        >
+                          Copy link
+                        </Button>
+                        <a 
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(window.location.href)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full"
+                        >
+                          <Button variant="ghost" size="sm" className="w-full justify-start">
+                            Share on Twitter
+                          </Button>
+                        </a>
+                        <a 
+                          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full"
+                        >
+                          <Button variant="ghost" size="sm" className="w-full justify-start">
+                            Share on Facebook
+                          </Button>
+                        </a>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </header>
               
+              {/* Article Content */}
               <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
                 <div dangerouslySetInnerHTML={{ __html: post.content }} />
               </div>
               
-              {/* Post Navigation */}
-              <div className="border-t pt-8 mt-8">
+              {/* Mobile Post Navigation */}
+              <div className="md:hidden border-t pt-8 mt-8">
                 <div className="flex justify-between items-center">
                   {prevPost ? (
                     <Link to={`/blog/${prevPost.slug}`} className="group flex items-center">
