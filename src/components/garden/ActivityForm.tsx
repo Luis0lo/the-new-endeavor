@@ -1,20 +1,54 @@
 
-import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useEffect } from "react";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { GardenActivity } from '@/types/garden';
+import { cn } from "@/lib/utils";
+import { GardenActivity } from "@/types/garden";
+
+const activitySchema = z.object({
+  title: z.string().min(2, { message: "Title is required" }),
+  description: z.string().optional(),
+  date: z.date({
+    required_error: "Please select a date",
+  }),
+  time: z.string().optional(),
+});
+
+type ActivityFormValues = z.infer<typeof activitySchema>;
 
 interface ActivityFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (formData: any) => void;
+  onSave: (activity: ActivityFormValues) => void;
   initialDate: Date;
-  initialActivity: GardenActivity | null;
+  initialActivity?: GardenActivity | null;
 }
 
 const ActivityForm: React.FC<ActivityFormProps> = ({
@@ -22,110 +56,143 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   onClose,
   onSave,
   initialDate,
-  initialActivity
+  initialActivity,
 }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState<Date>(new Date());
-  const [time, setTime] = useState('');
-  
-  // Reset form when opened or when initialActivity changes
+  const form = useForm<ActivityFormValues>({
+    resolver: zodResolver(activitySchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      date: initialDate,
+      time: format(new Date(), "HH:mm"),
+    },
+  });
+
+  // Reset form when initialActivity changes
   useEffect(() => {
-    if (isOpen) {
-      setDate(initialDate);
-      
-      if (initialActivity) {
-        setTitle(initialActivity.title);
-        setDescription(initialActivity.description || '');
-        
-        if (initialActivity.activity_time) {
-          setTime(initialActivity.activity_time);
-        } else {
-          setTime('');
-        }
-      } else {
-        setTitle('');
-        setDescription('');
-        setTime('');
-      }
+    if (initialActivity) {
+      const activityDate = new Date(initialActivity.date);
+      form.reset({
+        title: initialActivity.title,
+        description: initialActivity.description || "",
+        date: activityDate,
+        time: initialActivity.activity_time || format(new Date(), "HH:mm"),
+      });
+    } else {
+      form.reset({
+        title: "",
+        description: "",
+        date: initialDate,
+        time: format(new Date(), "HH:mm"),
+      });
     }
-  }, [isOpen, initialActivity, initialDate]);
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    onSave({
-      title,
-      description,
-      date: format(date, 'yyyy-MM-dd'),
-      time
-    });
-    
-    onClose();
+  }, [initialActivity, initialDate, form]);
+
+  const handleSubmit = (values: ActivityFormValues) => {
+    onSave(values);
+    form.reset();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {initialActivity ? 'Edit Garden Activity' : 'Add Garden Activity'}
-          </DialogTitle>
+          <DialogTitle>{initialActivity ? "Edit Garden Activity" : "Add Garden Activity"}</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Activity Title</Label>
-            <Input 
-              id="title" 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
-              placeholder="E.g., Water tomatoes" 
-              required 
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Activity Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Watering plants" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="time">Time (Optional)</Label>
-            <Input 
-              id="time" 
-              type="time"
-              value={time} 
-              onChange={(e) => setTime(e.target.value)} 
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Watered the tomatoes and peppers..." 
+                      {...field} 
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (Optional)</Label>
-            <Textarea 
-              id="description" 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
-              placeholder="Add notes or instructions..." 
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Date</Label>
-            <div className="border rounded-md p-2">
-              <Calendar 
-                mode="single"
-                selected={date}
-                onSelect={(date) => date && setDate(date)} 
-                className="mx-auto"
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {initialActivity ? 'Update' : 'Create'} Activity
-            </Button>
-          </div>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit">Save Activity</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
