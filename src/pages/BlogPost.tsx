@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Share2, Copy, Twitter, Facebook, Smartphone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Share2, Copy, Twitter, Facebook, MessageCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
 import { 
@@ -260,7 +260,7 @@ const BlogPost = () => {
                     </div>
                   </div>
                   
-                  {/* Share Button */}
+                  {/* Share Button - Updated to remove redundant "Share" text */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="sm" className="gap-1">
@@ -287,7 +287,7 @@ const BlogPost = () => {
                         >
                           <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
                             <Twitter className="h-4 w-4" />
-                            Share on Twitter
+                            Twitter
                           </Button>
                         </a>
                         <a 
@@ -298,7 +298,7 @@ const BlogPost = () => {
                         >
                           <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
                             <Facebook className="h-4 w-4" />
-                            Share on Facebook
+                            Facebook
                           </Button>
                         </a>
                         <a 
@@ -308,8 +308,8 @@ const BlogPost = () => {
                           className="w-full"
                         >
                           <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
-                            <Smartphone className="h-4 w-4" />
-                            Share on WhatsApp
+                            <MessageCircle className="h-4 w-4" />
+                            WhatsApp
                           </Button>
                         </a>
                       </div>
