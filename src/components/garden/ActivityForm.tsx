@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
@@ -118,6 +117,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   const handleSubmit = (values: ActivityFormValues) => {
     onSave(values);
     form.reset();
+    onClose(); // Add this line to close the modal after saving
   };
 
   const handleDialogChange = (open: boolean) => {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, CheckCircle2 } from 'lucide-react';
 import { GardenActivity } from '@/types/garden';
 
 interface WeekViewProps {
@@ -42,11 +42,11 @@ const WeekView: React.FC<WeekViewProps> = ({
       <div className="grid grid-cols-7 border rounded-lg overflow-hidden">
         {/* Header row with day names */}
         <div className="col-span-7 grid grid-cols-7">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, index) => (
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, index) => (
             <div 
               key={dayName} 
               className={`p-2 text-center font-medium ${
-                index === 6 ? 'bg-gray-100' : index === 0 ? 'bg-gray-100' : ''
+                index === 5 || index === 6 ? 'bg-gray-100' : ''
               }`}
             >
               {dayName}
@@ -63,7 +63,7 @@ const WeekView: React.FC<WeekViewProps> = ({
               <button
                 key={day.toString()}
                 className={`p-4 text-center hover:bg-gray-50 ${
-                  i === 6 || i === 0 ? 'bg-gray-50' : ''
+                  i === 5 || i === 6 ? 'bg-gray-50' : ''
                 }`}
                 onClick={() => onSelectDay(day)}
               >
@@ -84,17 +84,34 @@ const WeekView: React.FC<WeekViewProps> = ({
               isSameDay(new Date(activity.date), day)
             );
             
+            // Check if there are any completed activities
+            const hasCompletedActivities = dayActivities.some(
+              activity => activity.completed || activity.status === 'done'
+            );
+            
             return (
               <div 
                 key={day.toString()} 
-                className="p-4 min-h-[100px] hover:bg-gray-50 cursor-pointer"
+                className={`p-4 min-h-[100px] hover:bg-gray-50 cursor-pointer ${
+                  hasCompletedActivities ? 'bg-green-50' : ''
+                }`}
                 onClick={() => onSelectDay(day)}
               >
                 {dayActivities.length > 0 ? (
                   <div className="space-y-1">
                     {dayActivities.slice(0, 3).map(activity => (
-                      <div key={activity.id} className="text-sm p-1 truncate">
-                        {activity.title}
+                      <div 
+                        key={activity.id} 
+                        className={`text-sm p-1 truncate flex items-start gap-1 ${
+                          activity.completed || activity.status === 'done' 
+                            ? 'text-green-700' 
+                            : ''
+                        }`}
+                      >
+                        {(activity.completed || activity.status === 'done') && (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <span className="truncate">{activity.title}</span>
                       </div>
                     ))}
                     {dayActivities.length > 3 && (
