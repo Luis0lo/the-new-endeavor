@@ -1,176 +1,211 @@
-import React, { useState } from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import {
-  ChevronLeft,
-  Menu,
-  Calendar,
-  Settings,
-  Archive,
-  LayoutDashboard,
-  Leaf
-} from "lucide-react";
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useUser } from '@/hooks/use-user';
-import { supabase } from '@/integrations/supabase/client';
 
-interface NavItem {
-  title: string;
-  href: string;
-  icon: React.ReactNode;
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { 
+  Home, 
+  Calendar, 
+  Settings,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  Archive
+} from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { User } from '@supabase/supabase-js';
+
+interface DashboardLayoutProps {
+  children: React.ReactNode;
 }
 
-const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const location = useLocation();
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
-  const { user, isLoading } = useUser();
+  const location = useLocation();
   
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        if (!session?.user) {
+          navigate('/auth');
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (!session?.user) {
+        navigate('/auth');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign out",
+        variant: "destructive"
+      });
+    }
   };
 
-  const items: NavItem[] = [
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-    },
-    {
-      title: "Calendar",
-      href: "/dashboard/calendar",
-      icon: <Calendar className="h-5 w-5" />,
-    },
-    {
-      title: "Inventory",
-      href: "/dashboard/inventory",
-      icon: <Archive className="h-5 w-5" />,
-    },
-    {
-      title: "Companion Plants",
-      href: "/dashboard/companions",
-      icon: <Leaf className="h-5 w-5" />,
-    },
-    {
-      title: "Settings",
-      href: "/dashboard/settings",
-      icon: <Settings className="h-5 w-5" />,
-    },
-  ];
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Mobile Sidebar */}
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetTrigger asChild>
-          <button
-            onClick={toggleSidebar}
-            className="p-2 text-gray-500 hover:bg-gray-200 rounded-md focus:outline-none focus:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 md:hidden"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-        </SheetTrigger>
-        <SheetContent className="w-64 flex flex-col gap-4 p-4 z-50">
-          <SheetHeader className="text-left">
-            <SheetTitle>Menu</SheetTitle>
-            <SheetDescription>
-              Navigate your dashboard.
-            </SheetDescription>
-          </SheetHeader>
-          {items.map((item) => (
-            <Link
-              key={item.title}
-              to={item.href}
-              className={`flex items-center px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 ${location.pathname === item.href ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
-              onClick={closeSidebar}
+    <TooltipProvider delayDuration={300}>
+      <div className="flex min-h-screen w-full bg-background">
+        {/* Sidebar */}
+        <div 
+          className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ${
+            sidebarCollapsed ? "w-[60px]" : "w-[250px]"
+          }`}
+        >
+          {/* Sidebar header */}
+          <div className="flex h-16 items-center border-b px-4">
+            <Link 
+              to="/" 
+              className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
             >
-              {item.icon}
-              <span className="ml-2">{item.title}</span>
+              <span className="text-primary text-xl font-bold">
+                {sidebarCollapsed ? "GA" : "Garden App"}
+              </span>
             </Link>
-          ))}
-          <button onClick={signOut} className="mt-auto py-2 px-4 bg-red-500 text-white rounded hover:bg-red-700">
-            Sign Out
-          </button>
-        </SheetContent>
-      </Sheet>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex flex-col w-64 bg-gray-50 dark:bg-gray-800 border-r dark:border-gray-700">
-        <div className="flex items-center justify-between h-16 px-4 border-b dark:border-gray-700">
-          <Link to="/dashboard" className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-            My Garden
-          </Link>
-        </div>
-        <nav className="flex-1 p-4">
-          {items.map((item) => (
-            <Link
-              key={item.title}
-              to={item.href}
-              className={`flex items-center px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 ${location.pathname === item.href ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             >
-              {item.icon}
-              <span className="ml-2">{item.title}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className="p-4 border-t dark:border-gray-700">
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-full flex justify-between items-center">
-                  <div className="flex items-center space-x-2">
-                    <Avatar>
-                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || "Avatar"} />
-                      <AvatarFallback>{user.user_metadata?.full_name?.slice(0, 2).toUpperCase() || "UN"}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium">{user.user_metadata?.full_name || "Unknown User"}</span>
-                  </div>
-                  <ChevronLeft className="h-4 w-4 rotate-180" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/dashboard/settings')}>Settings</DropdownMenuItem>
-                <DropdownMenuItem onClick={signOut}>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/auth" className="block py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700">
-              Sign In
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-x-hidden">
-        <main className="py-4">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {children}
+              {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            </Button>
           </div>
-        </main>
+
+          {/* Navigation */}
+          <div className="flex-1 overflow-auto py-4">
+            <div className="mb-4 px-4">
+              {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>}
+              <nav className="flex flex-col gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Home size={18} />
+                      {!sidebarCollapsed && <span>Home</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Home</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard/calendar"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard/calendar")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Calendar size={18} />
+                      {!sidebarCollapsed && <span>Calendar</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Calendar</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard/inventory"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard/inventory")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Archive size={18} />
+                      {!sidebarCollapsed && <span>Inventory</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Inventory</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard/settings"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard/settings")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Settings size={18} />
+                      {!sidebarCollapsed && <span>Account Settings</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Account Settings</TooltipContent>}
+                </Tooltip>
+              </nav>
+            </div>
+          </div>
+
+          {/* Sidebar footer */}
+          <div className="border-t p-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
+                  onClick={handleSignOut}
+                >
+                  <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
+                  {!sidebarCollapsed && <span>Logout</span>}
+                </Button>
+              </TooltipTrigger>
+              {sidebarCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div 
+          className={`flex-1 transition-all ${
+            sidebarCollapsed ? "ml-[60px]" : "ml-[250px]"
+          }`}
+        >
+          {children}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 

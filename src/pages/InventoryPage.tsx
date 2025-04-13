@@ -5,14 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Archive, Leaf, Wrench, Edit, Trash, GripVertical } from 'lucide-react';
+import { Plus, Archive, Leaf, Wrench } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import CreateShelfDialog from '@/components/inventory/CreateShelfDialog';
-import EditShelfDialog from '@/components/inventory/EditShelfDialog';
-import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 interface InventoryShelf {
   id: string;
@@ -25,19 +20,8 @@ interface InventoryShelf {
 const InventoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [shelves, setShelves] = useState<InventoryShelf[]>([]);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedShelf, setSelectedShelf] = useState<InventoryShelf | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
-  
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
   
   useEffect(() => {
     fetchShelves();
@@ -66,54 +50,6 @@ const InventoryPage = () => {
     }
   };
   
-  const handleDeleteShelf = (shelf: InventoryShelf) => {
-    setSelectedShelf(shelf);
-    setDeleteDialogOpen(true);
-  };
-  
-  const confirmDeleteShelf = async () => {
-    if (!selectedShelf) return;
-    
-    try {
-      // First delete all items in the shelf
-      const { error: itemsError } = await supabase
-        .from('inventory_items')
-        .delete()
-        .eq('shelf_id', selectedShelf.id);
-        
-      if (itemsError) throw itemsError;
-      
-      // Then delete the shelf
-      const { error: shelfError } = await supabase
-        .from('inventory_shelves')
-        .delete()
-        .eq('id', selectedShelf.id);
-        
-      if (shelfError) throw shelfError;
-      
-      setShelves(shelves.filter(shelf => shelf.id !== selectedShelf.id));
-      
-      toast({
-        title: "Success",
-        description: `${selectedShelf.name} shelf and all its items have been deleted.`
-      });
-      
-      setDeleteDialogOpen(false);
-      setSelectedShelf(null);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete shelf",
-        variant: "destructive"
-      });
-    }
-  };
-  
-  const handleEditShelf = (shelf: InventoryShelf) => {
-    setSelectedShelf(shelf);
-    setEditDialogOpen(true);
-  };
-  
   const getShelfIcon = (type: 'seeds' | 'plants' | 'tools') => {
     switch (type) {
       case 'seeds':
@@ -140,81 +76,12 @@ const InventoryPage = () => {
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setShelves((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
-  
-  const SortableShelfCard = ({ shelf }: { shelf: InventoryShelf }) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-    } = useSortable({ id: shelf.id });
-    
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    };
-    
-    return (
-      <Card ref={setNodeRef} style={style} className="overflow-hidden">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {getShelfIcon(shelf.type)}
-              <div>
-                <CardTitle>{shelf.name}</CardTitle>
-                <CardDescription>{getShelfTypeText(shelf.type)}</CardDescription>
-              </div>
-            </div>
-            <div className="cursor-move" {...attributes} {...listeners}>
-              <GripVertical className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {shelf.description || 'No description provided.'}
-          </p>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button 
-            variant="outline" 
-            className="w-full mr-2"
-            onClick={() => navigate(`/dashboard/inventory/${shelf.id}`)}
-          >
-            View Items
-          </Button>
-          <div className="flex space-x-2">
-            <Button variant="ghost" size="icon" onClick={() => handleEditShelf(shelf)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => handleDeleteShelf(shelf)}>
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-    );
-  };
-
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-4 p-4 md:p-8">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Inventory Management</h2>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Shelf
           </Button>
@@ -222,7 +89,6 @@ const InventoryPage = () => {
         
         <p className="text-muted-foreground">
           Manage your garden inventory by creating different types of shelves for seeds, plants, and tools.
-          Drag and drop shelves to reorder them as you prefer.
         </p>
         
         {loading ? (
@@ -238,7 +104,7 @@ const InventoryPage = () => {
                 <p className="text-muted-foreground">
                   Start by creating a shelf to organize your garden inventory.
                 </p>
-                <Button onClick={() => setCreateDialogOpen(true)} className="mt-4">
+                <Button onClick={() => setDialogOpen(true)} className="mt-4">
                   <Plus className="h-4 w-4 mr-2" />
                   Create First Shelf
                 </Button>
@@ -246,41 +112,42 @@ const InventoryPage = () => {
             </CardContent>
           </Card>
         ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={shelves.map(s => s.id)} strategy={verticalListSortingStrategy}>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {shelves.map((shelf) => (
-                  <SortableShelfCard key={shelf.id} shelf={shelf} />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {shelves.map((shelf) => (
+              <Card key={shelf.id} className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center space-x-2">
+                    {getShelfIcon(shelf.type)}
+                    <div>
+                      <CardTitle>{shelf.name}</CardTitle>
+                      <CardDescription>{getShelfTypeText(shelf.type)}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {shelf.description || 'No description provided.'}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate(`/dashboard/inventory/${shelf.id}`)}
+                  >
+                    View Items
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
       
       <CreateShelfDialog 
-        open={createDialogOpen} 
-        onOpenChange={setCreateDialogOpen} 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen} 
         onShelfCreated={fetchShelves} 
-      />
-      
-      <EditShelfDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        onShelfUpdated={fetchShelves}
-        shelf={selectedShelf}
-      />
-      
-      <DeleteConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Delete Inventory Shelf"
-        description={`Are you sure you want to delete ${selectedShelf?.name}? This will also delete all items in this shelf. This action cannot be undone.`}
-        onConfirm={confirmDeleteShelf}
       />
     </DashboardLayout>
   );
