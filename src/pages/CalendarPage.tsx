@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { GardenActivity } from '@/types/garden';
-import ActivityForm from '@/components/garden/ActivityForm';
+import ActivityForm from '@/components/garden/activity-form/ActivityForm';
 import { runSeedData } from '@/seed';
 import WeekView from '@/components/garden/WeekView';
 import DayView from '@/components/garden/DayView';
