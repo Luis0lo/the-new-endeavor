@@ -67,7 +67,7 @@ const CalendarPage = () => {
           .eq('user_id', user.id);
           
         if (!error && data) {
-          // Map the Supabase data to match our GardenActivity type
+          // Map the Supabase data to match our GardenActivity type with proper type handling
           const mappedActivities: GardenActivity[] = data.map(activity => ({
             id: activity.id,
             title: activity.title,
@@ -76,8 +76,8 @@ const CalendarPage = () => {
             activity_time: activity.activity_time,
             completed: activity.completed || false,
             category_id: activity.category_id,
-            priority: activity.priority || "normal",
-            status: activity.status || "pending",
+            priority: (activity.priority as "high" | "normal" | "low") || "normal",
+            status: (activity.status as "pending" | "in_progress" | "done") || "pending",
             outcome_rating: activity.outcome_rating,
             outcome_log: activity.outcome_log
           }));
@@ -161,8 +161,8 @@ const CalendarPage = () => {
             description: formData.description || "",
             scheduled_date: format(formData.date, 'yyyy-MM-dd'),
             activity_time: formData.time || null,
-            priority: formData.priority || "normal",
-            status: formData.status || "pending",
+            priority: formData.priority as "high" | "normal" | "low" || "normal",
+            status: formData.status as "pending" | "in_progress" | "done" || "pending",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
@@ -170,7 +170,7 @@ const CalendarPage = () => {
 
         if (error) throw error;
         
-        // Update local state
+        // Update local state with proper type casting
         const updatedActivities = activities.map(activity => 
           activity.id === currentActivity.id 
             ? {
@@ -179,8 +179,8 @@ const CalendarPage = () => {
                 description: formData.description || "", 
                 date: format(formData.date, 'yyyy-MM-dd'),
                 activity_time: formData.time || null,
-                priority: formData.priority || "normal",
-                status: formData.status || "pending",
+                priority: formData.priority as "high" | "normal" | "low" || "normal",
+                status: formData.status as "pending" | "in_progress" | "done" || "pending",
                 outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
                 outcome_log: formData.status === "done" ? formData.outcome_log : null
               } 
@@ -212,8 +212,8 @@ const CalendarPage = () => {
             activity_time: formData.time || null,
             user_id: user?.id,
             completed: false,
-            priority: formData.priority || "normal",
-            status: formData.status || "pending",
+            priority: formData.priority as "high" | "normal" | "low" || "normal",
+            status: formData.status as "pending" | "in_progress" | "done" || "pending",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
@@ -228,8 +228,8 @@ const CalendarPage = () => {
           date: data[0].scheduled_date,
           activity_time: data[0].activity_time,
           completed: false,
-          priority: data[0].priority || "normal",
-          status: data[0].status || "pending",
+          priority: data[0].priority as "high" | "normal" | "low",
+          status: data[0].status as "pending" | "in_progress" | "done",
           outcome_rating: data[0].outcome_rating,
           outcome_log: data[0].outcome_log
         };
@@ -253,7 +253,7 @@ const CalendarPage = () => {
   const handleToggleComplete = async (activity: GardenActivity) => {
     try {
       // Update the status to "done" when completed, or back to "pending" when marked incomplete
-      const newStatus = !activity.completed ? "done" : "pending";
+      const newStatus = !activity.completed ? "done" as const : "pending" as const;
       
       const { error } = await supabase
         .from('garden_activities')
