@@ -22,7 +22,8 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 
-type SettingsTab = 'profile' | 'address' | 'notifications' | 'password' | 'billing';
+// type SettingsTab = 'profile' | 'address' | 'notifications' | 'password' | 'billing';
+type SettingsTab = 'profile';
 
 const AccountSettings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
