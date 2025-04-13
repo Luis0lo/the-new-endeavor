@@ -11,7 +11,7 @@ import DayView from "./DayView";
 import WeekView from "./WeekView";
 import MonthView from "./MonthView";
 import YearView from "./YearView";
-import ActivityForm from "./ActivityForm";
+import ActivityForm from "./activity-form/ActivityForm";
 
 interface GardenCalendarProps {
   sampleData?: GardenActivity[] | null;
