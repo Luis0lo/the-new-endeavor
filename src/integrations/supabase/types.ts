@@ -149,6 +149,89 @@ export type Database = {
           },
         ]
       }
+      inventory_items: {
+        Row: {
+          brand: string | null
+          condition: string | null
+          created_at: string
+          description: string | null
+          expiration_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          purchase_date: string | null
+          quantity: number
+          shelf_id: string
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          expiration_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          shelf_id: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          expiration_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          shelf_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_shelf_id_fkey"
+            columns: ["shelf_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_shelves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_shelves: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          type: Database["public"]["Enums"]["shelf_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          type: Database["public"]["Enums"]["shelf_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          type?: Database["public"]["Enums"]["shelf_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       plants: {
         Row: {
           created_at: string
@@ -226,7 +309,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      shelf_type: "seeds" | "plants" | "tools"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -341,6 +424,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      shelf_type: ["seeds", "plants", "tools"],
+    },
   },
 } as const
