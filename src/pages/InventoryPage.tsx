@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Archive, Leaf, Tool } from 'lucide-react';
+import { Plus, Archive, Leaf, Wrench } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import CreateShelfDialog from '@/components/inventory/CreateShelfDialog';
 
@@ -57,7 +57,7 @@ const InventoryPage = () => {
       case 'plants':
         return <Leaf className="h-5 w-5 text-green-500" />;
       case 'tools':
-        return <Tool className="h-5 w-5 text-blue-500" />;
+        return <Wrench className="h-5 w-5 text-blue-500" />;
       default:
         return <Archive className="h-5 w-5" />;
     }

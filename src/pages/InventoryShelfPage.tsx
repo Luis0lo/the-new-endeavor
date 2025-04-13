@@ -9,7 +9,7 @@ import {
   Plus, 
   Archive, 
   Leaf, 
-  Tool, 
+  Wrench, 
   ChevronLeft, 
   Calendar, 
   Clock, 
@@ -163,7 +163,7 @@ const InventoryShelfPage = () => {
       case 'plants':
         return <Leaf className="h-6 w-6 text-green-500" />;
       case 'tools':
-        return <Tool className="h-6 w-6 text-blue-500" />;
+        return <Wrench className="h-6 w-6 text-blue-500" />;
       default:
         return <Archive className="h-6 w-6" />;
     }

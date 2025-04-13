@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,19 @@ const CreateShelfDialog: React.FC<CreateShelfDialogProps> = ({ open, onOpenChang
   const [name, setName] = useState('');
   const [type, setType] = useState<'seeds' | 'plants' | 'tools'>('seeds');
   const [description, setDescription] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Get the current user's ID when component mounts
+    const getUserId = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        setUserId(session.user.id);
+      }
+    };
+    
+    getUserId();
+  }, []);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +46,15 @@ const CreateShelfDialog: React.FC<CreateShelfDialogProps> = ({ open, onOpenChang
       return;
     }
     
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a shelf",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setLoading(true);
       
@@ -41,7 +63,8 @@ const CreateShelfDialog: React.FC<CreateShelfDialogProps> = ({ open, onOpenChang
         .insert({
           name: name.trim(),
           type,
-          description: description.trim() || null
+          description: description.trim() || null,
+          user_id: userId
         });
         
       if (error) throw error;
@@ -124,7 +147,7 @@ const CreateShelfDialog: React.FC<CreateShelfDialogProps> = ({ open, onOpenChang
           </div>
           
           <DialogFooter>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !userId}>
               {loading ? 'Creating...' : 'Create Shelf'}
             </Button>
           </DialogFooter>
