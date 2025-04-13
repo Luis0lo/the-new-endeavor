@@ -84,17 +84,10 @@ const WeekView: React.FC<WeekViewProps> = ({
               isSameDay(new Date(activity.date), day)
             );
             
-            // Check if there are any completed activities
-            const hasCompletedActivities = dayActivities.some(
-              activity => activity.completed || activity.status === 'done'
-            );
-            
             return (
               <div 
                 key={day.toString()} 
-                className={`p-4 min-h-[100px] hover:bg-gray-50 cursor-pointer ${
-                  hasCompletedActivities ? 'bg-green-50' : ''
-                }`}
+                className="p-4 min-h-[100px] hover:bg-gray-50 cursor-pointer"
                 onClick={() => onSelectDay(day)}
               >
                 {dayActivities.length > 0 ? (
@@ -102,10 +95,10 @@ const WeekView: React.FC<WeekViewProps> = ({
                     {dayActivities.slice(0, 3).map(activity => (
                       <div 
                         key={activity.id} 
-                        className={`text-sm p-1 truncate flex items-start gap-1 ${
+                        className={`text-sm p-1 rounded-sm flex items-start gap-1 ${
                           activity.completed || activity.status === 'done' 
-                            ? 'text-green-700' 
-                            : ''
+                            ? 'bg-green-50 text-green-700' 
+                            : 'bg-gray-50'
                         }`}
                       >
                         {(activity.completed || activity.status === 'done') && (

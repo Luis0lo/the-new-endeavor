@@ -98,18 +98,12 @@ const MonthView: React.FC<MonthViewProps> = ({
               const dayActivities = getActivitiesForDay(day);
               const hasActivities = dayActivities.length > 0;
               
-              // Check if there are any completed activities for the day
-              const hasCompletedActivities = dayActivities.some(
-                activity => activity.completed || activity.status === 'done'
-              );
-              
               return (
                 <div 
                   key={day.toString()}
                   className={`relative flex flex-col p-1 min-h-[100px] 
                     ${isCurrentMonth ? 'bg-transparent' : 'bg-muted/20 text-muted-foreground'}
                     ${isToday ? 'ring-2 ring-primary rounded-md' : ''}
-                    ${hasCompletedActivities && isCurrentMonth ? 'bg-green-50' : ''}
                     hover:bg-muted/10 hover:ring-1 hover:ring-primary hover:rounded-md 
                     hover:shadow-sm cursor-pointer transition-all m-0.5`}
                   onClick={() => onSelectDay(day)}
@@ -129,7 +123,7 @@ const MonthView: React.FC<MonthViewProps> = ({
                             className={`truncate px-1 py-0.5 rounded-sm border flex items-center gap-1
                               ${getPriorityColor(activity.priority)}
                               ${getStatusColor(activity.status)}
-                              ${activity.status === 'done' || activity.completed ? 'text-green-700' : ''}
+                              ${activity.status === 'done' || activity.completed ? 'bg-green-50 text-green-700' : ''}
                               font-medium`}
                             title={activity.title}
                           >

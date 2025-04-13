@@ -111,7 +111,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     <Link
                       to="/dashboard"
                       className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
-                        isActive("/dashboard") && !isActive("/dashboard/calendar")
+                        isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}

@@ -193,6 +193,9 @@ const CalendarPage = () => {
           title: "Activity Updated",
           description: `"${formData.title}" has been updated in your garden calendar.`
         });
+        
+        // Close the form after saving
+        setIsFormOpen(false);
       } catch (error: any) {
         toast({
           title: "Failed to update activity",
@@ -240,6 +243,9 @@ const CalendarPage = () => {
           title: "Activity Added",
           description: `"${newActivity.title}" has been added to your garden calendar.`
         });
+        
+        // Close the form after saving
+        setIsFormOpen(false);
       } catch (error: any) {
         toast({
           title: "Failed to add activity",
