@@ -75,7 +75,11 @@ const CalendarPage = () => {
             date: activity.scheduled_date, // Map scheduled_date to date
             activity_time: activity.activity_time,
             completed: activity.completed || false,
-            category_id: activity.category_id
+            category_id: activity.category_id,
+            priority: activity.priority || "normal",
+            status: activity.status || "pending",
+            outcome_rating: activity.outcome_rating,
+            outcome_log: activity.outcome_log
           }));
           
           setActivities(mappedActivities);
@@ -156,7 +160,11 @@ const CalendarPage = () => {
             title: formData.title,
             description: formData.description || "",
             scheduled_date: format(formData.date, 'yyyy-MM-dd'),
-            activity_time: formData.time || null
+            activity_time: formData.time || null,
+            priority: formData.priority || "normal",
+            status: formData.status || "pending",
+            outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
+            outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
           .eq('id', currentActivity.id);
 
@@ -170,7 +178,11 @@ const CalendarPage = () => {
                 title: formData.title, 
                 description: formData.description || "", 
                 date: format(formData.date, 'yyyy-MM-dd'),
-                activity_time: formData.time || null
+                activity_time: formData.time || null,
+                priority: formData.priority || "normal",
+                status: formData.status || "pending",
+                outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
+                outcome_log: formData.status === "done" ? formData.outcome_log : null
               } 
             : activity
         );
@@ -199,7 +211,11 @@ const CalendarPage = () => {
             scheduled_date: format(formData.date, 'yyyy-MM-dd'),
             activity_time: formData.time || null,
             user_id: user?.id,
-            completed: false
+            completed: false,
+            priority: formData.priority || "normal",
+            status: formData.status || "pending",
+            outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
+            outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
           .select();
 
@@ -211,7 +227,11 @@ const CalendarPage = () => {
           description: data[0].description || "",
           date: data[0].scheduled_date,
           activity_time: data[0].activity_time,
-          completed: false
+          completed: false,
+          priority: data[0].priority || "normal",
+          status: data[0].status || "pending",
+          outcome_rating: data[0].outcome_rating,
+          outcome_log: data[0].outcome_log
         };
         
         setActivities([...activities, newActivity]);
@@ -232,10 +252,14 @@ const CalendarPage = () => {
 
   const handleToggleComplete = async (activity: GardenActivity) => {
     try {
+      // Update the status to "done" when completed, or back to "pending" when marked incomplete
+      const newStatus = !activity.completed ? "done" : "pending";
+      
       const { error } = await supabase
         .from('garden_activities')
         .update({
-          completed: !activity.completed
+          completed: !activity.completed,
+          status: newStatus
         })
         .eq('id', activity.id);
 
@@ -244,7 +268,7 @@ const CalendarPage = () => {
       // Update local state
       const updatedActivities = activities.map(act => 
         act.id === activity.id 
-          ? {...act, completed: !activity.completed} 
+          ? {...act, completed: !activity.completed, status: newStatus} 
           : act
       );
       

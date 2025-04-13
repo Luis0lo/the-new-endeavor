@@ -2,7 +2,7 @@
 import React from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, AlertTriangle, Clock } from 'lucide-react';
 import { GardenActivity } from '@/types/garden';
 
 interface MonthViewProps {
@@ -41,6 +41,30 @@ const MonthView: React.FC<MonthViewProps> = ({
       const activityDate = new Date(activity.date);
       return isSameDay(activityDate, day);
     });
+  };
+
+  // Priority color helper
+  const getPriorityColor = (priority?: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'low':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      default:
+        return 'bg-purple-100 text-purple-800 border-purple-300';
+    }
+  };
+
+  // Status color helper
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'done':
+        return 'border-green-300';
+      case 'in_progress':
+        return 'border-yellow-300';
+      default:
+        return 'border-gray-300';
+    }
   };
 
   const weeks = getDaysInMonth();
@@ -96,11 +120,20 @@ const MonthView: React.FC<MonthViewProps> = ({
                         {dayActivities.slice(0, 2).map(activity => (
                           <div 
                             key={activity.id}
-                            className={`truncate px-1 py-0.5 rounded-sm bg-primary/20 text-primary-foreground/90 font-medium
-                              ${activity.completed ? 'line-through opacity-50' : ''}`}
+                            className={`truncate px-1 py-0.5 rounded-sm border 
+                              ${getPriorityColor(activity.priority)}
+                              ${getStatusColor(activity.status)}
+                              ${activity.status === 'done' ? 'line-through opacity-50' : ''}
+                              font-medium`}
                             title={activity.title}
                           >
+                            {activity.priority === 'high' && (
+                              <AlertTriangle className="inline-block mr-1 h-3 w-3" />
+                            )}
                             {activity.title}
+                            {activity.activity_time && (
+                              <Clock className="inline-block ml-1 h-3 w-3 opacity-70" />
+                            )}
                           </div>
                         ))}
                         {dayActivities.length > 2 && (
