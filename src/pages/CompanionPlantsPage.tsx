@@ -2,22 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, X, ThumbsUp, ThumbsDown, AlertTriangle } from 'lucide-react';
 import { companionPlantsData, findCompanionPlants, checkPlantCompatibility } from '@/data/companionPlants';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { toast } from '@/hooks/use-toast';
-import PlantSelector from '@/components/PlantSelector';
 
 const CompanionPlantsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState(companionPlantsData);
   const [selectedPlant, setSelectedPlant] = useState<string | null>(null);
   const [compatibilityPlants, setCompatibilityPlants] = useState<string[]>([]);
+  const [plantInput, setPlantInput] = useState('');
   const [compatibilityResult, setCompatibilityResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('search');
 
@@ -39,21 +39,16 @@ const CompanionPlantsPage = () => {
   };
 
   // Add plant to compatibility check list
-  const handleAddCompatibilityPlant = (plantName: string) => {
-    if (plantName && !compatibilityPlants.includes(plantName)) {
-      const updatedPlants = [...compatibilityPlants, plantName];
-      setCompatibilityPlants(updatedPlants);
+  const handleAddCompatibilityPlant = () => {
+    if (plantInput && !compatibilityPlants.includes(plantInput)) {
+      setCompatibilityPlants([...compatibilityPlants, plantInput]);
+      setPlantInput('');
       
       // If we have more than one plant, check compatibility
-      if (updatedPlants.length > 1) {
-        const result = checkPlantCompatibility(updatedPlants);
+      if (compatibilityPlants.length > 0) {
+        const result = checkPlantCompatibility([...compatibilityPlants, plantInput]);
         setCompatibilityResult(result);
       }
-      
-      toast({
-        title: "Plant added",
-        description: `${plantName} has been added to your compatibility check.`
-      });
     }
   };
 
@@ -104,9 +99,9 @@ const CompanionPlantsPage = () => {
                     </CardDescription>
                     <div className="relative mt-2">
                       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <input
+                      <Input
                         placeholder="Search plants..."
-                        className="pl-8 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="pl-8"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
@@ -210,10 +205,23 @@ const CompanionPlantsPage = () => {
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <Label htmlFor="plantInput">Add Plants</Label>
-                      <PlantSelector 
-                        onPlantSelected={handleAddCompatibilityPlant}
-                        placeholder="Select a plant to add..."
+                      <Input
+                        id="plantInput"
+                        placeholder="Enter plant name..."
+                        value={plantInput}
+                        onChange={(e) => setPlantInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCompatibilityPlant();
+                          }
+                        }}
                       />
+                    </div>
+                    <div className="flex items-end">
+                      <Button onClick={handleAddCompatibilityPlant}>
+                        <Plus className="h-4 w-4 mr-2" /> Add
+                      </Button>
                     </div>
                   </div>
                   
