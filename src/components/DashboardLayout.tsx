@@ -13,7 +13,7 @@ import {
   Menu,
   Archive,
   BookOpen,
-  Plant
+  Flower2 // Using Flower2 icon instead of Plant (which doesn't exist)
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -173,7 +173,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}
                     >
-                      <Plant size={iconSize} />
+                      <Flower2 size={iconSize} />
                       {!sidebarCollapsed && <span>Companion Plants</span>}
                     </Link>
                   </TooltipTrigger>

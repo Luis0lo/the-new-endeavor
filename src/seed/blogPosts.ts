@@ -31,10 +31,10 @@ const createBlogPost = (): BlogPost => {
   };
 };
 
-export const blogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
+// Generate initial random blog posts
+const initialBlogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
 
-// Adding new blog posts about gardening topics
-
+// Adding predefined blog posts about gardening topics
 const additionalPosts = [
   {
     id: "7",
@@ -526,7 +526,5 @@ Organic gardening isn't just about avoiding chemicals; it's about fostering a th
   }
 ];
 
-export const blogPosts = [
-  ...blogPosts,
-  ...additionalPosts
-];
+// Export a combined array of blog posts
+export const blogPosts: BlogPost[] = [...initialBlogPosts, ...additionalPosts];
