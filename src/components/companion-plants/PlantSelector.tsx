@@ -3,20 +3,31 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+interface Plant {
+  id: string;
+  name: string;
+  scientific_name?: string;
+  description?: string;
+  image_url?: string;
+  growing_zones?: string[];
+  planting_season?: string[];
+}
+
 interface PlantSelectorProps {
-  onSelectPlant: (plant: any) => void;
+  onSelectPlant: (plant: Plant) => void;
 }
 
 export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
-  const [plants, setPlants] = useState<any[]>([]);
+  const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   
   useEffect(() => {
     const fetchPlants = async () => {
@@ -24,7 +35,7 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
         setLoading(true);
         const { data, error } = await supabase
           .from('plants')
-          .select('*')
+          .select('id, name, scientific_name, description, image_url, growing_zones, planting_season')
           .order('name');
         
         if (error) {
@@ -55,6 +66,14 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
       setOpen(false);
     }
   };
+  
+  // Filter plants based on searchTerm
+  const filteredPlants = searchTerm
+    ? plants.filter(plant => 
+        plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (plant.scientific_name && plant.scientific_name.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : plants;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,7 +86,10 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
           disabled={loading}
         >
           {loading ? (
-            "Loading plants..."
+            <div className="flex items-center">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <span>Loading plants...</span>
+            </div>
           ) : (
             <>
               <span>Select a plant to add...</span>
@@ -77,19 +99,23 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
         </Button>
       </PopoverTrigger>
       
-      {/* Only render PopoverContent when not loading and plants is an array */}
-      {!loading && Array.isArray(plants) && (
-        <PopoverContent className="w-full p-0">
+      {!loading && (
+        <PopoverContent className="w-[300px] p-0">
           <Command>
-            <CommandInput placeholder="Search plants..." />
+            <CommandInput 
+              placeholder="Search plants..." 
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+            />
             <CommandList>
               <CommandEmpty>No plant found.</CommandEmpty>
-              <CommandGroup>
-                {plants.map((plant) => (
+              <CommandGroup className="max-h-[300px] overflow-auto">
+                {filteredPlants.map((plant) => (
                   <CommandItem
                     key={plant.id}
                     value={plant.id}
                     onSelect={handleSelectPlant}
+                    className="flex items-center gap-2"
                   >
                     <Check
                       className={cn(
@@ -97,7 +123,14 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
                         value === plant.id ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    {plant.name}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{plant.name}</span>
+                      {plant.scientific_name && (
+                        <span className="text-xs text-muted-foreground italic">
+                          {plant.scientific_name}
+                        </span>
+                      )}
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
