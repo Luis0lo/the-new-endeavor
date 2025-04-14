@@ -20,18 +20,17 @@ const InventoryPage = () => {
     try {
       const counts: Record<string, number> = {};
       
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('shelf_id, count')
-        .in('shelf_id', shelfIds)
-        .group('shelf_id');
-      
-      if (error) throw error;
-      
-      // Set the counts
-      data.forEach(item => {
-        counts[item.shelf_id] = item.count;
-      });
+      // Use count() function instead of group
+      for (const shelfId of shelfIds) {
+        const { data, error, count } = await supabase
+          .from('inventory_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('shelf_id', shelfId);
+        
+        if (error) throw error;
+        
+        counts[shelfId] = count || 0;
+      }
       
       return counts;
     } catch (error: any) {
