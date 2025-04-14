@@ -79,7 +79,7 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
 
   return (
     <div className="space-y-4">
-      {/* Dropdown List Selection - New Addition */}
+      {/* Dropdown List Selection */}
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -106,25 +106,29 @@ export function PlantSelector({ onSelectPlant }: PlantSelectorProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-full max-h-80 overflow-auto" align="start">
           <DropdownMenuGroup>
-            {plants.slice(0, 200).map((plant) => (
-              <DropdownMenuItem 
-                key={plant.id}
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => {
-                  onSelectPlant(plant);
-                  setDropdownOpen(false);
-                }}
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{plant.name}</span>
-                  {plant.scientific_name && (
-                    <span className="text-xs text-muted-foreground italic">
-                      {plant.scientific_name}
-                    </span>
-                  )}
-                </div>
-              </DropdownMenuItem>
-            ))}
+            {plants.length > 0 ? (
+              plants.slice(0, 200).map((plant) => (
+                <DropdownMenuItem 
+                  key={plant.id}
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => {
+                    onSelectPlant(plant);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{plant.name}</span>
+                    {plant.scientific_name && (
+                      <span className="text-xs text-muted-foreground italic">
+                        {plant.scientific_name}
+                      </span>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))
+            ) : (
+              <DropdownMenuItem disabled>No plants found</DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

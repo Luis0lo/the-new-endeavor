@@ -237,6 +237,9 @@ export type Database = {
       }
       plants: {
         Row: {
+          antagonists: string[] | null
+          benefits: string[] | null
+          companions: string[] | null
           created_at: string
           description: string | null
           growing_zones: string[] | null
@@ -248,6 +251,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          antagonists?: string[] | null
+          benefits?: string[] | null
+          companions?: string[] | null
           created_at?: string
           description?: string | null
           growing_zones?: string[] | null
@@ -259,6 +265,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          antagonists?: string[] | null
+          benefits?: string[] | null
+          companions?: string[] | null
           created_at?: string
           description?: string | null
           growing_zones?: string[] | null

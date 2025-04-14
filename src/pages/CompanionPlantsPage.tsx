@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { PlantSelector } from '@/components/companion-plants/PlantSelector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,8 +21,8 @@ interface Plant {
 }
 
 const CompanionPlantsPage = () => {
-  const [selectedPlants, setSelectedPlants] = React.useState<Plant[]>([]);
-  const [isSeedingData, setIsSeedingData] = React.useState(false);
+  const [selectedPlants, setSelectedPlants] = useState<Plant[]>([]);
+  const [isSeedingData, setIsSeedingData] = useState(false);
   
   // Check if we have plants data in the database
   useEffect(() => {
@@ -37,15 +37,25 @@ const CompanionPlantsPage = () => {
         // If we have very few plants, seed the data
         if (!count || count < 20) {
           setIsSeedingData(true);
-          await runSeedData();
+          const success = await runSeedData();
           setIsSeedingData(false);
-          toast({
-            title: "Plants Database Ready",
-            description: "Plant compatibility database has been prepared.",
-          });
+          
+          if (success) {
+            toast({
+              title: "Plants Database Ready",
+              description: "Plant compatibility database has been prepared.",
+            });
+          } else {
+            toast({
+              title: "Database Error",
+              description: "Unable to prepare the plants database. Please try again later.",
+              variant: "destructive"
+            });
+          }
         }
       } catch (error) {
         console.error("Error checking plants data:", error);
+        setIsSeedingData(false);
       }
     };
     

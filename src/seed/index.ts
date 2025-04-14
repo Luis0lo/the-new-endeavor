@@ -15,44 +15,59 @@ export const runSeedData = async () => {
     console.log("Seeding database with plants:", plantData.length);
     try {
       // Check if plants already exist in the database
-      const { count } = await supabase
+      const { count, error: countError } = await supabase
         .from('plants')
         .select('*', { count: 'exact', head: true });
         
+      if (countError) {
+        console.error("Error checking plants count:", countError);
+        return false;
+      }
+        
       if (!count || count < 20) {
-        // Insert plants if database has few or no plants
-        const { error } = await supabase
-          .from('plants')
-          .upsert(
-            plantData.map(plant => ({
-              id: plant.id,
-              name: plant.name,
-              scientific_name: plant.scientific_name,
-              description: plant.description,
-              image_url: plant.image_url,
-              planting_season: plant.planting_season,
-              growing_zones: plant.growing_zones,
-              // Store companions and antagonists as metadata
-              companions: plant.companions,
-              antagonists: plant.antagonists,
-              benefits: plant.benefits
-            })),
-            { onConflict: 'id' }
-          );
+        console.log("Inserting plants data...");
+        
+        // Process plants in smaller batches to avoid request size limits
+        const batchSize = 50;
+        for (let i = 0; i < plantData.length; i += batchSize) {
+          const batch = plantData.slice(i, i + batchSize);
           
-        if (error) {
-          console.error("Error seeding plants:", error);
-        } else {
-          console.log("Successfully seeded plants database");
+          const { error } = await supabase
+            .from('plants')
+            .upsert(
+              batch.map(plant => ({
+                id: plant.id,
+                name: plant.name,
+                scientific_name: plant.scientific_name,
+                description: plant.description,
+                image_url: plant.image_url,
+                planting_season: plant.planting_season,
+                growing_zones: plant.growing_zones,
+                companions: plant.companions,
+                antagonists: plant.antagonists,
+                benefits: plant.benefits
+              })),
+              { onConflict: 'id' }
+            );
+            
+          if (error) {
+            console.error("Error seeding plants batch:", error);
+            return false;
+          }
+          
+          console.log(`Successfully seeded ${i + batch.length}/${plantData.length} plants`);
         }
+        
+        console.log("Successfully seeded all plants database");
+        return true;
       } else {
         console.log("Plants data already exists, skipping seed");
+        return true;
       }
     } catch (error) {
       console.error("Error in plant seeding process:", error);
+      return false;
     }
-    
-    return true;
   }
   
   return false;
