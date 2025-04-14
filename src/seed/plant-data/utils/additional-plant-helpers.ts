@@ -1,4 +1,5 @@
 
+import { v4 as uuidv4 } from 'uuid';
 import { generateBenefits, generateGrowingZones, generatePlantingSeasons } from './plant-helpers';
 
 // Create additional plants
@@ -6,7 +7,7 @@ export const createAdditionalPlants = (plants: any[], currentId: number) => {
   const additionalPlantsData = [];
   
   for (const plant of plants) {
-    const id = (currentId++).toString();
+    const id = uuidv4();
     
     additionalPlantsData.push({
       id,
@@ -22,5 +23,6 @@ export const createAdditionalPlants = (plants: any[], currentId: number) => {
     });
   }
   
+  // We still return the nextId for compatibility, but it's not used for generating IDs anymore
   return { plants: additionalPlantsData, nextId: currentId };
 };

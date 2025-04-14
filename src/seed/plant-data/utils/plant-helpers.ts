@@ -1,5 +1,6 @@
 
 import { possibleBenefits } from '../benefits';
+import { v4 as uuidv4 } from 'uuid';
 
 // Helper function to generate growing zones
 export const generateGrowingZones = () => {
@@ -18,7 +19,7 @@ export const generateBenefits = () => {
 
 // Helper function to create a base plant
 export const createBasePlant = (plant: any, index: number) => {
-  const id = (index + 1).toString();
+  const id = uuidv4();
   const benefits = generateBenefits();
   
   return {
