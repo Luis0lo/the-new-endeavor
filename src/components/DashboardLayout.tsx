@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Menu,
   Archive,
-  BookOpen
+  BookOpen,
+  Leaf
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -74,8 +75,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  // Determine icon size based on sidebar state
-  const iconSize = sidebarCollapsed ? 24 : 18;
+  // Determine icon size based on sidebar state - INCREASED size when collapsed
+  const iconSize = sidebarCollapsed ? 26 : 18;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -83,7 +84,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* Sidebar */}
         <div 
           className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ${
-            sidebarCollapsed ? "w-[60px]" : "w-[250px]"
+            sidebarCollapsed ? "w-[70px]" : "w-[250px]"
           }`}
         >
           {/* Sidebar header */}
@@ -102,7 +103,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               className="ml-auto"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             >
-              {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+              {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={18} />}
             </Button>
           </div>
 
@@ -116,7 +117,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     <Link
                       to="/dashboard"
                       className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
-                        isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory")
+                        isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory") && !isActive("/dashboard/companions")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}
@@ -165,6 +166,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
+                      to="/dashboard/companions"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/dashboard/companions")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <Leaf size={iconSize} />
+                      {!sidebarCollapsed && <span>Companion Plants</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Companion Plants</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
                       to="/blog"
                       className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
                         isActive("/blog")
@@ -208,7 +226,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
                   onClick={handleSignOut}
                 >
-                  <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
+                  <LogOut className={`h-5 w-5 ${sidebarCollapsed ? "" : "mr-2"}`} />
                   {!sidebarCollapsed && <span>Logout</span>}
                 </Button>
               </TooltipTrigger>
@@ -220,7 +238,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* Main content */}
         <div 
           className={`flex-1 transition-all ${
-            sidebarCollapsed ? "ml-[60px]" : "ml-[250px]"
+            sidebarCollapsed ? "ml-[70px]" : "ml-[250px]"
           }`}
         >
           {children}

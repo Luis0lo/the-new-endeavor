@@ -1,3 +1,4 @@
+
 import { faker } from "@faker-js/faker";
 
 export type BlogPost = {
@@ -31,10 +32,9 @@ const createBlogPost = (): BlogPost => {
   };
 };
 
-export const blogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
+const sampleBlogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
 
 // Adding new blog posts about gardening topics
-
 const additionalPosts = [
   {
     id: "7",
@@ -526,7 +526,5 @@ Organic gardening isn't just about avoiding chemicals; it's about fostering a th
   }
 ];
 
-export const blogPosts = [
-  ...blogPosts,
-  ...additionalPosts
-];
+// Export all the blog posts
+export const blogPosts = [...sampleBlogPosts, ...additionalPosts];
