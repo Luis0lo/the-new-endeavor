@@ -208,7 +208,6 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          position: number | null
           type: Database["public"]["Enums"]["shelf_type"]
           updated_at: string
           user_id: string
@@ -218,7 +217,6 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          position?: number | null
           type: Database["public"]["Enums"]["shelf_type"]
           updated_at?: string
           user_id: string
@@ -228,7 +226,6 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          position?: number | null
           type?: Database["public"]["Enums"]["shelf_type"]
           updated_at?: string
           user_id?: string

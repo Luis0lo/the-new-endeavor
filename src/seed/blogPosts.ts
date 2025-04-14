@@ -1,4 +1,3 @@
-
 import { faker } from "@faker-js/faker";
 
 export type BlogPost = {
@@ -32,10 +31,10 @@ const createBlogPost = (): BlogPost => {
   };
 };
 
-// Renamed from blogPosts to sampleBlogPosts to avoid naming conflict
-const sampleBlogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
+export const blogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
 
 // Adding new blog posts about gardening topics
+
 const additionalPosts = [
   {
     id: "7",
@@ -527,8 +526,7 @@ Organic gardening isn't just about avoiding chemicals; it's about fostering a th
   }
 ];
 
-// Now export the combined array as blogPosts
 export const blogPosts = [
-  ...sampleBlogPosts,
+  ...blogPosts,
   ...additionalPosts
 ];

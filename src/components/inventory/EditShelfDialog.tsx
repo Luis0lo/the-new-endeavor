@@ -35,7 +35,6 @@ interface EditShelfDialogProps {
     name: string;
     type: 'seeds' | 'plants' | 'tools';
     description: string | null;
-    position?: number;
   };
   onShelfUpdated: () => void;
 }
