@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,14 @@ const PlantSelector = ({
 
   // Extract all plant names from the companionPlantsData
   useEffect(() => {
-    const plants = companionPlantsData.map(item => item.plant);
-    setAvailablePlants(plants);
+    // Ensure companionPlantsData is defined and is an array before mapping
+    if (companionPlantsData && Array.isArray(companionPlantsData)) {
+      const plants = companionPlantsData.map(item => item.plant);
+      setAvailablePlants(plants);
+    } else {
+      // Set empty array as fallback
+      setAvailablePlants([]);
+    }
   }, []);
 
   return (
@@ -57,25 +63,29 @@ const PlantSelector = ({
           <CommandInput placeholder="Search plants..." />
           <CommandEmpty>No plant found.</CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {availablePlants.map((plant) => (
-              <CommandItem
-                key={plant}
-                value={plant}
-                onSelect={() => {
-                  setValue(plant);
-                  onPlantSelected(plant);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === plant ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {plant}
-              </CommandItem>
-            ))}
+            {availablePlants.length > 0 ? (
+              availablePlants.map((plant) => (
+                <CommandItem
+                  key={plant}
+                  value={plant}
+                  onSelect={() => {
+                    setValue(plant);
+                    onPlantSelected(plant);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === plant ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {plant}
+                </CommandItem>
+              ))
+            ) : (
+              <CommandItem disabled>Loading plants...</CommandItem>
+            )}
           </CommandGroup>
         </Command>
       </PopoverContent>
