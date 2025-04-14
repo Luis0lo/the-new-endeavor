@@ -31,16 +31,28 @@ const PlantSelector = ({
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [availablePlants, setAvailablePlants] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Extract all plant names from the companionPlantsData
   useEffect(() => {
-    // Ensure companionPlantsData is defined and is an array before mapping
-    if (companionPlantsData && Array.isArray(companionPlantsData)) {
-      const plants = companionPlantsData.map(item => item.plant);
-      setAvailablePlants(plants);
-    } else {
-      // Set empty array as fallback
+    try {
+      // Add a small delay to ensure data is loaded
+      const timer = setTimeout(() => {
+        if (companionPlantsData && Array.isArray(companionPlantsData)) {
+          const plants = companionPlantsData.map(item => item.plant);
+          setAvailablePlants(plants);
+        } else {
+          console.error("companionPlantsData is not available or not an array", companionPlantsData);
+          setAvailablePlants([]);
+        }
+        setIsLoading(false);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } catch (error) {
+      console.error("Error loading plant data:", error);
       setAvailablePlants([]);
+      setIsLoading(false);
     }
   }, []);
 
@@ -52,19 +64,19 @@ const PlantSelector = ({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
-          disabled={disabled}
+          disabled={disabled || isLoading}
         >
-          {value ? value : placeholder}
+          {value ? value : isLoading ? "Loading plants..." : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Search plants..." />
-          <CommandEmpty>No plant found.</CommandEmpty>
-          <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {availablePlants.length > 0 ? (
-              availablePlants.map((plant) => (
+      {!isLoading && (
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput placeholder="Search plants..." />
+            <CommandEmpty>No plant found.</CommandEmpty>
+            <CommandGroup className="max-h-[300px] overflow-y-auto">
+              {availablePlants.map((plant) => (
                 <CommandItem
                   key={plant}
                   value={plant}
@@ -82,13 +94,11 @@ const PlantSelector = ({
                   />
                   {plant}
                 </CommandItem>
-              ))
-            ) : (
-              <CommandItem disabled>Loading plants...</CommandItem>
-            )}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      )}
     </Popover>
   );
 };
