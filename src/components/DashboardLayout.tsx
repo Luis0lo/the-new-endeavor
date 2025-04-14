@@ -11,7 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Archive
+  Archive,
+  BookOpen
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -73,6 +74,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
+  // Determine icon size based on sidebar state
+  const iconSize = sidebarCollapsed ? 24 : 18;
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex min-h-screen w-full bg-background">
@@ -117,7 +121,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}
                     >
-                      <Home size={18} />
+                      <Home size={iconSize} />
                       {!sidebarCollapsed && <span>Home</span>}
                     </Link>
                   </TooltipTrigger>
@@ -134,7 +138,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}
                     >
-                      <Calendar size={18} />
+                      <Calendar size={iconSize} />
                       {!sidebarCollapsed && <span>Calendar</span>}
                     </Link>
                   </TooltipTrigger>
@@ -151,11 +155,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}
                     >
-                      <Archive size={18} />
+                      <Archive size={iconSize} />
                       {!sidebarCollapsed && <span>Inventory</span>}
                     </Link>
                   </TooltipTrigger>
                   {sidebarCollapsed && <TooltipContent side="right">Inventory</TooltipContent>}
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/blog"
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md px-3 py-2 ${
+                        isActive("/blog")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
+                      }`}
+                    >
+                      <BookOpen size={iconSize} />
+                      {!sidebarCollapsed && <span>Garden Resources</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right">Garden Resources</TooltipContent>}
                 </Tooltip>
                 
                 <Tooltip>
@@ -168,7 +189,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           : "text-muted-foreground hover:bg-accent/50"
                       }`}
                     >
-                      <Settings size={18} />
+                      <Settings size={iconSize} />
                       {!sidebarCollapsed && <span>Account Settings</span>}
                     </Link>
                   </TooltipTrigger>

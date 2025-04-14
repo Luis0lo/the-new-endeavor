@@ -1,1273 +1,532 @@
+import { faker } from "@faker-js/faker";
 
-import { supabase } from '@/integrations/supabase/client';
+export type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  author_id: string;
+  published: boolean;
+  published_at: string;
+  featured_image: string;
+};
 
-const blogPosts = [
+const createBlogPost = (): BlogPost => {
+  const title = faker.lorem.sentence();
+  const slug = title.toLowerCase().replace(/ /g, "-");
+  const date = faker.date.past().toISOString();
+  const featured_image = faker.image.urlLoremFlickr({ category: 'nature' });
+  
+  return {
+    id: faker.string.uuid(),
+    title: title,
+    slug: slug,
+    excerpt: faker.lorem.paragraph(),
+    content: faker.lorem.paragraphs(5),
+    author_id: faker.string.uuid(),
+    published: true,
+    published_at: date,
+    featured_image: featured_image,
+  };
+};
+
+export const blogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
+
+// Adding new blog posts about gardening topics
+
+const additionalPosts = [
   {
-    title: "Spring Gardening Essentials: Getting Started with Your Garden",
-    slug: "spring-gardening-essentials",
-    excerpt: "Learn the essential steps to prepare your garden for spring planting, including soil preparation, selecting seeds, and essential tools.",
+    id: "7",
+    title: "Seasonal Planting Guide: What to Plant and When",
+    slug: "seasonal-planting-guide",
+    excerpt: "Learn the best times to plant various vegetables, fruits, and flowers throughout the year to maximize your garden's productivity.",
     content: `
-# Spring Gardening Essentials: Getting Started with Your Garden
+# Seasonal Planting Guide: What to Plant and When
 
-Spring is the perfect time to start your garden journey! As the temperatures rise and the days grow longer, plants begin to awaken from their winter dormancy. Whether you're a seasoned gardener or just starting out, these essential tips will help you prepare your garden for a successful growing season.
+Knowing when to plant various crops is essential for a successful garden. This guide will help you understand the optimal planting times for different plants throughout the seasons.
 
-## Preparing Your Soil
+## Spring (March - May)
 
-The foundation of any successful garden is healthy soil. Start by removing debris and weeds from your garden beds. Then, test your soil's pH level to determine if any amendments are needed. Most vegetables and flowers prefer a slightly acidic to neutral pH (between 6.0 and 7.0).
+Spring is the perfect time to start many garden favorites as the soil warms and the threat of frost diminishes.
 
-Adding compost or well-rotted manure to your soil can improve its structure and nutrient content. Work these organic materials into the top 6-8 inches of soil. For heavy clay soils, adding sand or perlite can improve drainage, while sandy soils benefit from additional organic matter to help retain moisture.
+### Early Spring
+- **Cool-season vegetables**: Peas, lettuce, spinach, radishes, carrots
+- **Herbs**: Parsley, cilantro, dill
+- **Flowers**: Pansies, sweet peas, snapdragons
 
-## Selecting the Right Plants
+### Late Spring
+- **Warm-season vegetables**: Tomatoes, peppers, eggplants (after last frost)
+- **Herbs**: Basil, rosemary, thyme
+- **Flowers**: Marigolds, zinnias, cosmos
 
-When choosing plants for your spring garden, consider your local climate, the amount of sunlight your garden receives, and your personal preferences. Some easy-to-grow spring vegetables include:
+## Summer (June - August)
 
-- Lettuce and salad greens
-- Radishes
-- Peas
-- Spinach
-- Carrots
-- Beets
+Summer is ideal for heat-loving plants and succession planting of quick-growing vegetables.
 
-For flowers, consider spring favorites like:
+### Early Summer
+- **Vegetables**: Corn, beans, cucumbers, summer squash
+- **Herbs**: Oregano, sage, mint
+- **Flowers**: Sunflowers, dahlias, gladiolus
 
-- Pansies
-- Snapdragons
-- Sweet peas
-- Marigolds
-- Zinnias
+### Late Summer
+- **Fall crops**: Kale, collards, brussels sprouts
+- **Root vegetables**: Beets, turnips, carrots (for fall harvest)
+- **Herbs**: Second plantings of cilantro, dill
 
-## Essential Tools for Spring Gardening
+## Fall (September - November)
 
-Having the right tools can make gardening more enjoyable and efficient. Here are the essentials:
+Fall gardening focuses on cool-season crops and preparations for the following spring.
 
-1. **Garden Gloves**: Protect your hands from thorns, splinters, and soil.
-2. **Hand Trowel**: Perfect for digging small holes for transplants.
-3. **Garden Fork**: Helps to turn and aerate soil.
-4. **Pruning Shears**: For trimming and shaping plants.
-5. **Watering Can or Hose**: Essential for keeping your plants hydrated.
-6. **Wheelbarrow**: Makes transporting soil, compost, and plants easier.
+### Early Fall
+- **Vegetables**: Spinach, lettuce, arugula, radishes
+- **Cover crops**: Clover, rye, vetch
+- **Flowers**: Mums, asters, pansies
 
-## Planting Tips
+### Late Fall
+- **Garlic and onions**: For harvest next year
+- **Spring bulbs**: Tulips, daffodils, crocuses
+- **Trees and shrubs**: Ideal planting time for establishment
 
-When planting seeds, follow the instructions on the seed packet for planting depth and spacing. As a general rule, plant seeds at a depth of about twice their diameter. For transplants, dig a hole slightly larger than the plant's root ball, place the plant in the hole, and gently firm the soil around it.
+## Winter (December - February)
 
-Water your newly planted seeds and transplants thoroughly. Consistent moisture is crucial for germination and establishment. Consider adding a layer of mulch around your plants to help retain moisture and suppress weeds.
+Winter is planning time for most gardeners, though some growing can still happen.
 
-## Maintenance Schedule
+### Indoor Activities
+- **Seed starting**: Get a jump on spring crops
+- **Microgreens**: Quick-growing indoor crop
+- **Planning**: Garden design and seed ordering
 
-Establish a regular maintenance routine to keep your garden thriving:
+### Outdoor (Mild Climates)
+- **Winter vegetables**: Kale, brussels sprouts, certain lettuces
+- **Dormant pruning**: Fruit trees and roses
+- **Mulching**: Protecting perennial plants
 
-- **Watering**: Most plants need about 1 inch of water per week. Water deeply and less frequently to encourage deep root growth.
-- **Weeding**: Remove weeds regularly before they have a chance to establish and compete with your plants.
-- **Fertilizing**: Apply a balanced fertilizer according to package instructions to provide essential nutrients.
-- **Pest Control**: Monitor your plants for signs of pests and diseases. Address issues promptly using organic methods when possible.
-
-## Conclusion
-
-With proper preparation and care, your spring garden can provide beauty, fresh produce, and a rewarding connection to nature. Remember that gardening is a learning process, and each season brings new knowledge and experiences. Enjoy the journey and the fruits of your labor!
+Remember that these timeframes are general guidelines and should be adjusted based on your specific climate zone. Your local extension service can provide more precise planting dates for your area.
 
 Happy gardening!
     `,
+    author_id: "1",
     published: true,
-    featured_image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+    published_at: "2025-03-14T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
   {
-    title: "Companion Planting Guide: Boost Your Garden's Health Naturally",
-    slug: "companion-planting-guide",
-    excerpt: "Discover how to use companion planting techniques to improve plant health, deter pests, and increase yields naturally.",
+    id: "8",
+    title: "Essential Plant Care Tips for Thriving Gardens",
+    slug: "plant-care-tips",
+    excerpt: "Master the fundamentals of plant care with these expert tips on watering, fertilizing, pruning, and pest management.",
     content: `
-# Companion Planting Guide: Boost Your Garden's Health Naturally
+# Essential Plant Care Tips for Thriving Gardens
 
-Companion planting is an age-old gardening technique that involves growing different plants together for mutual benefit. This practice can help deter pests, attract beneficial insects, improve pollination, enhance plant growth, and make efficient use of garden space. In this guide, we'll explore some effective companion planting combinations and strategies to help your garden thrive naturally.
+Proper plant care is the foundation of a beautiful and productive garden. This guide covers the essential aspects of keeping your plants healthy and thriving throughout the growing season.
+
+## Watering Wisdom
+
+Water is life for plants, but improper watering practices can do more harm than good.
+
+### Basics of Proper Watering
+- **Deep, infrequent watering**: Encourages deeper root growth
+- **Morning watering**: Reduces evaporation and fungal disease
+- **Water at the base**: Avoid wetting foliage when possible
+- **Check soil moisture**: Insert your finger 1-2 inches into the soil; if it feels dry, it's time to water
+
+### Signs of Watering Problems
+- **Wilting**: Can indicate both under and overwatering
+- **Yellow leaves**: Often a sign of overwatering
+- **Brown leaf edges**: Typically indicates underwatering
+- **Slow growth**: May suggest inconsistent watering
+
+## Nutrition and Fertilizing
+
+Plants, like people, need proper nutrition to thrive.
+
+### Understanding Plant Nutrition
+- **Macronutrients (NPK)**: Nitrogen (leaf growth), Phosphorus (roots and flowers), Potassium (overall health)
+- **Micronutrients**: Iron, manganese, zinc, and others needed in smaller amounts
+- **Soil pH**: Affects nutrient availability; most plants prefer 6.0-7.0
+
+### Fertilizing Tips
+- **Start with soil testing**: Know what your soil needs
+- **Slow-release options**: Provide steady nutrition over time
+- **Compost**: Improves soil structure while adding nutrients
+- **Avoid over-fertilizing**: Can burn plants and cause excessive foliage at the expense of flowers/fruit
+
+## Pruning Practices
+
+Strategic cutting encourages better plant form and productivity.
+
+### Why Prune?
+- **Removes dead/diseased material**: Improves plant health
+- **Increases air circulation**: Reduces disease pressure
+- **Stimulates new growth**: Can increase flowering and fruiting
+- **Controls size and shape**: Keeps plants within bounds
+
+### Pruning Guidelines
+- **Use clean, sharp tools**: Prevents disease spread
+- **Know your plant's needs**: Some plants need specific pruning techniques
+- **Timing matters**: Many flowering shrubs are pruned right after blooming
+- **Remove no more than 1/3**: Avoid stressing the plant with excessive pruning
+
+## Pest and Disease Management
+
+Every garden faces challenges from unwanted visitors.
+
+### Preventive Measures
+- **Healthy soil**: Strong plants resist problems better
+- **Proper spacing**: Allows airflow and reduces disease
+- **Companion planting**: Certain plants naturally repel pests
+- **Regular inspection**: Catch problems early when they're easier to manage
+
+### Eco-friendly Solutions
+- **Insecticidal soap**: For soft-bodied insects
+- **Neem oil**: Natural pesticide and fungicide
+- **Beneficial insects**: Ladybugs, lacewings, and predatory mites
+- **Physical barriers**: Row covers, copper tape for slugs
+
+By mastering these fundamentals of plant care, you'll be well on your way to a garden that's not just surviving, but truly thriving throughout the seasons.
+    `,
+    author_id: "1",
+    published: true,
+    published_at: "2025-03-20T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1598900438156-4078e6043996?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+  },
+  {
+    id: "9",
+    title: "Companion Planting: Harmony in the Garden",
+    slug: "companion-planting",
+    excerpt: "Discover the art of companion planting to naturally deter pests, improve pollination, and enhance the growth and flavor of your garden plants.",
+    content: `
+# Companion Planting: Harmony in the Garden
+
+Companion planting is the practice of growing certain plants near each other for mutual benefit. This age-old gardening wisdom can help you create a more balanced, productive, and pest-resistant garden ecosystem.
 
 ## Benefits of Companion Planting
 
-- **Pest Control**: Some plants naturally repel specific insects or mask the scent of vulnerable plants.
-- **Pollination Enhancement**: Certain companions attract beneficial insects that help with pollination.
-- **Improved Plant Health**: Some plants can improve soil quality or provide shade/support for others.
-- **Space Efficiency**: Interplanting compatible species makes better use of garden space.
-- **Biodiversity**: Diverse plantings create a more resilient ecosystem.
+### Natural Pest Control
+- **Aromatic plants**: Strong-smelling herbs like basil, rosemary, and mint repel many common pests
+- **Trap crops**: Plants that attract pests away from your valuable crops
+- **Insectary plants**: Flowers that attract beneficial insects that prey on garden pests
+
+### Enhanced Growth and Flavor
+- **Nitrogen fixers**: Legumes like beans and peas add nitrogen to the soil
+- **Complementary nutrient needs**: Pairing plants with different nutritional requirements
+- **Taste improvement**: Some companions can enhance the flavor of nearby plants
+
+### Physical Benefits
+- **Shade providers**: Taller plants provide cooling shade for heat-sensitive crops
+- **Living mulch**: Low-growing plants that suppress weeds and retain soil moisture
+- **Structural support**: Sturdy plants can provide natural trellising
 
 ## Classic Companion Planting Combinations
 
-### Tomatoes
+### The Three Sisters
+Native Americans' perfect example of companion planting:
+- **Corn**: Provides a natural pole for beans
+- **Beans**: Fix nitrogen in the soil for corn and squash
+- **Squash**: Large leaves shade the soil and suppress weeds
 
-**Good Companions:**
-- Basil: Repels flies and mosquitoes, improves growth and flavor
-- Marigolds: Repel nematodes and other pests
-- Nasturtiums: Act as a trap crop for aphids
-- Carrots: Tomatoes provide shade for carrots
-- Garlic and Onions: Repel pests with their strong odor
+### Tomato Companions
+- **Basil**: Repels flies and mosquitoes, improves flavor and growth
+- **Marigolds**: Deter nematodes in the soil
+- **Borage**: Attracts pollinators, deters tomato hornworms
+- **Avoid planting near**: Potatoes, fennel, cabbage family
 
-**Poor Companions:**
-- Potatoes: Share diseases
-- Corn: Attract the same pests
-- Fennel: Inhibits tomato growth
+### Cabbage Family Protectors
+- **Aromatic herbs**: Thyme, mint, rosemary deter cabbage moths
+- **Nasturtiums**: Act as a trap crop for aphids
+- **Onion family**: Garlic and onions repel many cabbage pests
+- **Avoid planting near**: Strawberries, tomatoes
 
-### Beans
+### Root Vegetable Partners
+- **Lettuce**: Shallow-rooted, doesn't compete with deeper root vegetables
+- **Chives and onions**: Deter pests with their strong scent
+- **Chamomile**: Improves flavor of root crops
+- **Avoid planting near**: Other root crops that compete for space
 
-**Good Companions:**
-- Corn: Provides support for climbing beans
-- Squash: Creates living mulch to suppress weeds
-- Carrots and Cucumbers: Benefit from nitrogen fixed by beans
-- Marigolds: Repel Mexican bean beetles
+## Plants That Don't Get Along
 
-**Poor Companions:**
-- Onions, Garlic, and Leeks: Inhibit bean growth
-- Sunflowers: Can hamper bean growth
+Some plants actively inhibit the growth of others:
 
-### Cucumbers
+### Common Antagonistic Pairs
+- **Fennel**: Generally hostile to most garden plants
+- **Black walnut trees**: Produce juglone, toxic to many plants
+- **Sunflowers**: Can have allelopathic effects (inhibit growth) on certain plants
+- **Beans and onions**: Onion family plants stunt bean growth
 
-**Good Companions:**
-- Corn: Provides shade and windbreak
-- Beans: Fix nitrogen that cucumbers need
-- Radishes: Repel cucumber beetles
-- Sunflowers: Provide shade and attract pollinators
-- Nasturtiums: Repel cucumber beetles
+## How to Start Companion Planting
 
-**Poor Companions:**
-- Potatoes: Increase susceptibility to blight
-- Aromatic herbs: Can stunt cucumber growth
+### Planning Your Garden
+- **Research**: Learn which of your favorite plants grow well together
+- **Start small**: Try a few proven combinations before redesigning your whole garden
+- **Observe**: Keep notes on what works in your specific conditions
 
-## The Three Sisters: An Ancient Companion Planting System
+### Beyond Plants: Animal Companions
+- **Chickens**: Can help with pest control and provide fertilizer (when properly managed)
+- **Beneficial insects**: Create habitat for pollinators, predatory insects, and decomposers
+- **Toads and birds**: Natural pest controllers that can be attracted with the right habitat
 
-One of the most famous companion planting systems is the "Three Sisters," developed by Native American agriculturalists:
-
-1. **Corn**: Provides a natural trellis for beans
-2. **Beans**: Fix nitrogen in the soil for corn and squash; climb up corn stalks
-3. **Squash**: Creates living mulch that suppresses weeds and deters pests with prickly stems
-
-This system creates a beneficial relationship where each plant helps the others thrive.
-
-## Herbs as Companion Plants
-
-Many herbs make excellent companion plants throughout the garden:
-
-- **Basil**: Improves the growth and flavor of tomatoes, repels flies and mosquitoes
-- **Mint**: Deters cabbage moths, ants, and rodents (best planted in containers due to invasiveness)
-- **Rosemary**: Repels cabbage moths, carrot flies, and bean beetles
-- **Dill**: Attracts beneficial insects but should be kept away from tomatoes
-- **Chives**: Deter aphids and Japanese beetles, especially helpful near roses and tomatoes
-
-## Flowers for Companion Planting
-
-Integrating flowers into your vegetable garden isn't just beautiful—it's functional:
-
-- **Marigolds**: Repel nematodes and many insects with their strong scent
-- **Nasturtiums**: Act as trap crops for aphids and attract pollinators
-- **Sunflowers**: Attract pollinators and provide shade for heat-sensitive plants
-- **Calendula**: Attracts pollinators and beneficial insects
-- **Borage**: Deters tomato hornworms and cabbage worms, attracts pollinators
-
-## Implementation Tips
-
-1. **Research Before Planting**: Learn about the specific needs and compatibilities of your chosen plants.
-2. **Start Small**: Begin with a few proven companions rather than redesigning your entire garden.
-3. **Observe Results**: Keep notes on what combinations work best in your specific garden conditions.
-4. **Consider Plant Heights**: Plant taller companions on the north side of shorter plants to avoid blocking sunlight.
-5. **Mix It Up**: Create diversity in your garden beds rather than planting in single-crop rows.
-
-## Conclusion
-
-Companion planting offers a natural, sustainable approach to improving your garden's health and productivity. By working with nature rather than against it, you can create a thriving garden ecosystem that requires fewer external inputs like pesticides and fertilizers. While some companion planting advice is based on generations of farmer wisdom, many of these relationships have scientific backing related to pest deterrence, nutrient sharing, or habitat creation.
-
-Experiment with these companions in your own garden and discover the magic of plants helping plants!
+Companion planting is as much art as science, and regional variations abound. The best approach is to experiment with traditional combinations while remaining observant of what works in your unique garden ecosystem.
     `,
+    author_id: "1",
     published: true,
-    featured_image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1332&q=80"
+    published_at: "2025-03-28T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"
   },
   {
-    title: "Organic Pest Control: Natural Ways to Protect Your Garden",
-    slug: "organic-pest-control",
-    excerpt: "Learn effective organic methods to manage common garden pests without harmful chemicals.",
+    id: "10",
+    title: "Common Garden Pests and Natural Solutions",
+    slug: "garden-pests-natural-solutions",
+    excerpt: "Identify and manage common garden pests using natural, environmentally friendly methods that protect your plants and beneficial insects.",
     content: `
-# Organic Pest Control: Natural Ways to Protect Your Garden
+# Common Garden Pests and Natural Solutions
 
-One of the biggest challenges gardeners face is protecting their plants from pests while avoiding harmful chemicals. Fortunately, there are many effective organic methods to manage garden pests that are safe for your family, beneficial insects, and the environment. This guide will introduce you to natural pest control strategies that work.
+Every garden faces challenges from insect pests and other unwanted visitors. This guide will help you identify common garden pests and provide natural, environmentally friendly solutions to manage them effectively.
 
-## Prevention: The First Line of Defense
+## Aphids
 
-Prevention is always easier than treatment. These preventive measures can help keep pest problems from developing:
+These tiny sap-suckers are among the most common garden pests.
 
-### Build Healthy Soil
+### Identification
+- **Appearance**: Small (1/8 inch), pear-shaped, soft-bodied insects in various colors
+- **Behavior**: Cluster on new growth and undersides of leaves
+- **Damage**: Stunted growth, curled leaves, sticky "honeydew" residue
 
-Healthy plants grown in nutrient-rich soil are naturally more resistant to pests and diseases. Incorporate compost and organic matter regularly to:
-- Improve soil structure
-- Enhance beneficial microbial activity
-- Provide balanced nutrition for stronger plants
+### Natural Controls
+- **Strong water spray**: Dislodge aphids with a forceful stream of water
+- **Insecticidal soap**: Effective on contact with soft-bodied insects
+- **Neem oil**: Disrupts feeding and reproduction
+- **Beneficial insects**: Ladybugs, lacewings, and parasitic wasps are natural predators
 
-### Practice Crop Rotation
+## Tomato Hornworms
 
-Don't plant the same family of vegetables in the same location year after year. Crop rotation:
-- Disrupts pest life cycles
-- Prevents pathogen buildup in the soil
-- Balances soil nutrient usage
+These large caterpillars can devour tomato plants with amazing speed.
 
-### Choose Resistant Varieties
+### Identification
+- **Appearance**: Large green caterpillars (up to 4 inches) with white stripes and a horn-like projection
+- **Behavior**: Feed on leaves, stems, and occasionally fruits
+- **Damage**: Defoliation, especially on upper portions of plants
 
-Many seed catalogs and plant descriptions indicate resistance to common pests and diseases. Selecting these varieties can significantly reduce pest problems from the start.
+### Natural Controls
+- **Handpicking**: Most effective in small gardens
+- **Bacillus thuringiensis (Bt)**: Natural bacteria that affects only caterpillars
+- **Companion planting**: Dill attracts beneficial wasps that parasitize hornworms
+- **Look for parasitized hornworms**: White cocoons on the caterpillar's back indicate parasitic wasp activity; leave these in the garden
 
-### Encourage Biodiversity
+## Japanese Beetles
 
-A diverse garden with many different plants creates a balanced ecosystem where beneficial insects can thrive:
-- Plant flowers that attract beneficial insects
-- Include herbs that repel common pests
-- Create habitat areas for beneficial wildlife
+These metallic beauties can skeletonize leaves in record time.
 
-## Identifying Garden Pests and Their Natural Predators
+### Identification
+- **Appearance**: Metallic green-copper beetles about 1/2 inch long
+- **Behavior**: Feed in groups, starting at the top of plants
+- **Damage**: Skeletonized leaves (only veins remain)
 
-Before taking action against pests, it's important to identify them correctly. Not all insects are harmful—many are beneficial or harmless. Here are some common garden pests and their natural predators:
+### Natural Controls
+- **Handpicking**: Drop into soapy water in early morning when they're sluggish
+- **Row covers**: Physical exclusion during peak season
+- **Milky spore**: Biological control that affects the soil-dwelling grub stage
+- **Companion plants**: Garlic, rue, and tansy may repel them
 
-### Aphids
-**Natural predators**: Ladybugs, lacewings, parasitic wasps
-**Organic controls**: Strong water spray, insecticidal soap, neem oil
+## Squash Bugs
 
-### Cabbage Worms
-**Natural predators**: Paper wasps, parasitic wasps
-**Organic controls**: Bacillus thuringiensis (Bt), row covers, hand-picking
+These persistent pests target cucurbits (squash, pumpkins, cucumbers).
 
-### Slugs and Snails
-**Natural predators**: Ground beetles, birds
-**Organic controls**: Beer traps, diatomaceous earth, copper barriers
+### Identification
+- **Appearance**: Gray-brown, flat-backed bugs about 5/8 inch long
+- **Behavior**: Congregate at plant bases and under leaves
+- **Damage**: Wilting, yellow spots that turn brown, eventual plant death
 
-### Tomato Hornworms
-**Natural predators**: Braconid wasps, birds
-**Organic controls**: Hand-picking, Bt, attract parasitic wasps with flowers
+### Natural Controls
+- **Vigilant monitoring**: Check under leaves for egg clusters and crush them
+- **Diatomaceous earth**: Apply around plant bases
+- **Trap boards**: Place boards near plants; bugs collect underneath in the morning and can be destroyed
+- **Neem oil**: Apply to nymphs (immature stages)
 
-### Spider Mites
-**Natural predators**: Predatory mites, ladybugs
-**Organic controls**: Strong water spray, insecticidal soap, neem oil
+## Slugs and Snails
 
-## DIY Organic Pest Control Solutions
+These nocturnal mollusks can devastate seedlings and leafy greens.
 
-When prevention isn't enough, try these homemade remedies:
+### Identification
+- **Appearance**: Soft-bodied mollusks with or without shells
+- **Behavior**: Active at night and on cloudy, damp days
+- **Damage**: Large, irregular holes in leaves; slime trails
 
-### All-Purpose Insecticidal Soap
-**Ingredients**:
-- 1 tablespoon mild liquid soap (not detergent)
-- 1 quart water
-- Optional: 1 tablespoon of neem oil
+### Natural Controls
+- **Beer traps**: Shallow containers of beer sunk into the ground
+- **Copper barriers**: Create an unpleasant reaction when slugs and snails contact copper
+- **Diatomaceous earth**: Creates a sharp barrier they won't cross
+- **Iron phosphate baits**: Safe around pets and wildlife, unlike metaldehyde baits
 
-**Application**: Spray directly on pests, focusing on undersides of leaves. Test on a small area first to ensure no plant damage.
+## Cabbage Loopers and Cabbage Worms
 
-### Garlic-Pepper Spray
-**Ingredients**:
-- 6 cloves garlic, minced
-- 1 tablespoon hot pepper flakes
-- 1 quart water
-- 1 teaspoon liquid soap
+These caterpillars target members of the cabbage family.
 
-**Preparation**: Steep garlic and pepper in water for 24 hours, strain, add soap, and spray plants.
+### Identification
+- **Appearance**: Green caterpillars; loopers move in an inchworm fashion
+- **Behavior**: Feed on the undersides of leaves
+- **Damage**: Holes in leaves, contamination with frass (droppings)
 
-### Neem Oil Solution
-**Ingredients**:
-- 2 teaspoons neem oil
-- 1 teaspoon mild liquid soap
-- 1 quart water
+### Natural Controls
+- **Row covers**: Physical exclusion of the adult moths
+- **Bacillus thuringiensis (Bt)**: Effective biological control
+- **Companion planting**: Thyme, rosemary, sage deter the adult moths
+- **Paper collar barriers**: Prevent cutworm damage on young plants
 
-**Application**: Spray on plants every 7-14 days for persistent problems. Avoid application in direct sunlight.
+## Integrated Pest Management Approach
 
-## Beneficial Insects: Your Garden Allies
+Rather than reaching for sprays at the first sign of damage, consider these broader strategies:
 
-One of the most effective organic pest control strategies is encouraging beneficial insects to take up residence in your garden:
+### Prevention
+- **Healthy soil**: Produces stronger, more pest-resistant plants
+- **Proper plant spacing**: Improves air circulation and reduces disease
+- **Crop rotation**: Disrupts pest life cycles
+- **Season-appropriate planting**: Plants stressed by weather are more vulnerable to pests
 
-### How to Attract Beneficial Insects
-- Plant flowers with small, accessible blooms like alyssum, dill, calendula, and cosmos
-- Provide water sources such as shallow dishes with stones
-- Create insect habitats with rock piles, brush, or insect hotels
-- Avoid broad-spectrum organic pesticides that kill beneficials along with pests
+### Monitoring
+- **Regular inspection**: Check plants weekly, preferably in early morning
+- **Understand threshold levels**: Some damage is acceptable and doesn't warrant intervention
+- **Identify correctly**: Make sure you know what's causing the damage before treating
 
-### Key Beneficial Insects to Welcome
-1. **Ladybugs**: Consume large quantities of aphids, mites, and small insects
-2. **Lacewings**: Larvae are voracious predators of aphids and other soft-bodied pests
-3. **Ground Beetles**: Hunt slugs, snails, cutworms, and other ground-dwelling pests
-4. **Parasitic Wasps**: Lay eggs in or on host insects, which are then consumed by wasp larvae
-5. **Hoverflies**: Larvae feed on aphids while adults are important pollinators
+### Intervention Hierarchy
+1. **Physical controls**: Handpicking, barriers, traps
+2. **Biological controls**: Beneficial insects, nematodes, microbial products
+3. **Least-toxic chemical controls**: Soaps, oils, botanical insecticides
+4. **Synthetic chemicals**: As a last resort, and used with great care
 
-## Physical Barriers and Traps
-
-Sometimes, the simplest solutions are the most effective:
-
-### Row Covers
-Lightweight fabric barriers allow light and water to reach plants while keeping pests out. Perfect for:
-- Protecting young seedlings
-- Preventing egg-laying by cabbage moths, carrot flies, etc.
-- Creating shade for cool-season crops in summer
-
-### Sticky Traps
-Yellow or blue sticky cards attract and trap flying insect pests like aphids, whiteflies, and fungus gnats. Use them to:
-- Monitor pest populations
-- Reduce flying adult insects before they reproduce
-- Identify what pests are present
-
-### Copper Barriers
-Strips of copper create a barrier that slugs and snails won't cross due to a mild electrical charge created when they contact it with their slime.
-
-### Hand-Picking
-Never underestimate the effectiveness of simply removing pests by hand:
-- Drop collected pests into soapy water
-- Early morning is often the best time for hand-picking
-- Regular inspection makes this method more effective
-
-## Conclusion
-
-Organic pest control is about working with nature rather than against it. By creating a balanced garden ecosystem, you'll find that many pest problems resolve themselves as natural predators move in to control problematic species. When intervention is necessary, choosing targeted, organic methods preserves this balance while protecting your harvest.
-
-Remember that some plant damage is normal and acceptable in an organic garden. Perfect-looking produce isn't always the goal—healthy, sustainable growing practices that protect beneficial insects and soil life should be the priority. With patience and persistence, organic pest management can be just as effective as chemical controls, with added benefits for your health and the environment.
+Remember that a healthy garden ecosystem includes some pest presence, which supports beneficial predators. Perfect, pest-free plants are neither realistic nor ecologically sound as a goal.
     `,
+    author_id: "1",
     published: true,
-    featured_image: "https://images.unsplash.com/photo-1566842600175-97dca3c1e8cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80"
+    published_at: "2025-04-02T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1599583863916-e06c29087f51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
   {
-    title: "Container Gardening: Growing a Bountiful Garden in Limited Space",
-    slug: "container-gardening-limited-space",
-    excerpt: "Discover how to create a thriving garden in containers, perfect for small spaces like balconies and patios.",
+    id: "11",
+    title: "Organic Gardening Methods: Growing Naturally",
+    slug: "organic-gardening-methods",
+    excerpt: "Discover the principles and practices of organic gardening that promote soil health, biodiversity, and sustainable food production.",
     content: `
-# Container Gardening: Growing a Bountiful Garden in Limited Space
+# Organic Gardening Methods: Growing Naturally
 
-Container gardening opens up a world of possibilities for growing plants in limited spaces. Whether you have a small balcony, patio, or just a sunny windowsill, you can create a productive and beautiful garden in containers. This approach is perfect for urban dwellers, renters, or anyone with limited garden space.
+Organic gardening works with nature rather than against it, focusing on building healthy soil that produces strong plants naturally resistant to pests and diseases. This guide covers the fundamental principles and practices of organic gardening.
 
-## Advantages of Container Gardening
+## The Foundation: Soil Health
 
-- **Flexibility**: Move plants to optimize sun exposure or protect from extreme weather
-- **Accessibility**: Raised containers reduce bending and are ideal for gardeners with mobility issues
-- **Control**: Easier management of soil quality, watering, and fertilization
-- **Space Efficiency**: Utilize vertical space with hanging baskets and tiered arrangements
-- **Pest Management**: Fewer problems with soil-borne diseases and ground-dwelling pests
+The cornerstone of organic gardening is creating living, nutrient-rich soil.
 
-## Choosing the Right Containers
+### Building Organic Matter
+- **Compost**: The organic gardener's gold, providing nutrients and beneficial microorganisms
+- **Mulch**: Protects soil, suppresses weeds, and breaks down to add organic matter
+- **Cover crops**: Prevent erosion, fix nitrogen, and add biomass when turned into the soil
 
-The success of your container garden starts with selecting appropriate containers:
+### Soil Organisms
+- **Earthworms**: Nature's tillers that aerate soil and leave behind nutrient-rich castings
+- **Microorganisms**: Break down organic matter into plant-available nutrients
+- **Mycorrhizal fungi**: Form symbiotic relationships with plant roots, extending their reach
 
-### Container Materials
+### Natural Amendments
+- **Compost tea**: Liquid fertilizer and beneficial microbe inoculant
+- **Seaweed**: Provides trace minerals and growth hormones
+- **Rock dust**: Slowly releases minerals, restoring depleted soils
+- **Wood ash**: Adds potassium and increases pH (use sparingly)
 
-**Terracotta/Clay**
-- Natural appearance
-- Porous (allows air exchange)
-- Heavier and provides stability
-- Dries out more quickly
+## Organic Pest Management
 
-**Plastic**
-- Lightweight and affordable
-- Retains moisture better
-- Available in many colors
-- Less breakable than clay
+Working with nature's systems to manage pests without synthetic chemicals.
 
-**Fabric Pots**
-- Excellent drainage and air pruning
-- Prevents root circling
-- Lightweight and foldable for storage
-- Can dry out quickly
+### Cultural Practices
+- **Crop rotation**: Disrupts pest life cycles by changing what's planted where
+- **Polyculture**: Mixed plantings confuse pests and reduce disease spread
+- **Timing**: Planting to avoid peak pest periods
+- **Resistant varieties**: Choosing plants bred or selected for pest resistance
 
-**Wood**
-- Natural aesthetic
-- Good insulation for roots
-- Use cedar or redwood for rot resistance
-- Avoid treated wood that may contain harmful chemicals
+### Biological Controls
+- **Beneficial insects**: Ladybugs, lacewings, parasitic wasps, and more
+- **Birds**: Creating habitat for insect-eating birds
+- **Toads and frogs**: Natural pest controllers in the garden
+- **Beneficial nematodes**: Microscopic organisms that prey on soil-dwelling pests
 
-### Size Considerations
+### Organic Sprays and Treatments
+- **Garlic-pepper spray**: Homemade deterrent for many insects
+- **Bacillus thuringiensis (Bt)**: Bacteria that target caterpillars
+- **Diatomaceous earth**: Microscopic fossils that slice insect exoskeletons
+- **Horticultural oils**: Smother soft-bodied insects and some eggs
 
-Container size should match the needs of your plants:
+## Water Conservation
 
-- **Herbs**: 6-8 inches deep
-- **Lettuce and greens**: 4-6 inches deep
-- **Peppers and eggplants**: 12-16 inches deep
-- **Tomatoes**: 18-24 inches deep
-- **Root vegetables**: 12+ inches deep, depending on variety
+Responsible water use is integral to sustainable organic gardening.
 
-Remember that larger containers:
-- Require less frequent watering
-- Provide more root space
-- Maintain more stable temperatures
-- Support larger plants
+### Efficient Watering Methods
+- **Drip irrigation**: Delivers water directly to plant roots with minimal waste
+- **Ollas**: Buried clay pots that slowly release water to roots
+- **Deep, infrequent watering**: Encourages deep root growth
+- **Morning watering**: Reduces evaporation loss
 
-### Drainage is Critical
+### Water Capture and Storage
+- **Rain barrels**: Collect roof runoff for garden use
+- **Swales**: Contoured ditches that slow and capture surface water
+- **Berms**: Raised areas that direct and contain water flow
+- **Mulch**: Reduces evaporation from soil surface
 
-All containers need adequate drainage:
-- Ensure containers have drainage holes
-- Add a layer of coarse material at the bottom for improved drainage
-- Use pot feet or risers to elevate containers off surfaces
-- Consider self-watering containers for consistent moisture
+## Organic Weed Management
 
-## Selecting the Best Soil
+Controlling unwanted plants without herbicides.
 
-Regular garden soil is too heavy for containers. Instead, use:
+### Prevention
+- **Mulch**: Physical barrier to weed germination
+- **Close spacing**: Plants shade out potential weeds
+- **Cover crops**: Occupy bare soil where weeds would grow
+- **Landscape fabric**: Durable barrier for paths and permanent areas
 
-**Quality Potting Mix**
-- Lightweight and well-draining
-- Contains materials like perlite or vermiculite for aeration
-- Often includes slow-release fertilizer
-- Usually sterile to prevent disease
+### Removal
+- **Hand-pulling**: Most effective when soil is moist
+- **Hoeing**: Regular shallow cultivation for young weed seedlings
+- **Flame weeding**: Using propane torches to kill young weeds
+- **Boiling water**: Effective on walkway and path weeds
 
-**DIY Container Mix Recipe**:
-- 1 part coconut coir or peat moss
-- 1 part quality compost
-- 1 part perlite or vermiculite
-- Optional: slow-release organic fertilizer according to package directions
+## Seed Saving and Heritage Varieties
 
-## Best Plants for Container Gardens
+Preserving biodiversity and adapting plants to your local conditions.
 
-Many plants thrive in containers, but some are particularly well-suited:
+### Benefits of Seed Saving
+- **Adaptation**: Plants become better suited to your specific growing conditions
+- **Cost savings**: Reduce or eliminate seed purchases
+- **Food security**: Control over your food supply
+- **Preservation**: Maintain genetic diversity of food crops
 
-### Vegetables
-- **Tomatoes**: Cherry varieties like 'Tiny Tim' or 'Tumbling Tom'
-- **Peppers**: Both sweet and hot varieties perform well
-- **Lettuce** and other greens: Perfect for shallow containers
-- **Radishes**: Quick-growing for early harvests
-- **Bush beans**: Compact and productive
-- **Cucumbers**: Choose bush varieties or provide trellising
+### Basic Seed Saving Techniques
+- **Selection**: Choose the best plants for seed saving
+- **Isolation**: Prevent cross-pollination for true-to-type seeds
+- **Processing**: Proper cleaning and drying methods
+- **Storage**: Cool, dark, and dry conditions for maximum viability
 
-### Herbs
-Almost all herbs excel in containers, especially:
-- Basil
-- Parsley
-- Thyme
-- Mint (which is actually better contained)
-- Rosemary
-- Chives
+## The Organic Mindset
 
-### Fruits
-- **Strawberries**: Perfect for hanging baskets
-- **Blueberries**: Dwarf varieties in acidic potting mix
-- **Citrus**: Dwarf varieties in large containers
-- **Figs**: Compact varieties that can be overwintered indoors in cold climates
+Beyond techniques, organic gardening involves a philosophical approach.
 
-### Flowers
-- **Marigolds**: Repel pests and add color
-- **Nasturtiums**: Edible flowers with a peppery taste
-- **Petunias**: Long-blooming and cascading
-- **Zinnias**: Attract pollinators and provide cut flowers
-- **Pansies**: Thrive in cooler weather
+### Working With Nature
+- **Observation**: Spending time watching what happens in your garden
+- **Integration**: Seeing your garden as part of the broader ecosystem
+- **Patience**: Understanding that natural systems take time to establish
+- **Acceptance**: Some pest damage is part of a balanced system
 
-## Watering Your Container Garden
+### Continuous Learning
+- **Record-keeping**: Taking notes on what works and what doesn't
+- **Community connections**: Sharing knowledge with other gardeners
+- **Seasonal awareness**: Aligning activities with natural cycles
+- **Experimentation**: Trying new methods on a small scale
 
-Proper watering is the most critical aspect of container gardening:
-
-### Watering Guidelines
-- Check moisture levels daily during warm weather
-- Water when the top inch of soil feels dry
-- Water thoroughly until it flows from drainage holes
-- Direct water at the soil level, not on foliage
-- Water in the morning to reduce evaporation and fungal issues
-
-### Watering Solutions
-- Install drip irrigation systems with timers
-- Use self-watering containers with reservoirs
-- Add water-retaining crystals or coconut coir to soil
-- Place saucers under pots to catch excess water (but don't let plants sit in water)
-- Group plants with similar water needs together
-
-## Feeding Container Plants
-
-Plants in containers need regular feeding:
-
-### Fertilizer Options
-- **Slow-release granular fertilizers**: Apply every few months
-- **Liquid fertilizers**: Apply weekly or biweekly at half-strength
-- **Compost tea**: Natural option that adds beneficial microbes
-- **Fish emulsion**: Excellent natural fertilizer (though sometimes smelly)
-
-### Feeding Schedule
-- Most vegetables and flowering plants: Feed every 2-4 weeks
-- Herbs: Light feeding every 4-6 weeks (overfertilizing reduces flavor)
-- Reduce feeding in fall and winter when growth slows
-
-## Creative Container Garden Arrangements
-
-Maximize your space with these design strategies:
-
-### Vertical Gardening
-- Use trellises, wall planters, and hanging baskets
-- Stack containers on shelves or tiered plant stands
-- Install railing planters on balconies
-- Create living walls with pocket planters
-
-### Theme Gardens
-- **Salsa garden**: Tomatoes, peppers, cilantro, and onions
-- **Pizza garden**: Tomatoes, basil, oregano, and peppers
-- **Tea garden**: Mint, chamomile, lemon balm, and lavender
-- **Pollinator garden**: Flowers that attract bees and butterflies
-
-### Companion Planting in Containers
-Combine plants that benefit each other:
-- Basil with tomatoes
-- Marigolds with vegetables (deters pests)
-- Carrots with onions
-- Leafy greens as underplanting for taller vegetables
-
-## Seasonal Care
-
-### Spring
-- Clean and sanitize containers
-- Prepare fresh potting mix
-- Start seeds indoors
-- Gradually introduce plants to outdoor conditions (hardening off)
-
-### Summer
-- Monitor water needs carefully during hot weather
-- Provide shade during extreme heat
-- Harvest frequently to encourage production
-- Succession plant quick-growing crops
-
-### Fall
-- Plant cool-season crops like kale, spinach, and pansies
-- Reduce watering as temperatures drop
-- Clean up dead plant material to prevent disease
-- Prepare to bring tender perennials indoors
-
-### Winter
-- Move containers to protected areas
-- Insulate pots with bubble wrap or burlap in cold climates
-- Continue growing cold-hardy plants like kale and some herbs
-- Maintain indoor herbs on sunny windowsills
-
-## Conclusion
-
-Container gardening allows you to grow fresh produce and beautiful flowers regardless of your space limitations. With the right containers, soil, and care, you can create a productive garden that fits your lifestyle. The flexibility of container gardening means you can start small and expand as your confidence grows, experimenting with different plants and arrangements until you find what works best in your unique environment.
-
-Whether you're growing a few herbs on a windowsill or transforming a balcony into a lush garden, container gardening connects you to the joys of growing plants while providing fresh, homegrown produce right at your fingertips.
+Organic gardening isn't just about avoiding chemicals; it's about fostering a thriving ecosystem where plants, animals, insects, and microorganisms work together to create abundance and beauty. By working with natural systems rather than against them, organic gardeners create resilient, productive spaces that improve over time.
     `,
+    author_id: "1",
     published: true,
-    featured_image: "https://images.unsplash.com/photo-1526397751294-331021109fbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
-  },
-  {
-    title: "Four-Season Gardening: How to Grow Year-Round",
-    slug: "four-season-gardening",
-    excerpt: "Learn techniques for extending your growing season and maintaining a productive garden throughout the year.",
-    content: `
-# Four-Season Gardening: How to Grow Year-Round
-
-Traditional gardening often focuses on the warm months, but with the right techniques and planning, you can enjoy fresh harvests throughout all four seasons. Year-round gardening connects you more deeply to natural cycles and provides a continuous supply of fresh, homegrown produce. This guide will help you transform your garden into a four-season growing space.
-
-## Planning a Four-Season Garden
-
-The key to year-round gardening is strategic planning and understanding the natural growing seasons:
-
-### Seasonal Planting Calendar
-
-Divide your garden year into overlapping growing periods:
-
-**Early Spring (Late Winter)**
-- Start cool-season crops indoors
-- Direct-sow frost-tolerant vegetables under protection
-- Harvest overwintered crops and perennial herbs
-
-**Mid-to-Late Spring**
-- Plant main-season cool-weather crops
-- Start warm-season crops indoors
-- Begin succession planting of quick-growing vegetables
-
-**Summer**
-- Transition to heat-loving crops
-- Begin planning and starting fall garden
-- Maintain spring crops with shade cloth if needed
-- Continue succession planting
-
-**Fall**
-- Plant second crop of cool-season vegetables
-- Begin installing season extension devices
-- Plant garlic and perennial onions for next year
-- Sow cover crops in unused areas
-
-**Winter**
-- Harvest cold-hardy vegetables
-- Maintain crops under protection
-- Grow sprouts and microgreens indoors
-- Plan next year's garden
-
-### Garden Layout for Year-Round Production
-
-Design your garden with season extension in mind:
-- Orient beds east to west for maximum winter sun exposure
-- Place season extension structures where they won't shade other plants
-- Create microclimates by using south-facing walls or fences
-- Dedicate areas for different seasonal crops for easier rotation
-- Include permanent areas for perennial food plants
-
-## Choosing Crops for Each Season
-
-Select varieties suited to each growing season and your climate:
-
-### Cool-Season Crops (Spring and Fall)
-
-**Early Spring/Late Winter (25-45°F)**
-- Spinach
-- Mâche (corn salad)
-- Kale
-- Claytonia
-- Chervil
-
-**Spring/Fall (45-65°F)**
-- Lettuce
-- Peas
-- Radishes
-- Carrots
-- Beets
-- Broccoli
-- Cabbage
-- Cauliflower
-- Turnips
-
-### Warm-Season Crops (Summer)
-
-**Warm Weather (65-85°F)**
-- Tomatoes
-- Peppers
-- Eggplant
-- Cucumbers
-- Beans
-- Corn
-- Summer squash
-- Basil
-- Okra
-
-### Cold-Hardy Crops (Fall to Winter)
-
-**These crops can withstand light to moderate frosts (25-32°F)**
-- Kale
-- Brussels sprouts
-- Leeks
-- Collards
-- Spinach
-- Winter lettuce varieties
-- Swiss chard
-- Carrots
-- Parsnips
-- Turnips
-
-### Super-Hardy Crops (Deep Winter)
-
-**Can survive temperatures in the low 20s°F with minimal protection**
-- Mâche (corn salad)
-- Claytonia
-- Certain kale varieties
-- Parsnips
-- Some spinach varieties
-- Winterbor kale
-- Leeks
-
-## Season Extension Techniques
-
-These methods create microclimates that protect plants from extreme weather:
-
-### Cold Frames
-
-**Benefits**:
-- Capture solar heat during the day
-- Provide insulation at night
-- Protect from wind and precipitation
-- Can extend growing season by 4-8 weeks on each end
-
-**Tips**:
-- Use recycled windows as lids
-- Build with south-facing orientation
-- Include ventilation for temperature control
-- Ensure proper drainage
-
-### Hoop Houses and Low Tunnels
-
-**Benefits**:
-- Inexpensive and easy to construct
-- Can be made with PVC pipe or flexible electric conduit
-- Cover with greenhouse plastic, row cover, or insect netting
-- Provides temperature increase of 5-10°F
-
-**Materials Needed**:
-- Hoops (PVC pipe, conduit, or wire)
-- Cover material (greenhouse plastic, row cover fabric)
-- Method to secure covers (sand bags, bricks, special clips)
-- Options for ventilation
-
-### Row Covers
-
-**Types**:
-- Lightweight (provides 2-4°F protection, insect barrier)
-- Medium-weight (provides 4-6°F protection)
-- Heavy-weight (provides 6-8°F protection, less light transmission)
-
-**Applications**:
-- Drape directly over plants or support with hoops
-- Secure edges with soil, rocks, or landscape pins
-- Remove during pollination for fruiting crops
-- Replace when temperatures drop
-
-### Greenhouses
-
-**Benefits**:
-- Maximum temperature control
-- Protection from all weather elements
-- Extends growing season year-round in many climates
-- Allows for starting early seedlings
-
-**Considerations**:
-- Significant investment
-- Requires temperature management (ventilation, possible heating)
-- Benefits from thermal mass (water barrels, stone pathways)
-- May need supplemental lighting in winter
-
-### Mulching for Winter Protection
-
-**Methods**:
-- Apply thick mulch (6-12 inches) of straw around cold-hardy vegetables
-- Use leaf mulch for root crops
-- Consider mulching after ground has cooled but before it freezes
-- Remove mulch gradually in spring
-
-## Succession Planting Strategies
-
-Keep your garden continuously productive with these approaches:
-
-### Time-Based Succession
-
-**Same Crop, Staggered Planting**:
-- Plant the same crop every 1-3 weeks
-- Works well for: lettuce, radishes, beans, carrots, cilantro
-- Provides continuous harvest throughout the season
-
-### Relay Planting
-
-**Follow one crop immediately with another**:
-- Prepare and plant new crop as soon as previous one is harvested
-- Example: Spring peas → Summer beans → Fall greens
-- Maximizes production from the same space
-
-### Intercropping
-
-**Growing compatible crops together**:
-- Plant quick-growing crops between slower-maturing ones
-- Example: Radishes between cabbage plants
-- Utilizes space while main crop develops
-
-## Winter Indoor Growing
-
-Bring your gardening indoors during the coldest months:
-
-### Sprouts and Microgreens
-
-**Equipment Needed**:
-- Seeds (untreated, food-grade)
-- Jars with mesh lids or sprouting trays
-- Shallow containers with drainage
-- Growing medium for microgreens
-- Sunny window or grow lights
-
-**Easy Varieties to Grow**:
-- Sprouts: Alfalfa, broccoli, radish, mung bean
-- Microgreens: Sunflower, pea, radish, buckwheat, mustard
-
-### Windowsill Herbs
-
-**Best Varieties for Indoor Growing**:
-- Chives
-- Parsley
-- Basil
-- Mint
-- Oregano
-- Thyme
-
-**Growing Tips**:
-- Use a well-draining potting mix
-- Provide at least 6 hours of sunlight
-- Supplement with grow lights if needed
-- Rotate plants regularly for even growth
-- Monitor for pests like aphids and spider mites
-
-## Record Keeping and Continuous Learning
-
-Maintain records to improve your four-season gardening success:
-
-### Garden Journal Essentials
-
-- Planting dates and varieties
-- Weather patterns and first/last frost dates
-- Harvest times and yields
-- Successes and challenges
-- Season extension installation and removal dates
-- Pest and disease observations
-
-### Learning Resources
-
-- Regional gardening books specific to four-season growing
-- Local agricultural extension services
-- Seed companies that specialize in cold-hardy varieties
-- Community garden groups and master gardeners
-- Online forums for year-round growers in your climate zone
-
-## Conclusion
-
-Four-season gardening transforms the traditional growing calendar into a continuous cycle of production. While it requires more planning and some investment in season extension tools, the rewards are substantial: fresh produce year-round, a deeper connection to seasonal rhythms, and the satisfaction of defying the conventional limitations of your growing zone.
-
-Remember that year-round gardening is about working with nature's cycles, not fighting against them. Each season offers its unique crops and gardening experiences, and learning to appreciate the distinct qualities of winter greens, spring shoots, summer fruits, and fall roots connects you more deeply to the natural world and your food system.
-
-Start small with a few season extension techniques and cold-hardy crops, then expand your four-season garden as you gain experience and confidence. With time, you'll develop a garden that provides fresh harvests every month of the year.
-    `,
-    published: true,
-    featured_image: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
-  },
-  {
-    title: "Herb Gardening for Beginners: Essential Herbs for Cooking and Wellness",
-    slug: "herb-gardening-beginners",
-    excerpt: "Start your herb garden journey with this comprehensive guide to growing, harvesting, and using culinary and medicinal herbs.",
-    content: `
-# Herb Gardening for Beginners: Essential Herbs for Cooking and Wellness
-
-Growing herbs is one of the most rewarding gardening experiences for beginners. These versatile plants are generally easy to grow, take up minimal space, provide wonderful aromas, and transform ordinary cooking into extraordinary meals. Many herbs also offer wellness benefits beyond their culinary uses. This guide will help you establish a thriving herb garden, whether in your backyard, on a patio, or on a sunny windowsill.
-
-## Why Grow Your Own Herbs?
-
-- **Flavor**: Fresh herbs have more complex and vibrant flavors than dried ones
-- **Convenience**: Harvest exactly what you need, when you need it
-- **Cost-Effectiveness**: Save money compared to buying packaged herbs
-- **Variety**: Access unusual herbs not commonly found in stores
-- **Health Benefits**: Many herbs have medicinal properties and are packed with nutrients
-- **Pollinator Support**: Flowering herbs attract beneficial insects to your garden
-- **Beauty**: Many herbs have attractive foliage and flowers that enhance your landscape
-
-## Planning Your Herb Garden
-
-### Location Considerations
-
-Most culinary herbs originate from Mediterranean regions and share these preferences:
-- **Sunlight**: 6+ hours of direct sun daily (though some herbs tolerate partial shade)
-- **Drainage**: Well-draining soil is essential—herbs hate "wet feet"
-- **Air Circulation**: Good airflow prevents fungal issues
-- **Accessibility**: Place garden where you'll see and use it regularly
-
-### Growing Options
-
-**In-Ground Garden**
-- Ideal for perennial herbs that spread or grow large
-- Can be integrated into vegetable or flower gardens
-- Consider dedicated herb beds near the kitchen
-
-**Raised Beds**
-- Excellent drainage
-- Better soil control
-- Fewer weeds
-- Can be built at comfortable heights to reduce bending
-
-**Containers**
-- Perfect for small spaces
-- Can move to optimize sun or bring indoors
-- Control over soil and watering
-- Contain spreading herbs like mint
-- Mix herbs in one large pot or grow individually
-
-**Indoor Growing**
-- Year-round fresh herbs
-- Requires sunny south-facing window or grow lights
-- Best for compact herbs like basil, chives, and parsley
-- Consider hydroponics for maximum indoor success
-
-## Top 10 Herbs for Beginners
-
-### 1. Basil (*Ocimum basilicum*)
-
-**Growing Tips**:
-- Annual herb that loves heat
-- Pinch flower buds to extend leaf production
-- Regular harvesting encourages bushiness
-- Keep soil consistently moist but not soggy
-- Sensitive to cold—bring indoors before temperatures drop below 50°F
-
-**Culinary Uses**:
-- Italian cuisine: Pesto, caprese salad, tomato sauces
-- Thai cooking (Thai basil varieties)
-- Infused oils and vinegars
-- Fresh in salads and sandwiches
-
-**Varieties to Try**:
-- 'Genovese' (classic Italian)
-- 'Thai' (anise flavor)
-- 'Purple' (ornamental and flavorful)
-- 'Spicy Globe' (compact for containers)
-
-### 2. Rosemary (*Rosmarinus officinalis*)
-
-**Growing Tips**:
-- Perennial in zones 8-10; can overwinter indoors in colder areas
-- Drought-tolerant once established
-- Prefers lean soil—don't overfertilize
-- Good drainage is essential
-- Prune after flowering to maintain shape
-
-**Culinary Uses**:
-- Roasted meats, especially lamb
-- Roasted potatoes and root vegetables
-- Herb breads and focaccia
-- Infused oils and vinegars
-
-**Wellness Benefits**:
-- Traditionally used for memory enhancement
-- Contains antioxidants
-- Aromatherapy applications for focus and clarity
-
-### 3. Thyme (*Thymus vulgaris*)
-
-**Growing Tips**:
-- Perennial in zones 5-9
-- Drought-tolerant groundcover
-- Excellent for rocky areas and between pavers
-- Trim after flowering to prevent woodiness
-- Many varieties available with different flavors
-
-**Culinary Uses**:
-- Essential in bouquet garni
-- Roasted meats and vegetables
-- Soups and stews
-- Infused honey
-
-**Varieties to Try**:
-- 'English' (classic culinary thyme)
-- 'Lemon' (citrus notes)
-- 'Creeping' (excellent groundcover)
-- 'Silver' (variegated ornamental)
-
-### 4. Mint (*Mentha* species)
-
-**Growing Tips**:
-- Extremely vigorous—always grow in containers!
-- Perennial in zones 4-9
-- Tolerates partial shade
-- Likes consistent moisture
-- Harvest frequently to encourage fresh growth
-
-**Culinary Uses**:
-- Beverages: Tea, cocktails, infused water
-- Middle Eastern and Mediterranean cuisine
-- Desserts and fruit salads
-- Jellies and sauces for lamb
-
-**Varieties to Try**:
-- Spearmint (culinary standard)
-- Peppermint (medicinal, stronger flavor)
-- Chocolate mint (subtle chocolate aroma)
-- Apple mint (milder, fruity notes)
-
-### 5. Parsley (*Petroselinum crispum*)
-
-**Growing Tips**:
-- Biennial typically grown as an annual
-- Slow to germinate—soak seeds before planting
-- Tolerates partial shade
-- Keep consistently moist
-- Continues producing through light frosts
-
-**Culinary Uses**:
-- Garnish that's actually worth eating
-- Tabbouleh and Middle Eastern dishes
-- Chimichurri sauce
-- Base for many soup stocks
-
-**Varieties**:
-- Flat-leaf/Italian (stronger flavor, preferred for cooking)
-- Curly (decorative garnish, milder flavor)
-
-### 6. Chives (*Allium schoenoprasum*)
-
-**Growing Tips**:
-- Long-lived perennial (zones 3-9)
-- Cut back completely when harvesting
-- Will self-seed readily if flowers remain
-- Divide clumps every 3-4 years
-- Easy to grow indoors
-
-**Culinary Uses**:
-- Mild onion flavor for eggs and potatoes
-- Garnish for soups and salads
-- Compound butter
-- Edible purple flowers as garnish
-
-**Related Herb**:
-- Garlic chives (flat leaves, mild garlic flavor)
-
-### 7. Sage (*Salvia officinalis*)
-
-**Growing Tips**:
-- Woody perennial in zones 5-9
-- Drought-tolerant once established
-- Prune in spring to prevent woodiness
-- Beautiful in ornamental gardens
-- Replace plants every 3-4 years as flavor diminishes
-
-**Culinary Uses**:
-- Thanksgiving stuffing
-- Saltimbocca (with veal and prosciutto)
-- Brown butter and sage sauce for pasta
-- Fried sage leaves as garnish
-
-**Varieties**:
-- Common/Garden sage (culinary standard)
-- Purple sage (ornamental with good flavor)
-- Pineapple sage (fruity aroma, late-season red flowers)
-- Tricolor sage (variegated ornamental)
-
-### 8. Cilantro/Coriander (*Coriandrum sativum*)
-
-**Growing Tips**:
-- Cool-season annual that bolts quickly in heat
-- Direct sow every 2-3 weeks for continuous harvest
-- Allow some plants to flower for coriander seeds
-- Self-seeds readily
-- Try slow-bolt varieties in warm climates
-
-**Culinary Uses**:
-- Essential in Mexican, Indian, and Thai cuisine
-- Salsas and guacamole
-- Chutneys and curries
-- Seeds (coriander) for pickling and spice blends
-
-**Note**: Some people have a genetic predisposition to perceive cilantro as soapy-tasting
-
-### 9. Dill (*Anethum graveolens*)
-
-**Growing Tips**:
-- Cool-season annual
-- Direct sow—doesn't transplant well
-- Allow some plants to self-seed
-- Tall and wispy—may need staking
-- Companion plant for cabbage family
-
-**Culinary Uses**:
-- Pickling
-- Fish dishes
-- Potato salad
-- Eastern European cuisine
-- Both leaves and seeds are useful
-
-### 10. Oregano (*Origanum vulgare*)
-
-**Growing Tips**:
-- Perennial in zones 5-10
-- Drought-tolerant once established
-- More flavorful when not overfertilized
-- Harvest before flowering for best flavor
-- Trim back in spring to prevent woodiness
-
-**Culinary Uses**:
-- Italian and Greek cuisine
-- Tomato sauces
-- Pizza and pasta dishes
-- Meat marinades
-
-**Varieties**:
-- Greek oregano (strongest flavor for cooking)
-- Italian oregano (milder flavor)
-- Syrian oregano (also called za'atar)
-
-## Planting and Care
-
-### Soil Preparation
-
-Most herbs prefer:
-- Well-draining soil
-- Moderate fertility (excessive fertilizer reduces essential oils and flavor)
-- pH between 6.0-7.0
-- Addition of coarse sand or perlite to improve drainage
-
-For containers:
-- Use high-quality potting mix, not garden soil
-- Consider adding extra perlite for drainage
-- Use containers with drainage holes
-
-### Planting Methods
-
-**From Seeds**:
-- Direct-sow annuals like dill, cilantro, and basil
-- Start small seeds indoors under lights
-- Some herbs have specific requirements (lavender needs light to germinate)
-
-**From Transplants**:
-- Easier for beginners
-- Better for perennial herbs like rosemary and thyme
-- Look for healthy plants without flowers
-
-**From Cuttings**:
-- Economical way to propagate woody herbs
-- Take 4-6 inch cuttings below a leaf node
-- Remove lower leaves and place in water or moist soil
-- Rosemary, sage, and thyme propagate well this way
-
-**Division**:
-- Best for clumping herbs like chives and oregano
-- Divide in spring or fall
-- Ensure each division has roots and shoots
-
-### Watering Guidelines
-
-The golden rule: Most herbs prefer to be kept on the dry side rather than too wet.
-
-**Mediterranean Herbs** (rosemary, thyme, sage, oregano):
-- Allow soil to dry between waterings
-- Reduce watering in cool weather
-- Susceptible to root rot in soggy conditions
-
-**Moisture-Loving Herbs** (mint, parsley, basil, cilantro):
-- Keep soil consistently moist but not soggy
-- Water more frequently in hot weather
-- Mulch to retain moisture
-
-**Container Herbs**:
-- Check moisture levels daily in warm weather
-- Water when top inch of soil is dry
-- Ensure pots have drainage holes
-- Terra cotta pots dry out faster than plastic
-
-### Fertilizing
-
-Less is more when it comes to herbs. Over-fertilization reduces essential oil production.
-
-**Guidelines**:
-- Incorporate compost into soil before planting
-- Feed lightly with balanced organic fertilizer in spring
-- Container herbs need more frequent feeding (half-strength fertilizer monthly)
-- Avoid high-nitrogen fertilizers that promote leafy growth with less flavor
-
-## Harvesting and Preserving
-
-### Harvesting Best Practices
-
-**When to Harvest**:
-- Morning, after dew has dried but before heat of day
-- Harvest regularly to encourage bushy growth
-- For maximum flavor, harvest just before flowering
-- Never remove more than 1/3 of the plant at once
-
-**How to Harvest**:
-- Use clean, sharp scissors or pruners
-- Cut leaves from the top of the plant
-- For woody herbs, cut stem tips rather than stripping leaves
-- For basil, cut just above a pair of leaves to promote branching
-
-### Preserving Methods
-
-**Drying**:
-- Bundle small stems with twine and hang upside down
-- Use dehydrator at lowest setting (95-115°F)
-- Oven-dry on lowest setting with door slightly ajar
-- Leaves are dry when they crumble easily
-- Store dried herbs in airtight containers away from light
-
-**Freezing**:
-- Works well for soft herbs like basil, parsley, and cilantro
-- Chop and freeze in ice cube trays with water or olive oil
-- Freeze whole leaves on baking sheet, then transfer to bags
-- Flavor is better preserved than with drying
-
-**Herb-Infused Products**:
-- Vinegars and oils (use caution with oils—they must be refrigerated)
-- Herb butter (freeze in log shape and slice as needed)
-- Herb salts and sugars
-- Syrups and honeys
-
-## Common Herb Garden Problems
-
-### Pests
-
-**Aphids**:
-- Small soft-bodied insects that cluster on new growth
-- Control with strong water spray or insecticidal soap
-- Attract beneficial insects like ladybugs with companion planting
-
-**Spider Mites**:
-- Tiny pests that cause stippled yellowing
-- Common in hot, dry conditions
-- Increase humidity and spray with water regularly
-
-**Caterpillars**:
-- Hand-pick or use Bacillus thuringiensis (Bt)
-- Cover plants with floating row cover
-
-### Diseases
-
-**Powdery Mildew**:
-- White powdery coating on leaves
-- Common in humid conditions with poor air circulation
-- Provide adequate spacing and avoid overhead watering
-- Remove affected leaves
-
-**Root Rot**:
-- Caused by overwatering or poor drainage
-- Symptoms include wilting despite moist soil
-- Prevention is key—ensure good drainage
-
-**Leaf Spot**:
-- Fungal disease causing spotted leaves
-- Remove affected leaves
-- Improve air circulation
-
-## Companion Planting with Herbs
-
-Many herbs make excellent companion plants throughout the garden:
-
-- **Basil**: Plant near tomatoes to improve flavor and repel flies and mosquitoes
-- **Rosemary**: Deters cabbage moths and carrot flies
-- **Sage**: Repels cabbage moths and carrot rust flies
-- **Mint**: Deters ants and cabbage moths (keep contained!)
-- **Thyme**: Ground-covering thyme deters cabbage worms
-- **Dill**: Attracts beneficial insects but keep away from tomatoes
-- **Cilantro**: Attracts beneficial insects that prey on aphids
-- **Chives**: Deter aphids and Japanese beetles
-
-## Indoor Herb Gardens
-
-For year-round herbs or those with limited outdoor space:
-
-### Light Requirements
-
-- South-facing window for maximum natural light
-- Supplemental grow lights if window light is insufficient
-- 12-16 hours of light daily for best growth
-- Rotate plants regularly for even growth
-
-### Best Herbs for Indoors
-
-- **Basil**: Needs maximum light
-- **Chives**: Tolerates lower light
-- **Mint**: Adaptable to indoor conditions
-- **Parsley**: Does well in cooler indoor temperatures
-- **Oregano**: Needs good light but adapts well
-- **Thyme**: Compact growth habit suitable for pots
-
-### Indoor Growing Tips
-
-- Use well-draining potting mix
-- Choose containers with drainage holes
-- Monitor humidity—indoor air can be very dry
-- Watch for pests like aphids and spider mites
-- Harvest regularly to keep plants compact
-
-## Conclusion
-
-Herb gardening is the perfect entry point for beginning gardeners. With minimal space requirements and relatively few pest problems, herbs offer quick rewards and practical benefits. Start with a few favorites that you'll use regularly in cooking, then expand your collection as your confidence grows. Whether you're snipping fresh basil for summer's first caprese salad or brewing a cup of mint tea from your garden, there's something deeply satisfying about incorporating homegrown herbs into your daily life.
-
-Remember that herbs have been cultivated for thousands of years for food, medicine, fragrance, and beauty. As you tend your herb garden, you're connecting with this ancient tradition while creating your own fresh, flavorful harvests that will transform your cooking and enhance your well-being.
-    `,
-    published: true,
-    featured_image: "https://images.unsplash.com/photo-1620325867502-221cfb5faa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
+    published_at: "2025-04-10T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80"
   }
 ];
 
-const seedBlogPosts = async (userId: string) => {
-  // Check if we already have blog posts
-  const { count } = await supabase
-    .from('blog_posts')
-    .select('id', { count: 'exact' });
-
-  // Only seed if we have no posts
-  if (count !== null && count === 0) {
-    for (const post of blogPosts) {
-      await supabase.from('blog_posts').insert({
-        ...post,
-        author_id: userId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    }
-    console.log(`Seeded ${blogPosts.length} blog posts`);
-  } else {
-    console.log('Blog posts already exist, skipping seed');
-  }
-};
-
-export default seedBlogPosts;
+export const blogPosts = [
+  ...blogPosts,
+  ...additionalPosts
+];
