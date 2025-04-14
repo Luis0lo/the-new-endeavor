@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Leaf, Flower, Sprout } from 'lucide-react';
 
 const Footer = () => {
@@ -29,19 +30,19 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2">
               <li>
-                <a href="#seasonal-guide" className="text-gray-400 hover:text-white transition-colors">Seasonal Planting Guide</a>
+                <Link to="/blog/seasonal-planting-guide" className="text-gray-400 hover:text-white transition-colors">Seasonal Planting Guide</Link>
               </li>
               <li>
-                <a href="#plant-care" className="text-gray-400 hover:text-white transition-colors">Plant Care Tips</a>
+                <Link to="/blog/plant-care-tips" className="text-gray-400 hover:text-white transition-colors">Plant Care Tips</Link>
               </li>
               <li>
-                <a href="#companion-planting" className="text-gray-400 hover:text-white transition-colors">Companion Planting</a>
+                <Link to="/blog/companion-planting" className="text-gray-400 hover:text-white transition-colors">Companion Planting</Link>
               </li>
               <li>
-                <a href="#garden-pests" className="text-gray-400 hover:text-white transition-colors">Common Garden Pests</a>
+                <Link to="/blog/garden-pests-natural-solutions" className="text-gray-400 hover:text-white transition-colors">Common Garden Pests</Link>
               </li>
               <li>
-                <a href="#organic-methods" className="text-gray-400 hover:text-white transition-colors">Organic Gardening Methods</a>
+                <Link to="/blog/organic-gardening-methods" className="text-gray-400 hover:text-white transition-colors">Organic Gardening Methods</Link>
               </li>
             </ul>
           </div>
