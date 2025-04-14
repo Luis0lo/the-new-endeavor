@@ -1,48 +1,50 @@
 
 import { useState, useEffect } from 'react';
-import { Plant, CompatibilityData } from '@/components/companion-plants/types';
 import { fetchPlantsWithCompanionData, analyzeCompatibility } from '@/components/companion-plants/utils/compatibility-utils';
-import { toast } from '@/hooks/use-toast';
+import { Plant, CompatibilityData } from '@/components/companion-plants/types';
 
 export function useCompatibilityAnalysis(selectedPlants: Plant[]) {
   const [compatibilityData, setCompatibilityData] = useState<CompatibilityData>({
-    compatible: {plants: [], reasons: []},
-    incompatible: {plants: [], reasons: []},
+    compatible: { plants: [], reasons: [] },
+    incompatible: { plants: [], reasons: [] },
     neutral: []
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const analyzeCompanionPlants = async () => {
-      // Only analyze compatibility when we have 2 or more plants
-      if (selectedPlants.length < 2) {
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      
+    // Reset if less than 2 plants
+    if (selectedPlants.length < 2) {
+      setCompatibilityData({
+        compatible: { plants: [], reasons: [] },
+        incompatible: { plants: [], reasons: [] },
+        neutral: []
+      });
+      setLoading(false);
+      return;
+    }
+
+    const analyzeSelectedPlants = async () => {
       try {
-        // Fetch complete plant data if needed
+        setLoading(true);
+        
+        // Fetch full plant data with companion information
         const plantsWithCompanionData = await fetchPlantsWithCompanionData(selectedPlants);
         
-        // Analyze compatibility
-        const compatibility = analyzeCompatibility(plantsWithCompanionData);
-        setCompatibilityData(compatibility);
+        // Analyze compatibility between plants
+        const result = analyzeCompatibility(plantsWithCompanionData);
+        
+        setCompatibilityData(result);
       } catch (error: any) {
-        console.error("Error analyzing compatibility:", error);
-        toast({
-          title: "Error",
-          description: "There was a problem analyzing plant compatibility",
-          variant: "destructive"
-        });
+        console.error("Error analyzing plant compatibility:", error);
+        setError(error);
       } finally {
         setLoading(false);
       }
     };
     
-    analyzeCompanionPlants();
+    analyzeSelectedPlants();
   }, [selectedPlants]);
 
-  return { compatibilityData, loading };
+  return { compatibilityData, loading, error };
 }
