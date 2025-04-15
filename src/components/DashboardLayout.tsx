@@ -30,7 +30,11 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    // Load sidebar state from localStorage
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    return savedState !== null ? JSON.parse(savedState) : false;
+  });
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -53,6 +57,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   const handleSignOut = async () => {
     try {
@@ -78,6 +87,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Determine icon size based on sidebar state
   const iconSize = sidebarCollapsed ? 24 : 18;
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex min-h-screen w-full bg-background">
@@ -97,14 +110,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 {sidebarCollapsed ? "GA" : "Garden App"}
               </span>
             </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="ml-auto"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            >
-              {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-            </Button>
           </div>
 
           {/* Navigation */}
@@ -233,6 +238,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               {sidebarCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
             </Tooltip>
           </div>
+        </div>
+
+        {/* Toggle button positioned outside the sidebar, overlapping the border */}
+        <div 
+          className={`fixed top-1/2 transform -translate-y-1/2 z-50 transition-all duration-300 ${
+            sidebarCollapsed ? "left-[50px]" : "left-[240px]"
+          }`}
+        >
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-full shadow-md border-2 border-primary bg-background"
+            onClick={toggleSidebar}
+          >
+            {sidebarCollapsed ? 
+              <ChevronRight size={24} className="text-primary" /> : 
+              <ChevronLeft size={24} className="text-primary" />
+            }
+          </Button>
         </div>
 
         {/* Main content */}
