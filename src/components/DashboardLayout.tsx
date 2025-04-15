@@ -13,7 +13,9 @@ import {
   Menu,
   Archive,
   BookOpen,
-  Flower2 // Using Flower2 icon instead of Plant (which doesn't exist)
+  Flower2,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -23,6 +25,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { User } from '@supabase/supabase-js';
+import { Switch } from '@/components/ui/switch';
+import { useTheme } from '@/hooks/use-theme';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -37,6 +41,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   });
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -87,10 +92,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Determine icon size based on sidebar state
   const iconSize = sidebarCollapsed ? 24 : 18;
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
-
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex min-h-screen w-full bg-background">
@@ -101,7 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           }`}
         >
           {/* Sidebar header */}
-          <div className="flex h-16 items-center border-b px-4">
+          <div className="flex h-16 items-center justify-between border-b px-4">
             <Link 
               to="/" 
               className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
@@ -110,6 +111,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 {sidebarCollapsed ? "GA" : "Garden App"}
               </span>
             </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={sidebarCollapsed ? "hidden" : ""}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              <ChevronLeft size={18} />
+            </Button>
+            {sidebarCollapsed && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-auto"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              >
+                <ChevronRight size={18} />
+              </Button>
+            )}
           </div>
 
           {/* Navigation */}
@@ -224,6 +243,40 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
           {/* Sidebar footer */}
           <div className="border-t p-4">
+            {/* Theme Toggle */}
+            {!sidebarCollapsed && (
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium">Dark Mode</span>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    checked={theme === 'dark'} 
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  />
+                  {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+                </div>
+              </div>
+            )}
+            
+            {/* Theme toggle for collapsed sidebar */}
+            {sidebarCollapsed && (
+              <div className="flex justify-center mb-4">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    >
+                      {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+            
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -238,25 +291,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               {sidebarCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
             </Tooltip>
           </div>
-        </div>
-
-        {/* Toggle button positioned outside the sidebar, overlapping the border */}
-        <div 
-          className={`fixed top-1/2 transform -translate-y-1/2 z-50 transition-all duration-300 ${
-            sidebarCollapsed ? "left-[50px]" : "left-[240px]"
-          }`}
-        >
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 rounded-full shadow-md border-2 border-primary bg-background"
-            onClick={toggleSidebar}
-          >
-            {sidebarCollapsed ? 
-              <ChevronRight size={24} className="text-primary" /> : 
-              <ChevronLeft size={24} className="text-primary" />
-            }
-          </Button>
         </div>
 
         {/* Main content */}

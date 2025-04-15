@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Footer from '@/components/Footer';
 import { User } from '@supabase/supabase-js';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/hooks/use-theme';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -15,6 +17,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -60,7 +63,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 {menuOpen ? "✕" : "☰"}
               </button>
             </div>
-            <nav className="flex items-center">
+            <nav className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
