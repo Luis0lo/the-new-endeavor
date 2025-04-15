@@ -10,7 +10,8 @@ import { toast } from '@/hooks/use-toast';
 import { 
   User, Settings, Home, Lock, 
   CreditCard, Bell, UserCircle, 
-  MapPin, Mail, LogOut
+  MapPin, Mail, LogOut,
+  Moon, Sun
 } from 'lucide-react';
 import { 
   Card, 
@@ -20,14 +21,17 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { useTheme } from '@/hooks/use-theme';
 
-// Only keeping 'profile' as the active tab
-type SettingsTab = 'profile';
+// Keep profile as the active tab and add preferences tab
+type SettingsTab = 'profile' | 'preferences';
 
 const AccountSettings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const { theme, setTheme } = useTheme();
   
   // Real user data from Supabase
   const [userData, setUserData] = useState({
@@ -195,6 +199,42 @@ const AccountSettings = () => {
             </CardFooter>
           </Card>
         );
+      case 'preferences':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Preferences</CardTitle>
+              <CardDescription>Customize your application experience</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Appearance</h3>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="dark-mode">Dark Mode</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Switch between light and dark theme
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="dark-mode"
+                      checked={theme === 'dark'} 
+                      onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                    />
+                    {theme === 'dark' ? 
+                      <Moon size={20} className="text-muted-foreground" /> : 
+                      <Sun size={20} className="text-muted-foreground" />
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              {/* Can add more preference sections here in the future */}
+            </CardContent>
+          </Card>
+        );
       default:
         return null;
     }
@@ -227,6 +267,18 @@ const AccountSettings = () => {
                   >
                     <UserCircle className="h-5 w-5" />
                     <span>Profile</span>
+                  </button>
+                  
+                  <button
+                    className={`flex items-center space-x-2 p-3 ${
+                      activeTab === 'preferences' 
+                        ? 'bg-primary/10 text-primary border-l-4 border-primary' 
+                        : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setActiveTab('preferences')}
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>Preferences</span>
                   </button>
                   
                   {/* Commented out Address option */}

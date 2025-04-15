@@ -13,9 +13,7 @@ import {
   Menu,
   Archive,
   BookOpen,
-  Flower2,
-  Moon,
-  Sun
+  Flower2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -25,7 +23,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { User } from '@supabase/supabase-js';
-import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/use-theme';
 
 interface DashboardLayoutProps {
@@ -41,7 +38,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   });
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
   
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -243,40 +239,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
           {/* Sidebar footer */}
           <div className="border-t p-4">
-            {/* Theme Toggle */}
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium">Dark Mode</span>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    checked={theme === 'dark'} 
-                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                  />
-                  {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-                </div>
-              </div>
-            )}
-            
-            {/* Theme toggle for collapsed sidebar */}
-            {sidebarCollapsed && (
-              <div className="flex justify-center mb-4">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    >
-                      {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-            
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
