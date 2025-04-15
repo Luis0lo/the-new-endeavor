@@ -10,6 +10,44 @@ export const runSeedData = async () => {
   if (data?.session?.user) {
     // Seed blog posts
     console.log("Seeding database with blog posts:", blogPosts.length);
+    try {
+      // Check if blog posts already exist
+      const { count: blogCount, error: blogCountError } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true });
+        
+      if (blogCountError) {
+        console.error("Error checking blog posts count:", blogCountError);
+      } else if (!blogCount || blogCount < 5) {
+        console.log("Inserting blog posts data...");
+        const { error: blogError } = await supabase
+          .from('blog_posts')
+          .upsert(
+            blogPosts.map(post => ({
+              id: post.id,
+              title: post.title,
+              slug: post.slug,
+              excerpt: post.excerpt,
+              content: post.content,
+              author_id: post.author_id,
+              published: post.published,
+              published_at: post.published_at,
+              featured_image: post.featured_image
+            })),
+            { onConflict: 'id' }
+          );
+          
+        if (blogError) {
+          console.error("Error seeding blog posts:", blogError);
+        } else {
+          console.log("Successfully seeded blog posts database");
+        }
+      } else {
+        console.log("Blog posts data already exists, skipping seed");
+      }
+    } catch (blogError) {
+      console.error("Error in blog post seeding process:", blogError);
+    }
     
     // Seed plant data
     console.log("Seeding database with plants:", plantData.length);
