@@ -123,7 +123,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                       }`}
                     >
                       <Home size={iconSize} />
-                      {!sidebarCollapsed && <span>Home</span>}
+                      {!sidebarCollapsed && <span>Dashboard</span>}
                     </Link>
                   </TooltipTrigger>
                   {sidebarCollapsed && <TooltipContent side="right">Home</TooltipContent>}
