@@ -1,11 +1,29 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/MainLayout';
 import { Flower2, Calendar, Book, ArrowRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 const Index = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -91,26 +109,28 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-primary py-20">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center text-primary-foreground">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Ready to Start Growing?</h2>
-              <p className="max-w-[700px] text-primary-foreground/90 md:text-xl/relaxed">
-                Join our community of garden enthusiasts today and transform your gardening experience.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Link to="/auth">
-                <Button size="lg" variant="secondary">
-                  Sign Up Now
-                </Button>
-              </Link>
+      {/* CTA Section - Only shown if user is not logged in */}
+      {!user && (
+        <section className="bg-gradient-to-br from-green-400 to-green-600 py-20">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center text-primary-foreground">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Dig into a smarter way to garden</h2>
+                <p className="max-w-[700px] text-primary-foreground/90 md:text-xl/relaxed">
+                  Join our community of garden enthusiasts today and transform your gardening experience.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                <Link to="/auth">
+                  <Button size="lg" variant="secondary">
+                    Sign Up Now
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Blog Preview Section */}
       <section className="py-20">
