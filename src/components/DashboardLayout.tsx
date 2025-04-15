@@ -116,7 +116,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"} rounded-md py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
                         isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory") && !isActive("/dashboard/companions")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
