@@ -76,7 +76,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   // Determine icon size based on sidebar state
-  const iconSize = sidebarCollapsed ? 24 : 50;
+  const iconSize = sidebarCollapsed ? 35 : 18;
 
   return (
     <TooltipProvider delayDuration={300}>
