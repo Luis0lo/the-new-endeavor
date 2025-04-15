@@ -110,13 +110,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {/* Navigation */}
           <div className="flex-1 overflow-auto py-4">
             <div className="mb-4 px-4">
-              {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>}
+              {/* {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>} */}
               <nav className="flex flex-col gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-1 mx-0" : "gap-2"} rounded-md px-3 py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
                         isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory") && !isActive("/dashboard/companions")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
