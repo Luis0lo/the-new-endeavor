@@ -30,19 +30,10 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  // Check if there's a saved sidebar state in localStorage
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    const savedState = localStorage.getItem('sidebarCollapsed');
-    return savedState ? JSON.parse(savedState) : false;
-  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Save sidebar state to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed));
-  }, [sidebarCollapsed]);
-
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -242,26 +233,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               {sidebarCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
             </Tooltip>
           </div>
-        </div>
-
-        {/* Toggle Button - Moving it outside the sidebar for better visibility */}
-        <div 
-          className={`fixed top-16 z-[51] transition-all duration-300 ${
-            sidebarCollapsed ? "left-[50px]" : "left-[240px]"
-          }`}
-        >
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-card shadow-md border-accent"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? 
-              <ChevronRight size={24} className="text-accent-foreground" /> : 
-              <ChevronLeft size={24} className="text-accent-foreground" />
-            }
-          </Button>
         </div>
 
         {/* Main content */}
