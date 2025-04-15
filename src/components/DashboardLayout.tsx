@@ -267,7 +267,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                       size="icon"
                       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     >
-                      {theme === 'dark' ? <Sun size={16} className={`h-4 w-4 }`}/> : <Moon size={16} />}
+                      {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="right">
