@@ -111,7 +111,7 @@ const Index = () => {
 
       {/* CTA Section - Only shown if user is not logged in */}
       {!user && (
-        <section className="bg-gradient-to-br from-green-400 to-green-600 py-20">
+        <section className="bg-gradient-to-br from-primary/80 to-primary py-20">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center text-primary-foreground">
               <div className="space-y-2">
