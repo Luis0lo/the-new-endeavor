@@ -5,10 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import MainLayout from '@/components/MainLayout';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, Carrot, Flower2, Leaf, Lightbulb, Wrench } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 
 // Define the BlogPost interface to match what we expect from the database
@@ -19,9 +18,7 @@ interface BlogPost {
   slug: string;
   featured_image: string | null;
   published_at: string | null;
-  profiles: {
-    username: string;
-  };
+  category?: string;
 }
 
 const BlogHero = ({ onSearch }: { onSearch: (term: string) => void }) => {
@@ -63,6 +60,67 @@ const BlogHero = ({ onSearch }: { onSearch: (term: string) => void }) => {
   );
 };
 
+const CategoryTabs = ({ activeCategory, setActiveCategory }: { 
+  activeCategory: string, 
+  setActiveCategory: (category: string) => void 
+}) => {
+  return (
+    <div className="bg-background border-y border-border">
+      <div className="container mx-auto px-4">
+        <div className="flex overflow-x-auto py-2 scrollbar-hide">
+          <Button 
+            variant={activeCategory === 'all' ? "secondary" : "ghost"} 
+            className="mx-1 whitespace-nowrap"
+            onClick={() => setActiveCategory('all')}
+          >
+            All Posts
+          </Button>
+          <Button 
+            variant={activeCategory === 'vegetables' ? "secondary" : "ghost"} 
+            className="mx-1 whitespace-nowrap"
+            onClick={() => setActiveCategory('vegetables')}
+          >
+            <Carrot className="mr-2 h-4 w-4" />
+            Vegetables
+          </Button>
+          <Button 
+            variant={activeCategory === 'flowers' ? "secondary" : "ghost"} 
+            className="mx-1 whitespace-nowrap"
+            onClick={() => setActiveCategory('flowers')}
+          >
+            <Flower2 className="mr-2 h-4 w-4" />
+            Flowers
+          </Button>
+          <Button 
+            variant={activeCategory === 'herbs' ? "secondary" : "ghost"} 
+            className="mx-1 whitespace-nowrap"
+            onClick={() => setActiveCategory('herbs')}
+          >
+            <Leaf className="mr-2 h-4 w-4" />
+            Herbs
+          </Button>
+          <Button 
+            variant={activeCategory === 'tips' ? "secondary" : "ghost"} 
+            className="mx-1 whitespace-nowrap"
+            onClick={() => setActiveCategory('tips')}
+          >
+            <Lightbulb className="mr-2 h-4 w-4" />
+            Gardening Tips
+          </Button>
+          <Button 
+            variant={activeCategory === 'tools' ? "secondary" : "ghost"} 
+            className="mx-1 whitespace-nowrap"
+            onClick={() => setActiveCategory('tools')}
+          >
+            <Wrench className="mr-2 h-4 w-4" />
+            Tools
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BlogSection = ({ title, posts }: { title: string, posts: BlogPost[] }) => {
   return (
     <div className="py-12">
@@ -98,12 +156,6 @@ const BlogCard = ({ post }: { post: BlogPost }) => {
       )}
       <CardHeader className="flex-grow">
         <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
-        <div className="text-sm text-muted-foreground">
-          By {post.profiles?.username || "Unknown"} • 
-          {post.published_at && 
-            ` ${new Date(post.published_at).toLocaleDateString()}`
-          }
-        </div>
       </CardHeader>
       <CardContent className="flex-grow-0">
         <p className="line-clamp-3">{post.excerpt || `Read this article about ${post.title}`}</p>
@@ -119,7 +171,8 @@ const BlogCard = ({ post }: { post: BlogPost }) => {
 
 const Blog = () => {
   const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
-  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [searchResults, setSearchResults] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
@@ -129,6 +182,47 @@ const Blog = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
+  
+  // Filter posts when category changes
+  useEffect(() => {
+    if (activeCategory === 'all') {
+      setFilteredPosts(allPosts);
+    } else {
+      // Filter posts based on category
+      // In a real app, you would have actual category data
+      // For now, we'll simulate categories using the post content/title
+      const filtered = allPosts.filter(post => {
+        const titleAndExcerpt = `${post.title} ${post.excerpt || ''}`.toLowerCase();
+        
+        switch (activeCategory) {
+          case 'vegetables':
+            return titleAndExcerpt.includes('vegetable') || 
+                   titleAndExcerpt.includes('tomato') || 
+                   titleAndExcerpt.includes('carrot');
+          case 'flowers':
+            return titleAndExcerpt.includes('flower') || 
+                   titleAndExcerpt.includes('bloom') || 
+                   titleAndExcerpt.includes('petal');
+          case 'herbs':
+            return titleAndExcerpt.includes('herb') || 
+                   titleAndExcerpt.includes('basil') || 
+                   titleAndExcerpt.includes('mint');
+          case 'tips':
+            return titleAndExcerpt.includes('tip') || 
+                   titleAndExcerpt.includes('guide') || 
+                   titleAndExcerpt.includes('how to');
+          case 'tools':
+            return titleAndExcerpt.includes('tool') || 
+                   titleAndExcerpt.includes('equipment') || 
+                   titleAndExcerpt.includes('implement');
+          default:
+            return true;
+        }
+      });
+      
+      setFilteredPosts(filtered);
+    }
+  }, [activeCategory, allPosts]);
   
   const fetchPosts = async () => {
     try {
@@ -140,36 +234,29 @@ const Blog = () => {
           excerpt,
           slug,
           featured_image,
-          published_at,
-          profiles:author_id(username)
+          published_at
         `)
         .eq('published', true)
         .order('published_at', { ascending: false });
         
       if (error) throw error;
       
-      // Transform data to match our BlogPost interface with type safety
       if (data) {
         const formattedPosts = data.map(post => {
-          // Make sure profiles exists and has the expected shape
-          const profileData = post.profiles || { username: "Unknown" };
           return {
             id: post.id,
             title: post.title,
             excerpt: post.excerpt,
             slug: post.slug,
             featured_image: post.featured_image,
-            published_at: post.published_at,
-            profiles: {
-              username: (profileData as any).username || "Unknown"
-            }
+            published_at: post.published_at
           } as BlogPost;
         });
         
-        setLatestPosts(formattedPosts);
+        setAllPosts(formattedPosts);
+        setFilteredPosts(formattedPosts);
         
         // For demonstration, we'll just use the first 3 posts as featured
-        // In a real application, you might have a 'featured' field in your database
         setFeaturedPosts(formattedPosts.slice(0, 3));
       }
     } catch (error: any) {
@@ -196,7 +283,6 @@ const Blog = () => {
     
     try {
       // This is a simple search implementation
-      // In a real application, you might use a more sophisticated search solution
       const { data, error } = await supabase
         .from('blog_posts')
         .select(`
@@ -205,8 +291,7 @@ const Blog = () => {
           excerpt,
           slug,
           featured_image,
-          published_at,
-          profiles:author_id(username)
+          published_at
         `)
         .eq('published', true)
         .or(`title.ilike.%${term}%,excerpt.ilike.%${term}%,content.ilike.%${term}%`)
@@ -216,17 +301,13 @@ const Blog = () => {
       
       if (data) {
         const formattedPosts = data.map(post => {
-          const profileData = post.profiles || { username: "Unknown" };
           return {
             id: post.id,
             title: post.title,
             excerpt: post.excerpt,
             slug: post.slug,
             featured_image: post.featured_image,
-            published_at: post.published_at,
-            profiles: {
-              username: (profileData as any).username || "Unknown"
-            }
+            published_at: post.published_at
           } as BlogPost;
         });
         
@@ -246,6 +327,9 @@ const Blog = () => {
   return (
     <MainLayout>
       <BlogHero onSearch={handleSearch} />
+      
+      {/* Category Tabs - Now placed between hero and content */}
+      <CategoryTabs activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
       
       {isSearching ? (
         <div className="container mx-auto px-4 py-12">
@@ -285,22 +369,6 @@ const Blog = () => {
             </div>
           )}
           
-          {/* Categories */}
-          <div className="py-6 border-b">
-            <div className="container mx-auto px-4">
-              <Tabs defaultValue="all" value={activeCategory} onValueChange={setActiveCategory}>
-                <TabsList className="w-full justify-start overflow-auto py-2">
-                  <TabsTrigger value="all">All Posts</TabsTrigger>
-                  <TabsTrigger value="vegetables">Vegetables</TabsTrigger>
-                  <TabsTrigger value="flowers">Flowers</TabsTrigger>
-                  <TabsTrigger value="herbs">Herbs</TabsTrigger>
-                  <TabsTrigger value="tips">Gardening Tips</TabsTrigger>
-                  <TabsTrigger value="tools">Tools</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-          
           {/* Latest Posts */}
           <div className="py-12">
             <div className="container mx-auto px-4">
@@ -308,14 +376,14 @@ const Blog = () => {
               
               {loading ? (
                 <div className="text-center py-12">Loading blog posts...</div>
-              ) : latestPosts.length === 0 ? (
+              ) : filteredPosts.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No blog posts published yet.</p>
-                  <p className="text-sm mt-2">Check back soon for gardening tips and stories!</p>
+                  <p className="text-lg text-muted-foreground">No blog posts found in this category.</p>
+                  <p className="text-sm mt-2">Try another category or check back soon for more content!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {latestPosts.map((post) => (
+                  {filteredPosts.map((post) => (
                     <BlogCard key={post.id} post={post} />
                   ))}
                 </div>

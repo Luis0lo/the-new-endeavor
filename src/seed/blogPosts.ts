@@ -1,3 +1,4 @@
+
 import { faker } from "@faker-js/faker";
 
 export type BlogPost = {
@@ -10,13 +11,18 @@ export type BlogPost = {
   published: boolean;
   published_at: string;
   featured_image: string;
+  category: string; // Adding category field
 };
+
+// Define possible categories
+const categories = ['vegetables', 'flowers', 'herbs', 'tips', 'tools'];
 
 const createBlogPost = (): BlogPost => {
   const title = faker.lorem.sentence();
   const slug = title.toLowerCase().replace(/ /g, "-");
   const date = faker.date.past().toISOString();
   const featured_image = faker.image.urlLoremFlickr({ category: 'nature' });
+  const category = faker.helpers.arrayElement(categories);
   
   return {
     id: faker.string.uuid(),
@@ -28,13 +34,14 @@ const createBlogPost = (): BlogPost => {
     published: true,
     published_at: date,
     featured_image: featured_image,
+    category: category,
   };
 };
 
 // Generate initial random blog posts
 const initialBlogPosts: BlogPost[] = Array.from({ length: 6 }, () => createBlogPost());
 
-// Adding predefined blog posts about gardening topics
+// Adding predefined blog posts about gardening topics with specific categories
 const additionalPosts = [
   {
     id: "7",
@@ -109,7 +116,8 @@ Happy gardening!
     author_id: "1",
     published: true,
     published_at: "2025-03-14T12:00:00Z",
-    featured_image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    featured_image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    category: "vegetables"
   },
   {
     id: "8",
@@ -189,7 +197,8 @@ By mastering these fundamentals of plant care, you'll be well on your way to a g
     author_id: "1",
     published: true,
     published_at: "2025-03-20T12:00:00Z",
-    featured_image: "https://images.unsplash.com/photo-1598900438156-4078e6043996?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    featured_image: "https://images.unsplash.com/photo-1598900438156-4078e6043996?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    category: "tips"
   },
   {
     id: "9",
@@ -271,7 +280,8 @@ Companion planting is as much art as science, and regional variations abound. Th
     author_id: "1",
     published: true,
     published_at: "2025-03-28T12:00:00Z",
-    featured_image: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"
+    featured_image: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+    category: "vegetables"
   },
   {
     id: "10",
@@ -399,7 +409,8 @@ Remember that a healthy garden ecosystem includes some pest presence, which supp
     author_id: "1",
     published: true,
     published_at: "2025-04-02T12:00:00Z",
-    featured_image: "https://images.unsplash.com/photo-1599583863916-e06c29087f51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    featured_image: "https://images.unsplash.com/photo-1599583863916-e06c29087f51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    category: "tips"
   },
   {
     id: "11",
@@ -522,7 +533,44 @@ Organic gardening isn't just about avoiding chemicals; it's about fostering a th
     author_id: "1",
     published: true,
     published_at: "2025-04-10T12:00:00Z",
-    featured_image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80"
+    featured_image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
+    category: "tips"
+  },
+  {
+    id: "12",
+    title: "Beautiful Flower Arrangements for Every Season",
+    slug: "flower-arrangements-seasons",
+    excerpt: "Create stunning flower displays year-round with these seasonal arrangement ideas and expert techniques.",
+    content: faker.lorem.paragraphs(8),
+    author_id: "1",
+    published: true,
+    published_at: "2025-04-15T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1508610048659-a06b669e3321?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    category: "flowers"
+  },
+  {
+    id: "13",
+    title: "Essential Herb Garden: Growing Culinary Herbs at Home",
+    slug: "culinary-herbs-garden",
+    excerpt: "Learn how to grow, harvest, and use the most popular culinary herbs right from your home garden or windowsill.",
+    content: faker.lorem.paragraphs(8),
+    author_id: "1",
+    published: true,
+    published_at: "2025-04-18T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+    category: "herbs"
+  },
+  {
+    id: "14",
+    title: "Best Gardening Tools for Beginners: A Complete Guide",
+    slug: "best-gardening-tools-beginners",
+    excerpt: "Discover which essential tools every beginner gardener needs to start their garden journey successfully.",
+    content: faker.lorem.paragraphs(8),
+    author_id: "1",
+    published: true,
+    published_at: "2025-04-20T12:00:00Z",
+    featured_image: "https://images.unsplash.com/photo-1481671703460-040cb8a2d909?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    category: "tools"
   }
 ];
 
