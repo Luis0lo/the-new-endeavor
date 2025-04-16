@@ -46,6 +46,18 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
       priority: 0.5
+    },
+    {
+      loc: `${baseUrl}/privacy-policy`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'yearly',
+      priority: 0.5
+    },
+    {
+      loc: `${baseUrl}/terms-of-service`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'yearly',
+      priority: 0.5
     }
   ];
 

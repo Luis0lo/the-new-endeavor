@@ -13,7 +13,7 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-bold mb-4 flex items-center">
               <Sprout className="mr-2 h-5 w-5 text-green-400" />
-              Garden Companion
+              2day garden
             </h3>
             <p className="text-gray-400 mb-4">
               Your personal garden planning and management tool. Track activities, plan your garden, and grow thriving plants all year round.
@@ -57,7 +57,7 @@ const Footer = () => {
             </p>
             <ul className="space-y-2">
               <li className="text-gray-400">
-                Email: garden@example.com
+                Email: garden@2daygarden.com
               </li>
               <li className="text-gray-400">
                 Support: (555) 123-4567
@@ -87,12 +87,13 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-800 mt-10 pt-8 text-center text-gray-400">
-          <p>© {currentYear} Garden Companion App. All rights reserved.</p>
+          <p>© {currentYear} 2day garden. All rights reserved.</p>
           <div className="mt-2 flex justify-center space-x-4 text-sm">
             <Link to="/sitemap" className="text-gray-400 hover:text-white transition-colors">Sitemap</Link>
             <a href="/sitemap.xml" className="text-gray-400 hover:text-white transition-colors">XML Sitemap</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+            <Link to="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="/cookie-policy" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</Link>
           </div>
         </div>
       </div>

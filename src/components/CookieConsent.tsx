@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { X, Check, Settings, Cookie } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ interface CookiePreferences {
 const CookieConsent = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [hasUserChoices, setHasUserChoices] = useState(false);
   const { toast } = useToast();
   
   const [cookiePreferences, setCookiePreferences] = useState<CookiePreferences>({
@@ -39,10 +41,12 @@ const CookieConsent = () => {
     if (!consentStatus) {
       // If no preference stored, show the banner
       setShowBanner(true);
+      setHasUserChoices(false);
     } else {
       // Otherwise, apply the stored preferences
       const savedPreferences = JSON.parse(consentStatus);
       setCookiePreferences(savedPreferences);
+      setHasUserChoices(true);
     }
   }, []);
 
@@ -51,6 +55,7 @@ const CookieConsent = () => {
     setCookiePreferences(prefs);
     setShowBanner(false);
     setShowSettings(false);
+    setHasUserChoices(true);
     
     toast({
       title: "Cookie preferences saved",
@@ -82,7 +87,8 @@ const CookieConsent = () => {
   };
 
   if (!showBanner && !showSettings) {
-    return (
+    // Only show the settings button if the user has previously made choices
+    return hasUserChoices ? (
       <Button 
         onClick={() => setShowSettings(true)}
         variant="outline" 
@@ -92,7 +98,7 @@ const CookieConsent = () => {
         <Cookie size={16} />
         Cookie Settings
       </Button>
-    );
+    ) : null;
   }
 
   return (
@@ -117,7 +123,7 @@ const CookieConsent = () => {
               </div>
               
               <p className="text-sm text-muted-foreground">
-                We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. Visit our Cookie Policy for more information.
+                We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. Visit our <Link to="/cookie-policy" className="text-primary hover:underline">Cookie Policy</Link> for more information.
               </p>
               
               <div className="flex flex-wrap gap-2 justify-end sm:justify-between">
