@@ -136,7 +136,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
                         isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory") && !isActive("/dashboard/companions")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
@@ -153,7 +153,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard/calendar"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
                         isActive("/dashboard/calendar")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
@@ -170,7 +170,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard/inventory"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
                         isActive("/dashboard/inventory")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
@@ -187,7 +187,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard/companions"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
                         isActive("/dashboard/companions")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
@@ -204,7 +204,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/blog"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
                         isActive("/blog")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
@@ -221,7 +221,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard/settings"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2"} rounded-md px-3 py-2 ${
+                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
                         isActive("/dashboard/settings")
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50"
