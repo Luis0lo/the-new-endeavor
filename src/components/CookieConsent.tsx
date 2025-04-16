@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';  // Add this import
 import { X, Check, Settings, Cookie } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
