@@ -4,7 +4,11 @@ import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx'
 import './index.css'
 
-createRoot(document.getElementById("root")!).render(
+// Create a React root
+const root = createRoot(document.getElementById("root")!);
+
+// Render the app
+root.render(
   <HelmetProvider>
     <App />
   </HelmetProvider>
