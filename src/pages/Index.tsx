@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import { Flower2, Calendar, Book, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { Helmet } from 'react-helmet-async';
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,6 +26,21 @@ const Index = () => {
 
   return (
     <MainLayout>
+      <Helmet prioritizeSeoTags>
+        <title>GardenApp - Track Your Plants and Plan Your Garden</title>
+        <meta name="description" content="Track your plants, plan your garden activities, and learn from our community. Get started with GardenApp for free today." />
+        <link rel="canonical" href={`${window.location.origin}/`} />
+        <meta property="og:title" content="GardenApp - Track Your Plants and Plan Your Garden" />
+        <meta property="og:description" content="Track your plants, plan your garden activities, and learn from our community. Get started with GardenApp for free today." />
+        <meta property="og:url" content={`${window.location.origin}/`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=800&auto=format&fit=crop" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="GardenApp - Track Your Plants and Plan Your Garden" />
+        <meta name="twitter:description" content="Track your plants, plan your garden activities, and learn from our community. Get started with GardenApp for free today." />
+        <meta name="twitter:image" content="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=800&auto=format&fit=crop" />
+      </Helmet>
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-background py-20 md:py-32">
         <div className="container px-4 md:px-6">

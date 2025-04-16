@@ -12,7 +12,7 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
   // Fetch all published blog posts
   const { data: blogPosts, error } = await supabase
     .from('blog_posts')
-    .select('slug, published_at')
+    .select('slug, published_at, updated_at')
     .eq('published', true)
     .order('published_at', { ascending: false });
 
@@ -34,14 +34,20 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'weekly',
       priority: 0.8
+    },
+    {
+      loc: `${baseUrl}/sitemap`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: 0.5
     }
   ];
 
   // Create sitemap entries for blog posts
   const blogEntries: SitemapData[] = blogPosts.map(post => ({
     loc: `${baseUrl}/blog/${post.slug}`,
-    lastmod: post.published_at 
-      ? new Date(post.published_at).toISOString().split('T')[0] 
+    lastmod: post.updated_at || post.published_at 
+      ? new Date(post.updated_at || post.published_at).toISOString().split('T')[0] 
       : new Date().toISOString().split('T')[0],
     changefreq: 'yearly',
     priority: 0.7
