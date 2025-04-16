@@ -1,0 +1,49 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main Pages -->
+  <url>
+    <loc>https://yourdomain.com/</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/blog</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Blog Posts (will be dynamically generated in a proper implementation) -->
+  <url>
+    <loc>https://yourdomain.com/blog/spring-planting-guide</loc>
+    <lastmod>2025-04-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/blog/organic-pest-control</loc>
+    <lastmod>2025-04-10</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/blog/vegetable-garden-layout</loc>
+    <lastmod>2025-04-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/blog/composting-basics</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/blog/growing-herbs-indoors</loc>
+    <lastmod>2025-03-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>

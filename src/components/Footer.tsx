@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Leaf, Flower, Sprout } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -87,6 +88,12 @@ const Footer = () => {
         
         <div className="border-t border-gray-800 mt-10 pt-8 text-center text-gray-400">
           <p>© {currentYear} Garden Companion App. All rights reserved.</p>
+          <div className="mt-2 flex justify-center space-x-4 text-sm">
+            <Link to="/sitemap" className="text-gray-400 hover:text-white transition-colors">Sitemap</Link>
+            <a href="/sitemap.xml" className="text-gray-400 hover:text-white transition-colors">XML Sitemap</a>
+            <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+          </div>
         </div>
       </div>
     </footer>
