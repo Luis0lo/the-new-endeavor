@@ -56,7 +56,7 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
   // Combine all entries
   const allEntries = [...staticPages, ...blogEntries];
 
-  // Generate the XML
+  // Generate the XML - ensure XML declaration is at the very beginning with no whitespace
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allEntries.map(entry => `  <url>
