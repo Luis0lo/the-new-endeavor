@@ -40,6 +40,12 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'monthly',
       priority: 0.5
+    },
+    {
+      loc: `${baseUrl}/cookie-policy`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'yearly',
+      priority: 0.5
     }
   ];
 

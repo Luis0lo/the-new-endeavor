@@ -16,4 +16,4 @@ Allow: /
 Disallow: /dashboard/
 Disallow: /auth/
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://2daygarden.com/sitemap.xml

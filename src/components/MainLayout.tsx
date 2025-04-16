@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,12 +45,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="container flex h-16 items-center">
           <div className="mr-4 hidden md:flex">
             <Link to="/" className="mr-6 flex items-center space-x-2">
-              <span className="text-xl font-bold">GardenApp</span>
+              <span className="text-xl font-bold">2day garden</span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
               <Link to="/" className="transition-colors hover:text-foreground/80">Home</Link>
               <Link to="/blog" className="transition-colors hover:text-foreground/80">Blog</Link>
               {user && <Link to="/dashboard" className="transition-colors hover:text-foreground/80">Dashboard</Link>}
+              <Link to="/cookie-policy" className="transition-colors hover:text-foreground/80">Cookie Policy</Link>
             </nav>
           </div>
 
@@ -110,6 +112,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   Dashboard
                 </Link>
               )}
+              <Link to="/cookie-policy" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
+                Cookie Policy
+              </Link>
             </nav>
           </div>
         )}

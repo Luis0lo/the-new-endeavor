@@ -16,7 +16,9 @@ import CompanionPlantsPage from "./pages/CompanionPlantsPage";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Sitemap from "./pages/Sitemap";
+import CookiePolicy from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
+import CookieConsent from "./components/CookieConsent";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -35,6 +37,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <CookieConsent />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -47,6 +50,7 @@ const App = () => (
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/sitemap" element={<Sitemap />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
