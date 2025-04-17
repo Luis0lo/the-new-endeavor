@@ -111,7 +111,10 @@ const SortableShelfCard = ({ shelf, onEdit, onDelete }: {
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => navigate(`/dashboard/inventory/${shelf.id}`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/dashboard/inventory/${shelf.id}`);
+            }}
           >
             View Items
           </Button>

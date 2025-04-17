@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';  // Add this import
 import { X, Check, Settings, Cookie } from 'lucide-react';
@@ -88,18 +87,8 @@ const CookieConsent = () => {
   };
 
   if (!showBanner && !showSettings) {
-    // Only show the settings button if the user has previously made choices
-    return hasUserChoices ? (
-      <Button 
-        onClick={() => setShowSettings(true)}
-        variant="outline" 
-        size="sm"
-        className="fixed bottom-4 left-4 z-50 flex items-center gap-2 text-xs"
-      >
-        <Cookie size={16} />
-        Cookie Settings
-      </Button>
-    ) : null;
+    // Do not show any buttons when user has made choices
+    return null;
   }
 
   return (
