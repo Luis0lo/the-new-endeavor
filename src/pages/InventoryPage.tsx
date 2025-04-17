@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,6 +63,11 @@ const SortableShelfCard = ({ shelf, onEdit, onDelete }: {
     }
   };
 
+  const handleViewItems = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/dashboard/inventory/${shelf.id}`);
+  };
+
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <Card className="overflow-hidden">
@@ -111,10 +115,7 @@ const SortableShelfCard = ({ shelf, onEdit, onDelete }: {
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/dashboard/inventory/${shelf.id}`);
-            }}
+            onClick={handleViewItems}
           >
             View Items
           </Button>
