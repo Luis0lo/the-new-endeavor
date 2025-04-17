@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,6 +66,8 @@ const SortableShelfCard = ({ shelf, onEdit, onDelete }: {
 
   const handleViewItems = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault(); // Prevent any default behavior
+    console.log("Navigating to shelf:", shelf.id);
     navigate(`/dashboard/inventory/${shelf.id}`);
   };
 
