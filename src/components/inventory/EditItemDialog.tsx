@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -95,8 +94,9 @@ const EditItemDialog = ({
           name: values.name,
           quantity: values.quantity,
           description: values.description || null,
-          expiration_date: values.expiration_date,
-          purchase_date: values.purchase_date,
+          // Convert Date objects to ISO strings for Supabase
+          expiration_date: values.expiration_date ? values.expiration_date.toISOString().split('T')[0] : null,
+          purchase_date: values.purchase_date ? values.purchase_date.toISOString().split('T')[0] : null,
           brand: values.brand || null,
           condition: values.condition || null,
           notes: values.notes || null,
