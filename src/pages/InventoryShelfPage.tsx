@@ -182,6 +182,7 @@ const InventoryShelfPage = () => {
     return format(new Date(dateString), 'MMM d, yyyy');
   };
 
+  // Fix: Properly set the item to edit when edit button is clicked
   const handleEditItem = (item: InventoryItem) => {
     setItemToEdit(item);
     setEditDialogOpen(true);
@@ -447,7 +448,11 @@ const InventoryShelfPage = () => {
       {itemToEdit && (
         <EditItemDialog
           open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            // Clear the itemToEdit when dialog is closed
+            if (!open) setItemToEdit(null);
+          }}
           shelf={shelf!}
           item={itemToEdit}
           onItemUpdated={fetchShelfItems}

@@ -55,6 +55,7 @@ const EditItemDialog = ({
   item,
   onItemUpdated,
 }: EditItemDialogProps) => {
+  // Reset the form when the item changes (this ensures if we edit different items, the form updates)
   const form = useForm<InventoryItemFormValues>({
     resolver: zodResolver(inventoryItemSchema),
     defaultValues: {
@@ -68,6 +69,22 @@ const EditItemDialog = ({
       notes: item.notes || '',
     },
   });
+
+  // Reset form values when item changes
+  React.useEffect(() => {
+    if (item) {
+      form.reset({
+        name: item.name,
+        quantity: item.quantity,
+        description: item.description || '',
+        expiration_date: item.expiration_date ? new Date(item.expiration_date) : null,
+        purchase_date: item.purchase_date ? new Date(item.purchase_date) : null,
+        brand: item.brand || '',
+        condition: item.condition || '',
+        notes: item.notes || '',
+      });
+    }
+  }, [form, item]);
 
   const onSubmit = async (values: InventoryItemFormValues) => {
     try {
@@ -107,7 +124,7 @@ const EditItemDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Item</DialogTitle>
+          <DialogTitle>Edit {item.name}</DialogTitle>
           <DialogDescription>
             Make changes to your inventory item here. Click save when you're done.
           </DialogDescription>
