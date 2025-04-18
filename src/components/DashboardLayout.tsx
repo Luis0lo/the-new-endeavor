@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,22 +7,23 @@ import {
   Calendar, 
   Settings,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   Menu,
   Archive,
   BookOpen,
-  Flower2
+  Flower2,
+  ChevronLeft
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { User } from '@supabase/supabase-js';
 import { useTheme } from '@/hooks/use-theme';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,12 +32,14 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    // Load sidebar state from localStorage
     const savedState = localStorage.getItem('sidebarCollapsed');
     return savedState !== null ? JSON.parse(savedState) : false;
   });
+  
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -81,17 +83,49 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
+  const navigationItems = [
+    {
+      title: 'Dashboard',
+      icon: Home,
+      path: '/dashboard'
+    },
+    {
+      title: 'Calendar',
+      icon: Calendar,
+      path: '/dashboard/calendar'
+    },
+    {
+      title: 'Inventory',
+      icon: Archive,
+      path: '/dashboard/inventory'
+    },
+    {
+      title: 'Companion Plants',
+      icon: Flower2,
+      path: '/dashboard/companions'
+    },
+    {
+      title: 'Garden Resources',
+      icon: BookOpen,
+      path: '/blog'
+    },
+    {
+      title: 'Account Settings',
+      icon: Settings,
+      path: '/dashboard/settings'
+    }
+  ];
+
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  // Determine icon size based on sidebar state
   const iconSize = sidebarCollapsed ? 24 : 18;
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="flex min-h-screen w-full bg-background">
-        {/* Sidebar */}
+    <div className="flex min-h-screen w-full bg-background">
+      {/* Desktop Sidebar - Hidden on Mobile */}
+      {!isMobile && (
         <div 
           className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ${
             sidebarCollapsed ? "w-[60px]" : "w-[250px]"
@@ -122,7 +156,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 className="ml-auto"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               >
-                <ChevronRight size={18} />
+                <ChevronLeft size={18} />
               </Button>
             )}
           </div>
@@ -130,141 +164,93 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {/* Navigation */}
           <div className="flex-1 overflow-auto py-4">
             <div className="mb-4 px-4">
-              {/* {!sidebarCollapsed && <div className="text-xs font-semibold text-muted-foreground mb-2">Navigation</div>} */}
               <nav className="flex flex-col gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/dashboard"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
-                        isActive("/dashboard") && !isActive("/dashboard/calendar") && !isActive("/dashboard/settings") && !isActive("/dashboard/inventory") && !isActive("/dashboard/companions")
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      <Home size={iconSize} />
-                      {!sidebarCollapsed && <span>Dashboard</span>}
-                    </Link>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right">Home</TooltipContent>}
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/dashboard/calendar"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
-                        isActive("/dashboard/calendar")
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      <Calendar size={iconSize} />
-                      {!sidebarCollapsed && <span>Calendar</span>}
-                    </Link>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right">Calendar</TooltipContent>}
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/dashboard/inventory"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
-                        isActive("/dashboard/inventory")
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      <Archive size={iconSize} />
-                      {!sidebarCollapsed && <span>Inventory</span>}
-                    </Link>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right">Inventory</TooltipContent>}
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/dashboard/companions"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
-                        isActive("/dashboard/companions")
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      <Flower2 size={iconSize} />
-                      {!sidebarCollapsed && <span>Companion Plants</span>}
-                    </Link>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right">Companion Plants</TooltipContent>}
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/blog"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
-                        isActive("/blog")
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      <BookOpen size={iconSize} />
-                      {!sidebarCollapsed && <span>Garden Resources</span>}
-                    </Link>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right">Garden Resources</TooltipContent>}
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/dashboard/settings"
-                      className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
-                        isActive("/dashboard/settings")
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      <Settings size={iconSize} />
-                      {!sidebarCollapsed && <span>Account Settings</span>}
-                    </Link>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right">Account Settings</TooltipContent>}
-                </Tooltip>
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.title}
+                    to={item.path}
+                    className={`flex items-center ${sidebarCollapsed ? "justify-center px-0" : "gap-2 px-3"} rounded-md py-1 ${
+                      isActive(item.path)
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-accent/50"
+                    }`}
+                  >
+                    <item.icon size={iconSize} />
+                    {!sidebarCollapsed && <span>{item.title}</span>}
+                  </Link>
+                ))}
               </nav>
             </div>
           </div>
 
           {/* Sidebar footer */}
           <div className="border-t p-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
-                  onClick={handleSignOut}
-                >
-                  <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
-                  {!sidebarCollapsed && <span>Logout</span>}
-                </Button>
-              </TooltipTrigger>
-              {sidebarCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
-            </Tooltip>
+            <Button
+              variant="outline"
+              className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
+              onClick={handleSignOut}
+            >
+              <LogOut className={`h-4 w-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
+              {!sidebarCollapsed && <span>Logout</span>}
+            </Button>
           </div>
         </div>
+      )}
 
-        {/* Main content */}
-        <div 
-          className={`flex-1 transition-all ${
-            sidebarCollapsed ? "ml-[60px]" : "ml-[250px]"
-          }`}
-        >
-          {children}
+      {/* Mobile Top Navigation - Only shown on mobile */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 z-40 h-14 border-b bg-background px-4">
+          <div className="flex h-full items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[80%] max-w-[300px] p-0">
+                  <SheetHeader className="p-4 border-b">
+                    <SheetTitle>Garden App</SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col py-2">
+                    {navigationItems.map((item) => (
+                      <Link
+                        key={item.title}
+                        to={item.path}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 hover:bg-accent ${
+                          isActive(item.path) ? 'bg-accent text-accent-foreground' : 'text-foreground'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    ))}
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-3 px-4 py-3 text-foreground hover:bg-accent mt-auto"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+              <span className="font-semibold">Garden App</span>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Main content */}
+      <div 
+        className={`flex-1 transition-all ${
+          !isMobile ? (sidebarCollapsed ? "ml-[60px]" : "ml-[250px]") : "mt-14"
+        }`}
+      >
+        {children}
       </div>
-    </TooltipProvider>
+    </div>
   );
 };
 
