@@ -156,6 +156,7 @@ const AddItemDialog: React.FC<AddItemDialogProps> = ({ open, onOpenChange, shelf
                       selected={expirationDate}
                       onSelect={setExpirationDate}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -207,6 +208,7 @@ const AddItemDialog: React.FC<AddItemDialogProps> = ({ open, onOpenChange, shelf
                     selected={purchaseDate}
                     onSelect={setPurchaseDate}
                     initialFocus
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>

@@ -62,7 +62,7 @@ export const DateFields = ({ form, showExpirationDate = false }: DateFieldsProps
                     disabled={(date) =>
                       date < new Date()
                     }
-                    className={cn("p-3 pointer-events-auto")}
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -105,7 +105,7 @@ export const DateFields = ({ form, showExpirationDate = false }: DateFieldsProps
                   disabled={(date) =>
                     date > new Date()
                   }
-                  className={cn("p-3 pointer-events-auto")}
+                  className="p-3 pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
