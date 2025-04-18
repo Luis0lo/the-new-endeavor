@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,10 +9,9 @@ import {
   Archive, 
   Leaf, 
   Wrench, 
-  ChevronLeft, 
-  Calendar, 
-  Clock, 
-  Tag,
+  ChevronLeft,
+  Calendar,
+  ArrowUpDown,
   Edit,
   Trash
 } from 'lucide-react';
@@ -21,10 +19,8 @@ import { format } from 'date-fns';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import {
   Table,
@@ -36,6 +32,15 @@ import {
 } from '@/components/ui/table';
 import AddItemDialog from '@/components/inventory/AddItemDialog';
 import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
+import EditItemDialog from '@/components/inventory/EditItemDialog';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+  ColumnDef,
+  SortingState,
+} from '@tanstack/react-table';
 
 interface InventoryShelf {
   id: string;
@@ -64,8 +69,11 @@ const InventoryShelfPage = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
-  
+  const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   useEffect(() => {
     if (shelfId) {
       fetchShelfData();
@@ -174,6 +182,160 @@ const InventoryShelfPage = () => {
     return format(new Date(dateString), 'MMM d, yyyy');
   };
 
+  const handleEditItem = (item: InventoryItem) => {
+    setItemToEdit(item);
+    setEditDialogOpen(true);
+  };
+
+  const columns: ColumnDef<InventoryItem>[] = [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+    },
+    {
+      accessorKey: 'quantity',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Quantity
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+    },
+    ...(shelf?.type === 'seeds' ? [
+      {
+        accessorKey: 'expiration_date',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Expiration
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+        cell: ({ row }) => {
+          const date = row.getValue('expiration_date');
+          return date ? (
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {formatDate(date as string)}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          );
+        },
+      }
+    ] : [
+      {
+        accessorKey: 'brand',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Brand
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+      }
+    ]),
+    ...(shelf?.type === 'tools' ? [
+      {
+        accessorKey: 'condition',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Condition
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+      }
+    ] : []),
+    {
+      accessorKey: 'purchase_date',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Purchase Date
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        const date = row.getValue('purchase_date');
+        return date ? (
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {formatDate(date as string)}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">N/A</span>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => handleEditItem(item)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => handleDeleteItem(item)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const table = useReactTable({
+    data: items,
+    columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-4 p-4 md:p-8">
@@ -231,63 +393,32 @@ const InventoryShelfPage = () => {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  {shelf?.type === 'seeds' && <TableHead>Expiration</TableHead>}
-                  {shelf?.type !== 'seeds' && <TableHead>Brand</TableHead>}
-                  {shelf?.type === 'tools' && <TableHead>Condition</TableHead>}
-                  <TableHead>Purchase Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
               </TableHeader>
               <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    {shelf?.type === 'seeds' && (
-                      <TableCell>
-                        {item.expiration_date ? (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {formatDate(item.expiration_date)}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">N/A</span>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
                         )}
                       </TableCell>
-                    )}
-                    {shelf?.type !== 'seeds' && (
-                      <TableCell>
-                        {item.brand || <span className="text-muted-foreground">N/A</span>}
-                      </TableCell>
-                    )}
-                    {shelf?.type === 'tools' && (
-                      <TableCell>
-                        {item.condition || <span className="text-muted-foreground">N/A</span>}
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      {item.purchase_date ? (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(item.purchase_date)}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">N/A</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteItem(item)}>
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    ))}
                   </TableRow>
                 ))}
               </TableBody>
@@ -312,6 +443,16 @@ const InventoryShelfPage = () => {
         description={`Are you sure you want to delete ${itemToDelete?.name}? This action cannot be undone.`}
         onConfirm={confirmDeleteItem}
       />
+
+      {itemToEdit && (
+        <EditItemDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          shelf={shelf!}
+          item={itemToEdit}
+          onItemUpdated={fetchShelfItems}
+        />
+      )}
     </DashboardLayout>
   );
 };
