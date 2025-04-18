@@ -42,11 +42,10 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
     transition,
   } = useSortable({ id: shelf.id });
 
-  const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    transition,
-    cursor: 'grab',
-  };
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    transition
+  } : undefined;
 
   const getShelfIcon = (type: 'seeds' | 'plants' | 'tools') => {
     switch (type) {
@@ -77,7 +76,6 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
   const handleViewItems = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    // Use navigate directly with the shelf ID
     navigate(`/dashboard/inventory/${shelf.id}`);
     console.log('Navigating to shelf:', shelf.id);
   };
@@ -97,11 +95,16 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div style={style}>
       <Card className="overflow-hidden">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div 
+              ref={setNodeRef} 
+              {...attributes} 
+              {...listeners}
+              className="flex items-center space-x-2 cursor-grab"
+            >
               {getShelfIcon(shelf.type)}
               <div>
                 <CardTitle>{shelf.name}</CardTitle>
