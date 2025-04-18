@@ -77,7 +77,23 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
   const handleViewItems = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    // Use navigate directly with the shelf ID
     navigate(`/dashboard/inventory/${shelf.id}`);
+    console.log('Navigating to shelf:', shelf.id);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onEdit(shelf);
+    console.log('Edit shelf:', shelf.id);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onDelete(shelf);
+    console.log('Delete shelf:', shelf.id);
   };
 
   return (
@@ -96,10 +112,8 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(shelf);
-                }}
+                onClick={handleEdit}
+                type="button"
               >
                 <Edit className="h-4 w-4" />
                 <span className="sr-only">Edit</span>
@@ -107,10 +121,8 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(shelf);
-                }}
+                onClick={handleDelete}
+                type="button"
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
                 <span className="sr-only">Delete</span>
@@ -128,6 +140,7 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
             variant="outline" 
             className="w-full"
             onClick={handleViewItems}
+            type="button"
           >
             View Items
           </Button>
