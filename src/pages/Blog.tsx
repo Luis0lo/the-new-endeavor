@@ -32,7 +32,7 @@ const BlogHero = ({ onSearch }: { onSearch: (term: string) => void }) => {
   return (
     <div className="relative py-24 bg-gradient-to-b from-primary/10 to-background">
       <div className="container mx-auto px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Garden Blog</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">SubGarden</h1>
         <p className="text-xl mb-8 max-w-2xl mx-auto text-muted-foreground">
           Tips, guides, and inspiration for your garden journey
         </p>
