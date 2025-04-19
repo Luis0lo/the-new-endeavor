@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
@@ -47,6 +48,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   initialActivity,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activityItems, setActivityItems] = useState<{ item_id: string, quantity: number }[]>([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -56,6 +59,41 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
 
     fetchUser();
   }, []);
+
+  // Fetch inventory items for the activity when editing
+  useEffect(() => {
+    const fetchActivityItems = async () => {
+      if (initialActivity?.id) {
+        setIsLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from('activity_inventory_items')
+            .select('inventory_item_id, quantity')
+            .eq('activity_id', initialActivity.id);
+          
+          if (error) throw error;
+          
+          if (data) {
+            // Map the DB data to form structure
+            const formattedItems = data.map(item => ({
+              item_id: item.inventory_item_id,
+              quantity: item.quantity
+            }));
+            setActivityItems(formattedItems);
+          }
+        } catch (error) {
+          console.error("Error fetching activity items:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        // Reset items if not editing
+        setActivityItems([]);
+      }
+    };
+
+    fetchActivityItems();
+  }, [initialActivity]);
 
   const form = useForm<ActivityFormValues>({
     resolver: zodResolver(activitySchema),
@@ -75,7 +113,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   const status = form.watch("status");
   const showOutcomeFields = status === "done";
 
-  // Reset form when initialActivity changes
+  // Reset form when initialActivity changes or when activity items are loaded
   useEffect(() => {
     if (initialActivity) {
       const activityDate = new Date(initialActivity.date);
@@ -89,7 +127,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
         outcome_rating: initialActivity.outcome_rating,
         outcome_log: initialActivity.outcome_log,
         track: initialActivity.track !== undefined ? initialActivity.track : true,
-        inventory_items: []
+        inventory_items: activityItems
       });
     } else {
       form.reset({
@@ -105,43 +143,86 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
         inventory_items: []
       });
     }
-  }, [initialActivity, initialDate, form]);
+  }, [initialActivity, initialDate, form, activityItems]);
 
   const handleSubmit = async (values: ActivityFormValues) => {
     try {
-      // Create the activity
-      const { data: activity, error: activityError } = await supabase
-        .from('garden_activities')
-        .insert({
-          title: values.title,
-          description: values.description,
-          scheduled_date: format(values.date, 'yyyy-MM-dd'),
-          activity_time: values.time,
-          priority: values.priority,
-          status: values.status,
-          track: values.track,
-          outcome_rating: values.status === "done" ? values.outcome_rating : null,
-          outcome_log: values.status === "done" ? values.outcome_log : null,
-          user_id: user?.id
-        })
-        .select()
-        .single();
+      if (initialActivity) {
+        // Update existing activity
+        const { error: activityError } = await supabase
+          .from('garden_activities')
+          .update({
+            title: values.title,
+            description: values.description,
+            scheduled_date: format(values.date, 'yyyy-MM-dd'),
+            activity_time: values.time,
+            priority: values.priority,
+            status: values.status,
+            track: values.track,
+            outcome_rating: values.status === "done" ? values.outcome_rating : null,
+            outcome_log: values.status === "done" ? values.outcome_log : null,
+          })
+          .eq('id', initialActivity.id);
 
-      if (activityError) throw activityError;
+        if (activityError) throw activityError;
 
-      // If there are inventory items, create the relationships
-      if (values.inventory_items.length > 0) {
-        const { error: itemsError } = await supabase
+        // Remove existing inventory items for this activity
+        const { error: deleteError } = await supabase
           .from('activity_inventory_items')
-          .insert(
-            values.inventory_items.map(item => ({
-              activity_id: activity.id,
-              inventory_item_id: item.item_id,
-              quantity: item.quantity
-            }))
-          );
+          .delete()
+          .eq('activity_id', initialActivity.id);
 
-        if (itemsError) throw itemsError;
+        if (deleteError) throw deleteError;
+
+        // Add new inventory items if any
+        if (values.inventory_items.length > 0) {
+          const { error: itemsError } = await supabase
+            .from('activity_inventory_items')
+            .insert(
+              values.inventory_items.map(item => ({
+                activity_id: initialActivity.id,
+                inventory_item_id: item.item_id,
+                quantity: item.quantity
+              }))
+            );
+
+          if (itemsError) throw itemsError;
+        }
+      } else {
+        // Create the activity
+        const { data: activity, error: activityError } = await supabase
+          .from('garden_activities')
+          .insert({
+            title: values.title,
+            description: values.description,
+            scheduled_date: format(values.date, 'yyyy-MM-dd'),
+            activity_time: values.time,
+            priority: values.priority,
+            status: values.status,
+            track: values.track,
+            outcome_rating: values.status === "done" ? values.outcome_rating : null,
+            outcome_log: values.status === "done" ? values.outcome_log : null,
+            user_id: user?.id
+          })
+          .select()
+          .single();
+
+        if (activityError) throw activityError;
+
+        // If there are inventory items, create the relationships
+        if (values.inventory_items.length > 0) {
+          const { error: itemsError } = await supabase
+            .from('activity_inventory_items')
+            .insert(
+              values.inventory_items.map(item => ({
+                activity_id: activity.id,
+                inventory_item_id: item.item_id,
+                quantity: item.quantity
+              }))
+            );
+
+          if (itemsError) throw itemsError;
+        }
       }
 
       onSave(values);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -163,6 +162,7 @@ const CalendarPage = () => {
             activity_time: formData.time || null,
             priority: formData.priority as "high" | "normal" | "low" || "normal",
             status: formData.status as "pending" | "in_progress" | "done" || "pending",
+            track: formData.track,
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
@@ -181,6 +181,7 @@ const CalendarPage = () => {
                 activity_time: formData.time || null,
                 priority: formData.priority as "high" | "normal" | "low" || "normal",
                 status: formData.status as "pending" | "in_progress" | "done" || "pending",
+                track: formData.track,
                 outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
                 outcome_log: formData.status === "done" ? formData.outcome_log : null
               } 
@@ -218,7 +219,8 @@ const CalendarPage = () => {
             priority: formData.priority as "high" | "normal" | "low" || "normal",
             status: formData.status as "pending" | "in_progress" | "done" || "pending",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
-            outcome_log: formData.status === "done" ? formData.outcome_log : null
+            outcome_log: formData.status === "done" ? formData.outcome_log : null,
+            track: formData.track
           })
           .select();
 
@@ -234,7 +236,8 @@ const CalendarPage = () => {
           priority: data[0].priority as "high" | "normal" | "low",
           status: data[0].status as "pending" | "in_progress" | "done",
           outcome_rating: data[0].outcome_rating,
-          outcome_log: data[0].outcome_log
+          outcome_log: data[0].outcome_log,
+          track: data[0].track
         };
         
         setActivities([...activities, newActivity]);

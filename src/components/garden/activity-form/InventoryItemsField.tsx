@@ -60,10 +60,11 @@ export const InventoryItemsField = ({ control }: InventoryItemsFieldProps) => {
                     <SelectValue placeholder="Select an item" />
                   </SelectTrigger>
                   <SelectContent>
-                    {shelves?.map((shelf) => (
-                      <React.Fragment key={shelf.id}>
+                    {shelves?.map((shelf) => 
+                      /* Removing React.Fragment wrapper to fix the warning */
+                      <>
                         {/* Use the shelf id as a value instead of empty string */}
-                        <SelectItem value={`shelf-header-${shelf.id}`} disabled className="font-semibold">
+                        <SelectItem key={`shelf-header-${shelf.id}`} value={`shelf-header-${shelf.id}`} disabled className="font-semibold">
                           {shelf.name}
                         </SelectItem>
                         {shelf.inventory_items.map((item: any) => (
@@ -71,8 +72,8 @@ export const InventoryItemsField = ({ control }: InventoryItemsFieldProps) => {
                             {item.name}
                           </SelectItem>
                         ))}
-                      </React.Fragment>
-                    ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </FormItem>
