@@ -1,13 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from '@/components/DashboardLayout';
-
-// Import our new components
-import DashboardCalendar from '@/components/dashboard/DashboardCalendar';
 import ActivityList from '@/components/dashboard/ActivityList';
 import ActivityFormDialog from '@/components/dashboard/ActivityFormDialog';
 
@@ -185,8 +181,7 @@ const Dashboard = () => {
           />
         </div>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <DashboardCalendar date={date} setDate={setDate} />
+        <div className="grid gap-4">
           <ActivityList 
             activities={activities} 
             date={date} 
