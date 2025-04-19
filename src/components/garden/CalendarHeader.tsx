@@ -107,12 +107,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         
         <h2 className="text-xl font-medium">{getTitle()}</h2>
         
-        {onAddActivity && (
+        {/* {onAddActivity && (
           <Button onClick={() => onAddActivity(date)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Activity
           </Button>
-        )}
+        )} */}
       </div>
     </div>
   );
