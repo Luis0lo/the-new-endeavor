@@ -49,9 +49,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
               <Link to="/" className="transition-colors hover:text-foreground/80">Home</Link>
-              <Link to="/blog" className="transition-colors hover:text-foreground/80">Blog</Link>
+              <Link to="/blog" className="transition-colors hover:text-foreground/80" title="Blog">SubGarden</Link>
               {user && <Link to="/dashboard" className="transition-colors hover:text-foreground/80">Dashboard</Link>}
-              <Link to="/cookie-policy" className="transition-colors hover:text-foreground/80">Cookie Policy</Link>
             </nav>
           </div>
 
