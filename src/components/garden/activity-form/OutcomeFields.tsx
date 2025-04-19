@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Control } from "react-hook-form";
+import { Control, useFormState } from "react-hook-form";
 import { ActivityFormValues } from "./activity-form-schema";
 import { cn } from "@/lib/utils";
 import { SmilePlus, Meh, SmileIcon, FrownIcon } from "lucide-react";
@@ -20,6 +20,8 @@ interface OutcomeFieldsProps {
 }
 
 export const OutcomeFields: React.FC<OutcomeFieldsProps> = ({ control }) => {
+  const { errors } = useFormState({ control });
+  
   return (
     <>
       <FormField

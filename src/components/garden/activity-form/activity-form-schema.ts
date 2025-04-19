@@ -17,6 +17,15 @@ export const activitySchema = z.object({
     item_id: z.string(),
     quantity: z.number().min(1)
   })).default([])
+}).refine((data) => {
+  // If status is "done", outcome_rating is required
+  if (data.status === "done") {
+    return data.outcome_rating !== undefined;
+  }
+  return true;
+}, {
+  message: "Outcome rating is required when status is Done",
+  path: ["outcome_rating"]
 });
 
 export type ActivityFormValues = z.infer<typeof activitySchema>;

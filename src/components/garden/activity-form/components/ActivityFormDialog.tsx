@@ -13,6 +13,7 @@ import { ActivityFormContent } from "./ActivityFormContent";
 import { useActivityForm } from "../hooks/useActivityForm";
 import { GardenActivity } from "@/types/garden";
 import { ActivityFormValues } from "../activity-form-schema";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ActivityFormDialogProps {
   isOpen: boolean;
@@ -45,9 +46,13 @@ export const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <ActivityFormContent control={form.control} showOutcomeFields={showOutcomeFields} />
-            <DialogFooter>
+          <form onSubmit={handleSubmit}>
+            <ScrollArea className="h-[60vh] pr-4">
+              <div className="space-y-4 pr-2">
+                <ActivityFormContent control={form.control} showOutcomeFields={showOutcomeFields} />
+              </div>
+            </ScrollArea>
+            <DialogFooter className="mt-4">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>

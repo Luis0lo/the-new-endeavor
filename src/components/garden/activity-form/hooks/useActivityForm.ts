@@ -17,8 +17,11 @@ export const useActivityForm = (
   const [isLoading, setIsLoading] = useState(false);
   const [activityItems, setActivityItems] = useState<{ item_id: string; quantity: number }[]>([]);
 
+  // Custom resolver to conditionally validate outcome fields only when status is "done"
+  const customResolver = zodResolver(activitySchema);
+
   const form = useForm<ActivityFormValues>({
-    resolver: zodResolver(activitySchema),
+    resolver: customResolver,
     defaultValues: {
       title: "",
       description: "",
@@ -29,6 +32,7 @@ export const useActivityForm = (
       track: true,
       inventory_items: []
     },
+    mode: "onChange"
   });
 
   // Fetch inventory items for the activity when editing
