@@ -33,42 +33,138 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_inventory_items: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          inventory_item_id: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          inventory_item_id: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          inventory_item_id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_inventory_items_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "garden_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_inventory_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_post_tags: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_tags_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_post_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "blog_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
+          alt_text_data: Json | null
           author_id: string
+          canonical_url: string | null
           content: string
           created_at: string
           excerpt: string | null
           featured_image: string | null
           id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_image: string | null
           published: boolean | null
           published_at: string | null
+          reading_time: number | null
           slug: string
           title: string
           updated_at: string
         }
         Insert: {
+          alt_text_data?: Json | null
           author_id: string
+          canonical_url?: string | null
           content: string
           created_at?: string
           excerpt?: string | null
           featured_image?: string | null
           id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image?: string | null
           published?: boolean | null
           published_at?: string | null
+          reading_time?: number | null
           slug: string
           title: string
           updated_at?: string
         }
         Update: {
+          alt_text_data?: Json | null
           author_id?: string
+          canonical_url?: string | null
           content?: string
           created_at?: string
           excerpt?: string | null
           featured_image?: string | null
           id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image?: string | null
           published?: boolean | null
           published_at?: string | null
+          reading_time?: number | null
           slug?: string
           title?: string
           updated_at?: string
@@ -82,6 +178,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      blog_tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       garden_activities: {
         Row: {
@@ -97,6 +217,7 @@ export type Database = {
           scheduled_date: string
           status: string | null
           title: string
+          track: boolean
           updated_at: string
           user_id: string
         }
@@ -113,6 +234,7 @@ export type Database = {
           scheduled_date: string
           status?: string | null
           title: string
+          track?: boolean
           updated_at?: string
           user_id: string
         }
@@ -129,6 +251,7 @@ export type Database = {
           scheduled_date?: string
           status?: string | null
           title?: string
+          track?: boolean
           updated_at?: string
           user_id?: string
         }
