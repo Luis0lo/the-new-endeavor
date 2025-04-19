@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -208,13 +207,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="fixed top-0 left-0 right-0 z-40 h-14 border-b bg-background px-4">
           <div className="flex h-full items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[80%] max-w-[300px] p-0">
+              <span className="font-semibold">Garden App</span>
+            </div>
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[80%] max-w-[300px] p-0">
                   <SheetHeader className="p-4 border-b">
                     <SheetTitle>Garden App</SheetTitle>
                   </SheetHeader>
@@ -241,9 +242,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     </button>
                   </div>
                 </SheetContent>
-              </Sheet>
-              <span className="font-semibold">Garden App</span>
-            </div>
+            </Sheet>
           </div>
         </div>
       )}
@@ -261,4 +260,3 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
-
