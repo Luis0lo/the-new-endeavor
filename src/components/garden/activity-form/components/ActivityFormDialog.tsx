@@ -39,24 +39,26 @@ export const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="max-w-full h-screen flex flex-col m-0 rounded-none border-0">
         <DialogHeader>
           <DialogTitle>
             {initialActivity ? "Edit Garden Activity" : "Add Garden Activity"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={handleSubmit}>
-            <ScrollArea className="h-[60vh] pr-4">
-              <div className="space-y-4 pr-2">
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+            <ScrollArea className="flex-1 px-4">
+              <div className="space-y-4 max-w-3xl mx-auto py-6">
                 <ActivityFormContent control={form.control} showOutcomeFields={showOutcomeFields} />
               </div>
             </ScrollArea>
-            <DialogFooter className="mt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit">Save Activity</Button>
+            <DialogFooter className="mt-4 px-4 py-4 border-t bg-background">
+              <div className="max-w-3xl w-full mx-auto flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit">Save Activity</Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>
@@ -64,3 +66,4 @@ export const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
     </Dialog>
   );
 };
+
