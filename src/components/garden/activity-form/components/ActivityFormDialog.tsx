@@ -66,4 +66,3 @@ export const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
     </Dialog>
   );
 };
-
