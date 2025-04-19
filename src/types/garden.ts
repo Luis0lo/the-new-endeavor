@@ -13,4 +13,5 @@ export interface GardenActivity {
   status?: "pending" | "in_progress" | "done";
   outcome_rating?: number;
   outcome_log?: string;
+  track?: boolean;
 }
