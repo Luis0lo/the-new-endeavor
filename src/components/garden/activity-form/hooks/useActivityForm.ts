@@ -1,0 +1,111 @@
+
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { activitySchema, type ActivityFormValues } from "../activity-form-schema";
+import { GardenActivity } from "@/types/garden";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+export const useActivityForm = (
+  onSave: (values: ActivityFormValues) => void,
+  onClose: () => void,
+  initialActivity?: GardenActivity | null,
+  initialDate?: Date
+) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [activityItems, setActivityItems] = useState<{ item_id: string; quantity: number }[]>([]);
+
+  const form = useForm<ActivityFormValues>({
+    resolver: zodResolver(activitySchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      date: initialDate || new Date(),
+      time: format(new Date(), "HH:mm"),
+      priority: "normal",
+      status: "pending",
+      track: true,
+      inventory_items: []
+    },
+  });
+
+  // Fetch inventory items for the activity when editing
+  useEffect(() => {
+    const fetchActivityItems = async () => {
+      if (initialActivity?.id) {
+        setIsLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from('activity_inventory_items')
+            .select('inventory_item_id, quantity')
+            .eq('activity_id', initialActivity.id);
+          
+          if (error) throw error;
+          
+          if (data) {
+            const formattedItems = data.map(item => ({
+              item_id: item.inventory_item_id,
+              quantity: item.quantity
+            }));
+            setActivityItems(formattedItems);
+          }
+        } catch (error) {
+          console.error("Error fetching activity items:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setActivityItems([]);
+      }
+    };
+
+    fetchActivityItems();
+  }, [initialActivity]);
+
+  // Reset form when initialActivity changes or when activity items are loaded
+  useEffect(() => {
+    if (initialActivity) {
+      const activityDate = new Date(initialActivity.date);
+      form.reset({
+        title: initialActivity.title,
+        description: initialActivity.description || "",
+        date: activityDate,
+        time: initialActivity.activity_time || format(new Date(), "HH:mm"),
+        priority: initialActivity.priority || "normal",
+        status: initialActivity.status || "pending",
+        outcome_rating: initialActivity.outcome_rating,
+        outcome_log: initialActivity.outcome_log,
+        track: initialActivity.track !== undefined ? initialActivity.track : true,
+        inventory_items: activityItems
+      });
+    } else {
+      form.reset({
+        title: "",
+        description: "",
+        date: initialDate || new Date(),
+        time: format(new Date(), "HH:mm"),
+        priority: "normal",
+        status: "pending",
+        outcome_rating: undefined,
+        outcome_log: "",
+        track: true,
+        inventory_items: []
+      });
+    }
+  }, [initialActivity, initialDate, form, activityItems]);
+
+  const handleSubmit = async (values: ActivityFormValues) => {
+    onSave(values);
+    form.reset();
+    onClose();
+  };
+
+  return {
+    form,
+    isLoading,
+    handleSubmit: form.handleSubmit(handleSubmit),
+    showOutcomeFields: form.watch("status") === "done"
+  };
+};
