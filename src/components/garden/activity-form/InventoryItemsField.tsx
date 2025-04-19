@@ -62,7 +62,8 @@ export const InventoryItemsField = ({ control }: InventoryItemsFieldProps) => {
                   <SelectContent>
                     {shelves?.map((shelf) => (
                       <React.Fragment key={shelf.id}>
-                        <SelectItem value="" disabled className="font-semibold">
+                        {/* Use the shelf id as a value instead of empty string */}
+                        <SelectItem value={`shelf-header-${shelf.id}`} disabled className="font-semibold">
                           {shelf.name}
                         </SelectItem>
                         {shelf.inventory_items.map((item: any) => (
