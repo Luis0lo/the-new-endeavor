@@ -1,99 +1,224 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Menu, Home } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
-const InventoryPage: React.FC = () => {
-  const isMobile = useIsMobile();
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
+import CreateShelfDialog from '@/components/inventory/CreateShelfDialog';
+import EditShelfDialog from '@/components/inventory/EditShelfDialog';
+import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
+import { SortableShelfCard } from '@/components/inventory/SortableShelfCard';
+import { EmptyShelvesState } from '@/components/inventory/EmptyShelvesState';
+
+// DND Kit imports
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove
+} from '@dnd-kit/sortable';
+
+interface InventoryShelf {
+  id: string;
+  name: string;
+  type: 'seeds' | 'plants' | 'tools';
+  description: string | null;
+  created_at: string;
+  position?: number;
+}
+
+const InventoryPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [shelves, setShelves] = useState<InventoryShelf[]>([]);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedShelf, setSelectedShelf] = useState<InventoryShelf | null>(null);
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  useEffect(() => {
+    fetchShelves();
+  }, []);
+
+  const fetchShelves = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('inventory_shelves')
+        .select('*')
+        .order('position', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      setShelves(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fetch inventory shelves",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setShelves((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+      
+      const updatedShelves = shelves.map((shelf, index) => ({
+        id: shelf.id,
+        position: index
+      }));
+      
+      try {
+        for (const shelf of updatedShelves) {
+          const { error } = await supabase
+            .from('inventory_shelves')
+            .update({ position: shelf.position })
+            .eq('id', shelf.id);
+          if (error) throw error;
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to update shelf positions",
+          variant: "destructive"
+        });
+        fetchShelves();
+      }
+    }
+  };
+
+  const handleEditShelf = (shelf: InventoryShelf) => {
+    setSelectedShelf(shelf);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteShelf = (shelf: InventoryShelf) => {
+    setSelectedShelf(shelf);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteShelf = async () => {
+    if (!selectedShelf) return;
+    try {
+      const { error } = await supabase
+        .from('inventory_shelves')
+        .delete()
+        .eq('id', selectedShelf.id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Shelf deleted successfully",
+      });
+      
+      fetchShelves();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete shelf",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedShelf(null);
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {isMobile && (
-        <div className="flex justify-between items-center mb-4">
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold">
-            <Home size={24} />
-            Garden App
-          </Link>
-          <Button variant="ghost" size="icon" className="ml-auto">
-            <Menu className="h-6 w-6" />
+    <DashboardLayout>
+      <div className="flex-1 space-y-4 p-4 md:p-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight">Inventory Management</h2>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Shelf
           </Button>
         </div>
+        
+        <p className="text-muted-foreground">
+          Manage your garden inventory by creating different types of shelves for seeds, plants, and tools. Drag to reorder shelves.
+        </p>
+        
+        {loading ? (
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+          </div>
+        ) : shelves.length === 0 ? (
+          <EmptyShelvesState onCreateShelf={() => setCreateDialogOpen(true)} />
+        ) : (
+          <DndContext 
+            sensors={sensors} 
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext 
+              items={shelves.map(shelf => shelf.id)} 
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {shelves.map((shelf) => (
+                  <SortableShelfCard
+                    key={shelf.id}
+                    shelf={shelf}
+                    onEdit={handleEditShelf}
+                    onDelete={handleDeleteShelf}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
+      
+      <CreateShelfDialog 
+        open={createDialogOpen} 
+        onOpenChange={setCreateDialogOpen} 
+        onShelfCreated={fetchShelves} 
+      />
+      
+      {selectedShelf && (
+        <EditShelfDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          shelf={selectedShelf}
+          onShelfUpdated={fetchShelves}
+        />
       )}
       
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Inventory Management</h1>
-        <Button>+ Add Shelf</Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="border rounded-lg p-4 shadow-sm">
-          <h2 className="text-xl font-semibold mb-3">Shelf 1</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Tomato Seeds</span>
-              <span className="text-sm text-muted-foreground">12 packets</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Basil Seeds</span>
-              <span className="text-sm text-muted-foreground">5 packets</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Fertilizer</span>
-              <span className="text-sm text-muted-foreground">2 bags</span>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" size="sm">Edit</Button>
-            <Button variant="ghost" size="sm">Delete</Button>
-          </div>
-        </div>
-
-        <div className="border rounded-lg p-4 shadow-sm">
-          <h2 className="text-xl font-semibold mb-3">Shelf 2</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Gardening Gloves</span>
-              <span className="text-sm text-muted-foreground">3 pairs</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Pruning Shears</span>
-              <span className="text-sm text-muted-foreground">2 units</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Watering Can</span>
-              <span className="text-sm text-muted-foreground">1 unit</span>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" size="sm">Edit</Button>
-            <Button variant="ghost" size="sm">Delete</Button>
-          </div>
-        </div>
-
-        <div className="border rounded-lg p-4 shadow-sm">
-          <h2 className="text-xl font-semibold mb-3">Shelf 3</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Potting Soil</span>
-              <span className="text-sm text-muted-foreground">4 bags</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Plant Pots</span>
-              <span className="text-sm text-muted-foreground">8 units</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-accent/30 rounded">
-              <span>Plant Labels</span>
-              <span className="text-sm text-muted-foreground">50 pieces</span>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" size="sm">Edit</Button>
-            <Button variant="ghost" size="sm">Delete</Button>
-          </div>
-        </div>
-      </div>
-    </div>
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Shelf"
+        description={`Are you sure you want to delete the shelf "${selectedShelf?.name}"? This action cannot be undone and will remove all items in this shelf.`}
+        onConfirm={confirmDeleteShelf}
+      />
+    </DashboardLayout>
   );
 };
 
