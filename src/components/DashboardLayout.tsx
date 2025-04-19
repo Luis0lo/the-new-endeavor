@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -117,6 +118,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   ];
 
   const isActive = (path: string) => {
+    // Fix for the dashboard route being active on all /dashboard/* routes
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    // For other routes, check if the path matches exactly or starts with the path followed by a slash
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
@@ -255,3 +261,4 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
+
