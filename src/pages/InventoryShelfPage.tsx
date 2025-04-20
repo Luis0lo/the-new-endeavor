@@ -133,7 +133,9 @@ export default function InventoryShelfPage() {
     }
   };
   
-  const handleDeleteItem = async (item: InventoryItem) => {
+  const handleDeleteItem = (e: React.MouseEvent, item: InventoryItem) => {
+    // Stop event propagation to prevent row click
+    e.stopPropagation();
     setItemToDelete(item);
     setDeleteDialogOpen(true);
   };
@@ -185,8 +187,10 @@ export default function InventoryShelfPage() {
     return format(new Date(dateString), 'MMM d, yyyy');
   };
 
-  // Fix: Properly set the item to edit when edit button is clicked
-  const handleEditItem = (item: InventoryItem) => {
+  // Modified to accept event parameter and prevent propagation
+  const handleEditItem = (e: React.MouseEvent, item: InventoryItem) => {
+    // Stop event propagation to prevent row click
+    e.stopPropagation();
     setItemToEdit(item);
     setEditDialogOpen(true);
   };
@@ -317,14 +321,14 @@ export default function InventoryShelfPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => handleEditItem(item)}
+              onClick={(e) => handleEditItem(e, item)}
             >
               <Edit className="h-4 w-4" />
             </Button>
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => handleDeleteItem(item)}
+              onClick={(e) => handleDeleteItem(e, item)}
             >
               <Trash className="h-4 w-4" />
             </Button>
