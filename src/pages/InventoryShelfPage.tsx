@@ -196,28 +196,6 @@ export default function InventoryShelfPage() {
     setDetailsDialogOpen(true);
   };
 
-  // Update the table body to make rows clickable
-  const tableBody = (
-    <TableBody>
-      {table.getRowModel().rows.map((row) => (
-        <TableRow 
-          key={row.id}
-          className="cursor-pointer hover:bg-muted/50"
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.getVisibleCells().map((cell) => (
-            <TableCell key={cell.id}>
-              {flexRender(
-                cell.column.columnDef.cell,
-                cell.getContext()
-              )}
-            </TableCell>
-          ))}
-        </TableRow>
-      ))}
-    </TableBody>
-  );
-
   const columns: ColumnDef<InventoryItem>[] = [
     {
       accessorKey: 'name',
@@ -366,6 +344,28 @@ export default function InventoryShelfPage() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+
+  // Move tableBody definition AFTER table is defined
+  const tableBody = (
+    <TableBody>
+      {table.getRowModel().rows.map((row) => (
+        <TableRow 
+          key={row.id}
+          className="cursor-pointer hover:bg-muted/50"
+          onClick={() => handleRowClick(row.original)}
+        >
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(
+                cell.column.columnDef.cell,
+                cell.getContext()
+              )}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </TableBody>
+  );
 
   return (
     <DashboardLayout>
