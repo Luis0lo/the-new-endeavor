@@ -11,21 +11,23 @@ export const activitySchema = z.object({
   priority: z.enum(["high", "normal", "low"]).default("normal"),
   status: z.enum(["pending", "in_progress", "done"]).default("pending"),
   track: z.boolean().default(true),
-  outcome_rating: z.number().min(1).max(5).optional(),
-  outcome_log: z.string().optional(),
+  outcome_rating: z.number().min(1).max(5).optional().nullable(),
+  outcome_log: z.string().optional().nullable(),
   inventory_items: z.array(z.object({
     item_id: z.string(),
     quantity: z.number().min(1)
   })).default([])
-}).refine((data) => {
-  // If status is "done", outcome_rating is required
+}).superRefine((data, ctx) => {
+  // Only validate outcome_rating when status is "done"
   if (data.status === "done") {
-    return data.outcome_rating !== undefined;
+    if (data.outcome_rating === undefined || data.outcome_rating === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Outcome rating is required when status is Done",
+        path: ["outcome_rating"]
+      });
+    }
   }
-  return true;
-}, {
-  message: "Outcome rating is required when status is Done",
-  path: ["outcome_rating"]
 });
 
 export type ActivityFormValues = z.infer<typeof activitySchema>;

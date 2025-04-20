@@ -30,10 +30,22 @@ export const useActivityForm = (
       priority: "normal",
       status: "pending",
       track: true,
+      outcome_rating: null,
+      outcome_log: "",
       inventory_items: []
     },
     mode: "onChange"
   });
+
+  // Watch the status field to update outcome fields validation
+  const status = form.watch("status");
+  
+  // Reset outcome fields when status changes away from "done"
+  useEffect(() => {
+    if (status !== "done") {
+      form.setValue("outcome_rating", null);
+    }
+  }, [status, form]);
 
   // Fetch inventory items for the activity when editing
   useEffect(() => {
@@ -79,8 +91,8 @@ export const useActivityForm = (
         time: initialActivity.activity_time || format(new Date(), "HH:mm"),
         priority: initialActivity.priority || "normal",
         status: initialActivity.status || "pending",
-        outcome_rating: initialActivity.outcome_rating,
-        outcome_log: initialActivity.outcome_log,
+        outcome_rating: initialActivity.outcome_rating || null,
+        outcome_log: initialActivity.outcome_log || "",
         track: initialActivity.track !== undefined ? initialActivity.track : true,
         inventory_items: activityItems
       });
@@ -92,7 +104,7 @@ export const useActivityForm = (
         time: format(new Date(), "HH:mm"),
         priority: "normal",
         status: "pending",
-        outcome_rating: undefined,
+        outcome_rating: null,
         outcome_log: "",
         track: true,
         inventory_items: []

@@ -35,6 +35,7 @@ export const OutcomeFields: React.FC<OutcomeFieldsProps> = ({ control }) => {
               <RadioGroup
                 onValueChange={(value) => field.onChange(parseInt(value))}
                 defaultValue={field.value?.toString()}
+                value={field.value?.toString()}
                 className="flex justify-between pt-2"
               >
                 <FormItem className="flex flex-col items-center space-y-1">
