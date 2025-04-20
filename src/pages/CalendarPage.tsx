@@ -78,7 +78,8 @@ const CalendarPage = () => {
             priority: (activity.priority as "high" | "normal" | "low") || "normal",
             status: (activity.status as "pending" | "in_progress" | "done") || "pending",
             outcome_rating: activity.outcome_rating,
-            outcome_log: activity.outcome_log
+            outcome_log: activity.outcome_log,
+            track: activity.track
           }));
           
           setActivities(mappedActivities);
@@ -127,6 +128,13 @@ const CalendarPage = () => {
 
   const handleDeleteActivity = async (activityId: string) => {
     try {
+      // First delete any associated inventory items
+      await supabase
+        .from('activity_inventory_items')
+        .delete()
+        .eq('activity_id', activityId);
+      
+      // Then delete the activity
       const { error } = await supabase
         .from('garden_activities')
         .delete()
@@ -150,9 +158,9 @@ const CalendarPage = () => {
   };
 
   const handleSaveActivity = async (formData: any) => {
-    if (currentActivity) {
-      // Update existing activity
-      try {
+    try {
+      if (currentActivity) {
+        // Update existing activity
         const { error } = await supabase
           .from('garden_activities')
           .update({
@@ -169,6 +177,29 @@ const CalendarPage = () => {
           .eq('id', currentActivity.id);
 
         if (error) throw error;
+        
+        // First, delete existing inventory items for this activity
+        await supabase
+          .from('activity_inventory_items')
+          .delete()
+          .eq('activity_id', currentActivity.id);
+        
+        // Then add new inventory items
+        if (formData.inventory_items && formData.inventory_items.length > 0) {
+          const inventoryItemsToInsert = formData.inventory_items.map((item: any) => ({
+            activity_id: currentActivity.id,
+            inventory_item_id: item.item_id,
+            quantity: item.quantity
+          }));
+          
+          const { error: insertError } = await supabase
+            .from('activity_inventory_items')
+            .insert(inventoryItemsToInsert);
+            
+          if (insertError) {
+            console.error("Error inserting inventory items:", insertError);
+          }
+        }
         
         // Update local state with proper type casting
         const updatedActivities = activities.map(activity => 
@@ -194,19 +225,8 @@ const CalendarPage = () => {
           title: "Activity Updated",
           description: `"${formData.title}" has been updated in your garden calendar.`
         });
-        
-        // Close the form after saving
-        setIsFormOpen(false);
-      } catch (error: any) {
-        toast({
-          title: "Failed to update activity",
-          description: error.message,
-          variant: "destructive"
-        });
-      }
-    } else {
-      // Create new activity
-      try {
+      } else {
+        // Create new activity
         const { data, error } = await supabase
           .from('garden_activities')
           .insert({
@@ -226,36 +246,57 @@ const CalendarPage = () => {
 
         if (error) throw error;
 
-        const newActivity: GardenActivity = {
-          id: data[0].id,
-          title: data[0].title,
-          description: data[0].description || "",
-          date: data[0].scheduled_date,
-          activity_time: data[0].activity_time,
-          completed: false,
-          priority: data[0].priority as "high" | "normal" | "low",
-          status: data[0].status as "pending" | "in_progress" | "done",
-          outcome_rating: data[0].outcome_rating,
-          outcome_log: data[0].outcome_log,
-          track: data[0].track
-        };
-        
-        setActivities([...activities, newActivity]);
-        
-        toast({
-          title: "Activity Added",
-          description: `"${newActivity.title}" has been added to your garden calendar.`
-        });
-        
-        // Close the form after saving
-        setIsFormOpen(false);
-      } catch (error: any) {
-        toast({
-          title: "Failed to add activity",
-          description: error.message,
-          variant: "destructive"
-        });
+        if (data && data[0]) {
+          const newActivityId = data[0].id;
+          
+          // Add inventory items if any
+          if (formData.inventory_items && formData.inventory_items.length > 0) {
+            const inventoryItemsToInsert = formData.inventory_items.map((item: any) => ({
+              activity_id: newActivityId,
+              inventory_item_id: item.item_id,
+              quantity: item.quantity
+            }));
+            
+            const { error: insertError } = await supabase
+              .from('activity_inventory_items')
+              .insert(inventoryItemsToInsert);
+              
+            if (insertError) {
+              console.error("Error inserting inventory items:", insertError);
+            }
+          }
+          
+          const newActivity: GardenActivity = {
+            id: newActivityId,
+            title: data[0].title,
+            description: data[0].description || "",
+            date: data[0].scheduled_date,
+            activity_time: data[0].activity_time,
+            completed: false,
+            priority: data[0].priority as "high" | "normal" | "low",
+            status: data[0].status as "pending" | "in_progress" | "done",
+            outcome_rating: data[0].outcome_rating,
+            outcome_log: data[0].outcome_log,
+            track: data[0].track
+          };
+          
+          setActivities([...activities, newActivity]);
+          
+          toast({
+            title: "Activity Added",
+            description: `"${newActivity.title}" has been added to your garden calendar.`
+          });
+        }
       }
+      
+      // Close the form after saving
+      setIsFormOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Failed to save activity",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 

@@ -66,21 +66,29 @@ export const useActivityForm = (
               quantity: item.quantity
             }));
             setActivityItems(formattedItems);
+            form.setValue("inventory_items", formattedItems);
+            console.log("Loaded activity items:", formattedItems);
           }
         } catch (error) {
           console.error("Error fetching activity items:", error);
+          toast({
+            title: "Error loading inventory items",
+            description: "Could not load the inventory items for this activity",
+            variant: "destructive"
+          });
         } finally {
           setIsLoading(false);
         }
       } else {
         setActivityItems([]);
+        form.setValue("inventory_items", []);
       }
     };
 
     fetchActivityItems();
-  }, [initialActivity]);
+  }, [initialActivity, form]);
 
-  // Reset form when initialActivity changes or when activity items are loaded
+  // Reset form when initialActivity changes
   useEffect(() => {
     if (initialActivity) {
       const activityDate = new Date(initialActivity.date);
