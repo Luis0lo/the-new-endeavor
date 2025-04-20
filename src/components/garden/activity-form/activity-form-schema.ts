@@ -13,10 +13,12 @@ export const activitySchema = z.object({
   track: z.boolean().default(true),
   outcome_rating: z.number().min(1).max(5).optional().nullable(),
   outcome_log: z.string().optional().nullable(),
-  inventory_items: z.array(z.object({
-    item_id: z.string(),
-    quantity: z.number().min(1)
-  })).default([])
+  inventory_items: z.array(
+    z.object({
+      item_id: z.string().min(1, "Please select an item"),
+      quantity: z.number().min(1, "Quantity must be at least 1")
+    })
+  ).default([])
 }).superRefine((data, ctx) => {
   // Only validate outcome_rating when status is "done"
   if (data.status === "done") {

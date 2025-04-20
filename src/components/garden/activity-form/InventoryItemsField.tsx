@@ -4,7 +4,7 @@ import { Control, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Plus, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,20 +60,18 @@ export const InventoryItemsField = ({ control }: InventoryItemsFieldProps) => {
                     <SelectValue placeholder="Select an item" />
                   </SelectTrigger>
                   <SelectContent>
-                    {shelves?.map((shelf) => 
-                      /* Removing React.Fragment wrapper to fix the warning */
-                      <>
-                        {/* Use the shelf id as a value instead of empty string */}
-                        <SelectItem key={`shelf-header-${shelf.id}`} value={`shelf-header-${shelf.id}`} disabled className="font-semibold">
+                    {shelves?.map((shelf) => (
+                      <React.Fragment key={`shelf-${shelf.id}`}>
+                        <SelectItem value={`shelf-header-${shelf.id}`} disabled className="font-semibold">
                           {shelf.name}
                         </SelectItem>
                         {shelf.inventory_items.map((item: any) => (
-                          <SelectItem key={item.id} value={item.id}>
+                          <SelectItem key={`item-${item.id}`} value={item.id}>
                             {item.name}
                           </SelectItem>
                         ))}
-                      </>
-                    )}
+                      </React.Fragment>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -88,8 +86,17 @@ export const InventoryItemsField = ({ control }: InventoryItemsFieldProps) => {
                 <Input
                   type="number"
                   min="1"
-                  {...quantityField}
+                  value={quantityField.value}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value) && value >= 1) {
+                      quantityField.onChange(value);
+                    } else {
+                      quantityField.onChange(1);
+                    }
+                  }}
                 />
+                <FormMessage />
               </FormItem>
             )}
           />
