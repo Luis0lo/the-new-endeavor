@@ -134,8 +134,10 @@ export default function InventoryShelfPage() {
   };
   
   const handleDeleteItem = (e: React.MouseEvent, item: InventoryItem) => {
-    // Stop event propagation to prevent row click
+    // Explicitly stop propagation to prevent row click
     e.stopPropagation();
+    // Prevent default to ensure no additional events are triggered
+    e.preventDefault();
     setItemToDelete(item);
     setDeleteDialogOpen(true);
   };
@@ -187,10 +189,11 @@ export default function InventoryShelfPage() {
     return format(new Date(dateString), 'MMM d, yyyy');
   };
 
-  // Modified to accept event parameter and prevent propagation
   const handleEditItem = (e: React.MouseEvent, item: InventoryItem) => {
-    // Stop event propagation to prevent row click
+    // Explicitly stop propagation to prevent row click
     e.stopPropagation();
+    // Prevent default to ensure no additional events are triggered
+    e.preventDefault();
     setItemToEdit(item);
     setEditDialogOpen(true);
   };
@@ -317,7 +320,11 @@ export default function InventoryShelfPage() {
       cell: ({ row }) => {
         const item = row.original;
         return (
-          <div className="flex items-center justify-end gap-2">
+          <div 
+            className="flex items-center justify-end gap-2"
+            // Add this to stop propagation at the div level as an extra precaution
+            onClick={(e) => e.stopPropagation()}
+          >
             <Button 
               variant="ghost" 
               size="icon"
