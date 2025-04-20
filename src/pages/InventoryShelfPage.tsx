@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -367,6 +368,28 @@ export default function InventoryShelfPage() {
     getSortedRowModel: getSortedRowModel(),
   });
 
+  // Update the table body to make rows clickable
+  const tableBody = (
+    <TableBody>
+      {table.getRowModel().rows.map((row) => (
+        <TableRow 
+          key={row.id}
+          className="cursor-pointer hover:bg-muted/50"
+          onClick={() => handleRowClick(row.original)}
+        >
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(
+                cell.column.columnDef.cell,
+                cell.getContext()
+              )}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </TableBody>
+  );
+
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-4 p-4 md:p-8">
@@ -444,43 +467,44 @@ export default function InventoryShelfPage() {
           </div>
         )}
 
-      {/* Add the ItemDetailsDialog */}
-      <ItemDetailsDialog
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
-        item={selectedItem}
-      />
-      
-      {shelf && (
-        <AddItemDialog 
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          shelf={shelf}
-          onItemAdded={fetchShelfItems}
+        {/* Add the ItemDetailsDialog */}
+        <ItemDetailsDialog
+          open={detailsDialogOpen}
+          onOpenChange={setDetailsDialogOpen}
+          item={selectedItem}
         />
-      )}
-      
-      <DeleteConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Delete Inventory Item"
-        description={`Are you sure you want to delete ${itemToDelete?.name}? This action cannot be undone.`}
-        onConfirm={confirmDeleteItem}
-      />
+        
+        {shelf && (
+          <AddItemDialog 
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            shelf={shelf}
+            onItemAdded={fetchShelfItems}
+          />
+        )}
+        
+        <DeleteConfirmDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title="Delete Inventory Item"
+          description={`Are you sure you want to delete ${itemToDelete?.name}? This action cannot be undone.`}
+          onConfirm={confirmDeleteItem}
+        />
 
-      {itemToEdit && (
-        <EditItemDialog
-          open={editDialogOpen}
-          onOpenChange={(open) => {
-            setEditDialogOpen(open);
-            // Clear the itemToEdit when dialog is closed
-            if (!open) setItemToEdit(null);
-          }}
-          shelf={shelf!}
-          item={itemToEdit}
-          onItemUpdated={fetchShelfItems}
-        />
-      )}
+        {itemToEdit && (
+          <EditItemDialog
+            open={editDialogOpen}
+            onOpenChange={(open) => {
+              setEditDialogOpen(open);
+              // Clear the itemToEdit when dialog is closed
+              if (!open) setItemToEdit(null);
+            }}
+            shelf={shelf!}
+            item={itemToEdit}
+            onItemUpdated={fetchShelfItems}
+          />
+        )}
+      </div>
     </DashboardLayout>
   );
 }
