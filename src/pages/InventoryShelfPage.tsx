@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -367,28 +366,6 @@ export default function InventoryShelfPage() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-
-  // Update the table body to make rows clickable
-  const tableBody = (
-    <TableBody>
-      {table.getRowModel().rows.map((row) => (
-        <TableRow 
-          key={row.id}
-          className="cursor-pointer hover:bg-muted/50"
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.getVisibleCells().map((cell) => (
-            <TableCell key={cell.id}>
-              {flexRender(
-                cell.column.columnDef.cell,
-                cell.getContext()
-              )}
-            </TableCell>
-          ))}
-        </TableRow>
-      ))}
-    </TableBody>
-  );
 
   return (
     <DashboardLayout>
