@@ -41,6 +41,7 @@ import {
   ColumnDef,
   SortingState,
 } from '@tanstack/react-table';
+import { ItemDetailsDialog } from '@/components/inventory/ItemDetailsDialog';
 
 interface InventoryShelf {
   id: string;
@@ -61,7 +62,7 @@ interface InventoryItem {
   notes: string | null;
 }
 
-const InventoryShelfPage = () => {
+export default function InventoryShelfPage() {
   const { shelfId } = useParams<{ shelfId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,8 @@ const InventoryShelfPage = () => {
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (shelfId) {
@@ -187,6 +190,33 @@ const InventoryShelfPage = () => {
     setItemToEdit(item);
     setEditDialogOpen(true);
   };
+
+  const handleRowClick = (item: InventoryItem) => {
+    setSelectedItem(item);
+    setDetailsDialogOpen(true);
+  };
+
+  // Update the table body to make rows clickable
+  const tableBody = (
+    <TableBody>
+      {table.getRowModel().rows.map((row) => (
+        <TableRow 
+          key={row.id}
+          className="cursor-pointer hover:bg-muted/50"
+          onClick={() => handleRowClick(row.original)}
+        >
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(
+                cell.column.columnDef.cell,
+                cell.getContext()
+              )}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </TableBody>
+  );
 
   const columns: ColumnDef<InventoryItem>[] = [
     {
@@ -409,24 +439,17 @@ const InventoryShelfPage = () => {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
+              {tableBody}
             </Table>
           </div>
         )}
-      </div>
+
+      {/* Add the ItemDetailsDialog */}
+      <ItemDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        item={selectedItem}
+      />
       
       {shelf && (
         <AddItemDialog 
@@ -460,6 +483,4 @@ const InventoryShelfPage = () => {
       )}
     </DashboardLayout>
   );
-};
-
-export default InventoryShelfPage;
+}
