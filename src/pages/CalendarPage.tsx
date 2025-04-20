@@ -342,7 +342,7 @@ const CalendarPage = () => {
     <DashboardLayout>
       <div className="flex flex-col h-screen">
         {/* Calendar header */}
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex flex-col p-4 border-b space-y-2">
           <div>
             <h1 className="text-2xl font-bold">Garden Calendar</h1>
             <p className="text-muted-foreground">Track your garden activities and events</p>
@@ -350,8 +350,8 @@ const CalendarPage = () => {
         </div>
         
         {/* Calendar toolbar */}
-        <div className="flex justify-between items-center p-4 border-b">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 border-b">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button onClick={goToToday} variant="outline" size="sm">
               Today
             </Button>
@@ -374,7 +374,7 @@ const CalendarPage = () => {
             </h2>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Select value={view} onValueChange={(v: 'month' | 'week' | 'day') => setView(v)}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="View" />
@@ -385,11 +385,6 @@ const CalendarPage = () => {
                 <SelectItem value="day">Day</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Button onClick={() => handleAddActivity()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Activity
-            </Button>
           </div>
         </div>
         
