@@ -16,8 +16,17 @@ type GardenActivity = Omit<GlobalGardenActivity, "date"> & {
   date: string; // always in ISO "yyyy-MM-dd"
 };
 
+// This type is used for the ActivityList component which expects scheduled_date
+interface Activity {
+  id: string;
+  title: string;
+  description: string | null;
+  scheduled_date: string;
+  completed: boolean | null;
+}
+
 const Dashboard = () => {
-  const [activities, setActivities] = useState<GardenActivity[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -52,9 +61,13 @@ const Dashboard = () => {
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (activities) {
-        const typedActivities: GardenActivity[] = activities.map(activity => ({
-          ...activity,
-          date: activity.scheduled_date // ensure correct mapping!
+        // Map directly to the Activity type that ActivityList expects
+        const typedActivities: Activity[] = activities.map(activity => ({
+          id: activity.id,
+          title: activity.title,
+          description: activity.description,
+          scheduled_date: activity.scheduled_date,
+          completed: activity.completed
         }));
         setActivities(typedActivities);
       } else {
@@ -98,8 +111,18 @@ const Dashboard = () => {
           getYear(activityDate) !== getYear(date)
         );
       }).map((activity: any) => ({
-        ...activity,
-        date: activity.scheduled_date // force as the consistent key for display/edit
+        id: activity.id,
+        title: activity.title,
+        description: activity.description,
+        date: activity.scheduled_date, // Map to the date field for GardenActivity
+        activity_time: activity.activity_time,
+        completed: activity.completed,
+        category_id: activity.category_id,
+        priority: activity.priority as GlobalGardenActivity["priority"],
+        status: activity.status as GlobalGardenActivity["status"], // Cast to the expected union type
+        outcome_rating: activity.outcome_rating,
+        outcome_log: activity.outcome_log,
+        track: activity.track
       }));
       setPastWeekActivities(past);
     } catch (error: any) {
