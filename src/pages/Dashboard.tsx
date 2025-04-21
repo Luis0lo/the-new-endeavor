@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, startOfWeek, addDays, getYear } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from '@/components/DashboardLayout';
 import ActivityList from '@/components/dashboard/ActivityList';
 import ActivityFormDialog from '@/components/dashboard/ActivityFormDialog';
+import PastWeekActivities from '@/components/dashboard/PastWeekActivities';
 
 interface GardenActivity {
   id: string;
@@ -22,9 +23,9 @@ const Dashboard = () => {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pastWeekActivities, setPastWeekActivities] = useState<GardenActivity[]>([]);
   const navigate = useNavigate();
   
-  // Check if user is logged in
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -32,29 +33,23 @@ const Dashboard = () => {
         navigate('/auth');
         return;
       }
-      
-      // Fetch activities
       fetchActivities();
+      fetchPastWeekActivities();
     };
-    
     checkSession();
+  // eslint-disable-next-line
   }, [navigate]);
   
-  // Fetch garden activities for the current date
   const fetchActivities = async () => {
     setLoading(true);
-    
     try {
       const { data: activities, error } = await supabase
         .from('garden_activities')
         .select('*')
         .eq('scheduled_date', format(date, 'yyyy-MM-dd'))
         .order('created_at', { ascending: false });
-        
       if (error) throw error;
-      
       if (activities) {
-        // Transform to match our interface
         const typedActivities: GardenActivity[] = activities.map(activity => ({
           id: activity.id,
           title: activity.title,
@@ -62,7 +57,6 @@ const Dashboard = () => {
           scheduled_date: activity.scheduled_date,
           completed: activity.completed
         }));
-        
         setActivities(typedActivities);
       } else {
         setActivities([]);
@@ -75,6 +69,42 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch activities for the same week number (same month/day, all years)
+  const fetchPastWeekActivities = async () => {
+    try {
+      const start = startOfWeek(date, { weekStartsOn: 1 });
+      const days: Date[] = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
+
+      // Create array of 'MM-dd'
+      const weekDaysKeys = days.map(day => format(day, 'MM-dd'));
+
+      // Query for all past activities matching any MM-dd in the week (from previous years)
+      // Get all records for the user except for the current year!
+      const { data: userSession } = await supabase.auth.getSession();
+      if (!userSession?.session) return;
+
+      const { data, error } = await supabase
+        .from('garden_activities')
+        .select('*')
+        .eq('user_id', userSession.session.user.id)
+        .order('scheduled_date', { ascending: false });
+
+      if (error) throw error;
+
+      const past = (data || []).filter((activity: any) => {
+        const activityDate = new Date(activity.scheduled_date);
+        // Exclude activities from the current calendar year
+        return (
+          weekDaysKeys.includes(format(activityDate, 'MM-dd')) &&
+          getYear(activityDate) !== getYear(date)
+        );
+      });
+      setPastWeekActivities(past);
+    } catch (error: any) {
+      setPastWeekActivities([]);
     }
   };
   
@@ -160,8 +190,25 @@ const Dashboard = () => {
   useEffect(() => {
     if (supabase.auth.getSession) {
       fetchActivities();
+      fetchPastWeekActivities();
     }
   }, [date]);
+
+  // Group past activities by MM-dd for rendering
+  const getPastActivitiesByDay = () => {
+    const start = startOfWeek(date, { weekStartsOn: 1 });
+    const days: Date[] = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
+    const group: { [mmdd: string]: GardenActivity[] } = {};
+    for (const day of days) {
+      group[format(day, "MM-dd")] = [];
+    }
+    for (const activity of pastWeekActivities) {
+      const key = format(new Date(activity.scheduled_date), "MM-dd");
+      if (!group[key]) group[key] = [];
+      group[key].push(activity);
+    }
+    return { days, activitiesByDay: group };
+  };
 
   return (
     <DashboardLayout>
@@ -180,7 +227,7 @@ const Dashboard = () => {
             setDate={setDate}
           />
         </div>
-        
+
         <div className="grid gap-4">
           <ActivityList 
             activities={activities} 
@@ -188,6 +235,9 @@ const Dashboard = () => {
             loading={loading}
             onToggleActivityStatus={toggleActivityStatus}
           />
+
+          {/* Past week in previous years */}
+          <PastWeekActivities {...getPastActivitiesByDay()} />
         </div>
       </div>
     </DashboardLayout>
