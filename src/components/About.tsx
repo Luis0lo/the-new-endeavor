@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-const About = () => {
+export const AboutComponent = () => {
   return (
     <section id="about" className="py-20 bg-gray-50 dark:bg-[#181624] min-h-screen transition-colors">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -36,6 +36,23 @@ const About = () => {
           </ul>
         </div>
 
+        <div className="bg-white dark:bg-[#23203a] rounded-2xl shadow-lg p-8 mb-8">
+          <h3 className="text-2xl font-semibold mb-4 text-blue-700 dark:text-blue-300">Gardening as Therapy</h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            Beyond the practical benefits, gardening has become my way to relax and find peace in a busy world. There's something deeply therapeutic about 
+            getting your hands in the soil, watching seeds sprout into life, and nurturing plants through their growth cycle.
+          </p>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            In our increasingly digital lives, gardening offers a mindful escape—a chance to slow down, connect with nature, and find joy in simple accomplishments. 
+            Whether I'm weeding between rows of vegetables or harvesting sun-ripened tomatoes, these moments of focused attention bring a calmness that's hard to find elsewhere.
+          </p>
+          <p className="text-gray-700 dark:text-gray-300">
+            I've found that the rhythmic nature of garden work, the sensory experience of being outdoors, and the satisfaction of growing something tangible 
+            all contribute to reduced stress and improved mental wellbeing. It's this therapeutic aspect of gardening that keeps me coming back 
+            to my garden day after day, season after season.
+          </p>
+        </div>
+
         <div className="bg-white dark:bg-[#23203a] rounded-2xl shadow-lg p-8">
           <h3 className="text-2xl font-semibold mb-4 text-purple-800 dark:text-purple-300">My Journey from Portugal to the UK</h3>
           <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -56,4 +73,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default AboutComponent;
