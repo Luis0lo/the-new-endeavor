@@ -25,7 +25,7 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
   <div className="bg-white rounded-lg shadow-sm border p-4 mt-2">
     <div className="flex items-center justify-between mb-2">
       <h3 className="text-xl font-semibold">
-        This week in past years
+        This week in past years {`(${Object.values(activitiesByDay).flat().length})`}
       </h3>
       <div className="flex items-center gap-2">
         <Button
@@ -53,12 +53,19 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
       {days.map((day) => {
         const key = format(day, "MM-dd");
         const activities = activitiesByDay[key] || [];
+        const hasActivities = activities.length > 0;
         return (
-          <div key={key} className="border rounded-md p-2 min-h-[120px]">
+          <div
+            key={key}
+            className={`rounded-md p-2 min-h-[120px] border ${
+              hasActivities ? 'border-green-200' : 'border-gray-200'
+            }`}
+          >
             <div className="text-sm font-bold text-gray-700 mb-1 text-center">
               {format(day, "E MMM d")}
+              {hasActivities ? ` (${activities.length})` : ""}
             </div>
-            {activities.length > 0 ? (
+            {hasActivities ? (
               <ul className="space-y-1">
                 {activities.map((activity) => (
                   <li
