@@ -1,23 +1,54 @@
 
 import React from "react";
 import { format, getYear } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { GardenActivity } from "@/types/garden";
 
 interface PastWeekActivitiesProps {
   days: Date[];
   activitiesByDay: { [dateKey: string]: GardenActivity[] };
   onActivityClick?: (activity: GardenActivity) => void;
+  onPreviousWeek?: () => void;
+  onNextWeek?: () => void;
+  weekOffset?: number;
 }
 
 export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
   days,
   activitiesByDay,
   onActivityClick,
+  onPreviousWeek,
+  onNextWeek,
+  weekOffset = 0
 }) => (
   <div className="bg-white rounded-lg shadow-sm border p-4 mt-2">
-    <h3 className="text-xl font-semibold mb-2">
-      This week in past years
-    </h3>
+    <div className="flex items-center justify-between mb-2">
+      <h3 className="text-xl font-semibold">
+        This week in past years
+      </h3>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-7 w-7"
+          title="Previous Week"
+          onClick={onPreviousWeek}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="text-sm">{weekOffset === 0 ? 'Current week' : `Week ${weekOffset > 0 ? '+' : ''}${weekOffset}`}</div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-7 w-7"
+          title="Next Week"
+          onClick={onNextWeek}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
     <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
       {days.map((day) => {
         const key = format(day, "MM-dd");
