@@ -6,11 +6,13 @@ import { GardenActivity } from "@/types/garden";
 interface PastWeekActivitiesProps {
   days: Date[];
   activitiesByDay: { [dateKey: string]: GardenActivity[] };
+  onActivityClick?: (activity: GardenActivity) => void;
 }
 
 export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
   days,
   activitiesByDay,
+  onActivityClick,
 }) => (
   <div className="bg-white rounded-lg shadow-sm border p-4 mt-2">
     <h3 className="text-xl font-semibold mb-2">
@@ -30,13 +32,17 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
                 {activities.map((activity) => (
                   <li
                     key={activity.id}
-                    className="text-xs border-b last:border-b-0 pb-1 flex flex-col gap-0.5"
+                    className="text-xs border-b last:border-b-0 pb-1 flex flex-col gap-0.5 cursor-pointer hover:bg-muted px-1 rounded"
+                    onClick={() => onActivityClick?.(activity)}
+                    tabIndex={0}
+                    role="button"
+                    title="Click to view/edit activity"
                   >
                     <span className="font-medium">
                       {activity.title}
                     </span>
                     <span className="text-muted-foreground">
-                      {getYear(new Date(activity.scheduled_date))}
+                      {getYear(new Date(activity.date))}
                     </span>
                   </li>
                 ))}
@@ -54,4 +60,3 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
 );
 
 export default PastWeekActivities;
-
