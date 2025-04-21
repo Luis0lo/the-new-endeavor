@@ -2,7 +2,7 @@
 import React from 'react';
 import MainLayout from '@/components/MainLayout';
 import { AboutComponent } from '@/components/About';
-import SEO from '@/components/SEO';
+import { SEO } from '@/components/SEO';
 
 const About = () => {
   return (
