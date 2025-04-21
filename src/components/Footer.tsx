@@ -83,6 +83,12 @@ const Footer = () => {
                 </svg>
               </a>
             </div>
+            {/* About page link (NEW) */}
+            <div className="mt-5">
+              <Link to="/about" className="text-gray-300 hover:text-white underline transition-colors">
+                About
+              </Link>
+            </div>
           </div>
         </div>
         
