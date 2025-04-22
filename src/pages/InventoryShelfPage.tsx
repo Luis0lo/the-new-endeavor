@@ -76,6 +76,7 @@ export default function InventoryShelfPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [deleteWarning, setDeleteWarning] = useState<null | string>(null); // Added for warning
 
   useEffect(() => {
     if (shelfId) {
@@ -132,12 +133,33 @@ export default function InventoryShelfPage() {
       setLoading(false);
     }
   };
+
+  // Helper to check if item is used
+  const checkIfItemIsUsed = async (itemId: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('activity_inventory_items')
+      .select('id')
+      .eq('inventory_item_id', itemId)
+      .limit(1);
+
+    return !!(data && data.length > 0);
+  };
   
-  const handleDeleteItem = (e: React.MouseEvent, item: InventoryItem) => {
+  const handleDeleteItem = async (e: React.MouseEvent, item: InventoryItem) => {
     // Explicitly stop propagation to prevent row click
     e.stopPropagation();
     // Prevent default to ensure no additional events are triggered
     e.preventDefault();
+
+    // Check if used in any activities (show warning if so)
+    setDeleteWarning(null);
+    const isUsed = await checkIfItemIsUsed(item.id);
+    if (isUsed) {
+      setDeleteWarning(
+        "This item has been used on an activity. Its deletion will remove the item from the record."
+      );
+    }
+
     setItemToDelete(item);
     setDeleteDialogOpen(true);
   };
@@ -168,6 +190,7 @@ export default function InventoryShelfPage() {
     } finally {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
+      setDeleteWarning(null);
     }
   };
   
@@ -473,10 +496,15 @@ export default function InventoryShelfPage() {
         
         <DeleteConfirmDialog
           open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) setDeleteWarning(null);
+          }}
           title="Delete Inventory Item"
           description={`Are you sure you want to delete ${itemToDelete?.name}? This action cannot be undone.`}
           onConfirm={confirmDeleteItem}
+          showWarning={!!deleteWarning}
+          warningMessage={deleteWarning || ""}
         />
 
         {itemToEdit && (

@@ -18,6 +18,8 @@ interface DeleteConfirmDialogProps {
   title: string;
   description: string;
   onConfirm: () => void;
+  showWarning?: boolean;
+  warningMessage?: string;
 }
 
 const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
@@ -26,12 +28,19 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   title,
   description,
   onConfirm,
+  showWarning,
+  warningMessage,
 }) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
+          {showWarning && warningMessage && (
+            <div className="mb-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 rounded">
+              {warningMessage}
+            </div>
+          )}
           <AlertDialogDescription>
             {description}
           </AlertDialogDescription>
@@ -48,3 +57,4 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 };
 
 export default DeleteConfirmDialog;
+
