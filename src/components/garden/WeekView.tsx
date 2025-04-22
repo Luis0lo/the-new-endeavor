@@ -46,7 +46,7 @@ const WeekView: React.FC<WeekViewProps> = ({
             <div 
               key={dayName} 
               className={`p-2 text-center font-medium ${
-                index >= 5 ? 'bg-gray-100 text-gray-600' : 'text-gray-500'
+                index >= 5 ? 'bg-gray-800/50 text-gray-200 dark:bg-gray-800/70 dark:text-gray-300' : 'text-gray-600 dark:text-gray-300'
               }`}
             >
               {dayName}
@@ -62,15 +62,15 @@ const WeekView: React.FC<WeekViewProps> = ({
             return (
               <button
                 key={day.toString()}
-                className={`p-4 text-center hover:bg-gray-50 transition-colors duration-200 ${
-                  i >= 5 ? 'bg-gray-100 hover:bg-gray-200' : ''
+                className={`p-4 text-center hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors duration-200 ${
+                  i >= 5 ? 'bg-gray-50 dark:bg-gray-800/30 hover:bg-gray-200 dark:hover:bg-gray-700/50' : ''
                 }`}
                 onClick={() => onSelectDay(day)}
               >
                 <div className={`inline-flex items-center justify-center h-8 w-8 rounded-full ${
                   isToday ? 'bg-primary text-primary-foreground' : ''
                 } ${
-                  i >= 5 ? 'text-gray-600' : 'text-gray-800'
+                  i >= 5 ? 'text-gray-600 dark:text-gray-200' : 'text-gray-800 dark:text-gray-100'
                 }`}>
                   {format(day, 'd')}
                 </div>
@@ -89,8 +89,8 @@ const WeekView: React.FC<WeekViewProps> = ({
             return (
               <div 
                 key={day.toString()} 
-                className={`p-4 min-h-[100px] hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
-                  days.indexOf(day) >= 5 ? 'bg-gray-100 hover:bg-gray-200' : ''
+                className={`p-4 min-h-[100px] hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors duration-200 ${
+                  days.indexOf(day) >= 5 ? 'bg-gray-100 dark:bg-gray-800/30 hover:bg-gray-200 dark:hover:bg-gray-700/50' : ''
                 }`}
                 onClick={() => onSelectDay(day)}
               >
@@ -101,24 +101,24 @@ const WeekView: React.FC<WeekViewProps> = ({
                         key={activity.id} 
                         className={`text-sm p-1 rounded-sm flex items-start gap-1 transition-colors duration-200 ${
                           activity.completed || activity.status === 'done' 
-                            ? 'bg-green-50 text-green-700 hover:bg-green-100' 
-                            : 'bg-gray-50 hover:bg-gray-100'
+                            ? 'bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/70' 
+                            : 'bg-gray-50 dark:bg-gray-700/30 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                         }`}
                       >
                         {(activity.completed || activity.status === 'done') && (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
                         )}
                         <span className="truncate">{activity.title}</span>
                       </div>
                     ))}
                     {dayActivities.length > 3 && (
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground dark:text-gray-400">
                         + {dayActivities.length - 3} more
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-400 text-center">
+                  <div className="text-sm text-gray-400 dark:text-gray-500 text-center">
                     No activities
                   </div>
                 )}
@@ -132,4 +132,3 @@ const WeekView: React.FC<WeekViewProps> = ({
 };
 
 export default WeekView;
-
