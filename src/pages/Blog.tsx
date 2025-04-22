@@ -233,6 +233,7 @@ const Blog = () => {
   
   const fetchPosts = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('blog_posts')
         .select(`
@@ -247,20 +248,20 @@ const Blog = () => {
         .eq('published', true)
         .order('published_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
-      if (data) {
-        const formattedPosts = data.map(post => {
-          return {
-            id: post.id,
-            title: post.title,
-            excerpt: post.excerpt,
-            slug: post.slug,
-            featured_image: post.featured_image,
-            published_at: post.published_at,
-            category: post.category
-          } as BlogPost;
-        });
+      if (data && Array.isArray(data)) {
+        const formattedPosts = data.map(post => ({
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt,
+          slug: post.slug,
+          featured_image: post.featured_image,
+          published_at: post.published_at,
+          category: post.category
+        } as BlogPost));
         
         console.log("Fetched posts:", formattedPosts);
         
@@ -269,13 +270,24 @@ const Blog = () => {
         
         // For demonstration, we'll just use the first 3 posts as featured
         setFeaturedPosts(formattedPosts.slice(0, Math.min(3, formattedPosts.length)));
+      } else {
+        // Handle case when data is null or not an array
+        console.log("No posts data returned or data is not an array");
+        setAllPosts([]);
+        setFilteredPosts([]);
+        setFeaturedPosts([]);
       }
     } catch (error: any) {
+      console.error("Error fetching posts:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to fetch blog posts",
         variant: "destructive"
       });
+      // Initialize with empty arrays on error
+      setAllPosts([]);
+      setFilteredPosts([]);
+      setFeaturedPosts([]);
     } finally {
       setLoading(false);
     }
@@ -309,29 +321,33 @@ const Blog = () => {
         .or(`title.ilike.%${term}%,excerpt.ilike.%${term}%,content.ilike.%${term}%`)
         .order('published_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
-      if (data) {
-        const formattedPosts = data.map(post => {
-          return {
-            id: post.id,
-            title: post.title,
-            excerpt: post.excerpt,
-            slug: post.slug,
-            featured_image: post.featured_image,
-            published_at: post.published_at,
-            category: post.category
-          } as BlogPost;
-        });
+      if (data && Array.isArray(data)) {
+        const formattedPosts = data.map(post => ({
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt,
+          slug: post.slug,
+          featured_image: post.featured_image,
+          published_at: post.published_at,
+          category: post.category
+        } as BlogPost));
         
         setSearchResults(formattedPosts);
+      } else {
+        setSearchResults([]);
       }
     } catch (error: any) {
+      console.error("Error searching posts:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to search blog posts",
         variant: "destructive"
       });
+      setSearchResults([]);
     } finally {
       setLoading(false);
     }

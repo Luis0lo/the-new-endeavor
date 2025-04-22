@@ -116,6 +116,7 @@ export type Database = {
           alt_text_data: Json | null
           author_id: string
           canonical_url: string | null
+          category: string | null
           content: string
           created_at: string
           excerpt: string | null
@@ -135,6 +136,7 @@ export type Database = {
           alt_text_data?: Json | null
           author_id: string
           canonical_url?: string | null
+          category?: string | null
           content: string
           created_at?: string
           excerpt?: string | null
@@ -154,6 +156,7 @@ export type Database = {
           alt_text_data?: Json | null
           author_id?: string
           canonical_url?: string | null
+          category?: string | null
           content?: string
           created_at?: string
           excerpt?: string | null
