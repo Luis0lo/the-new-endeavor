@@ -46,7 +46,7 @@ const WeekView: React.FC<WeekViewProps> = ({
             <div 
               key={dayName} 
               className={`p-2 text-center font-medium ${
-                index >= 5 ? 'bg-gray-800/50 text-gray-300' : 'text-gray-400'
+                index >= 5 ? 'bg-gray-100 text-gray-600' : 'text-gray-500'
               }`}
             >
               {dayName}
@@ -62,15 +62,15 @@ const WeekView: React.FC<WeekViewProps> = ({
             return (
               <button
                 key={day.toString()}
-                className={`p-4 text-center hover:bg-gray-700/30 transition-colors duration-200 ${
-                  i >= 5 ? 'bg-gray-800/30 hover:bg-gray-700/50' : ''
+                className={`p-4 text-center hover:bg-gray-50 transition-colors duration-200 ${
+                  i >= 5 ? 'bg-gray-100 hover:bg-gray-200' : ''
                 }`}
                 onClick={() => onSelectDay(day)}
               >
                 <div className={`inline-flex items-center justify-center h-8 w-8 rounded-full ${
                   isToday ? 'bg-primary text-primary-foreground' : ''
                 } ${
-                  i >= 5 ? 'text-gray-300' : 'text-gray-100'
+                  i >= 5 ? 'text-gray-600' : 'text-gray-800'
                 }`}>
                   {format(day, 'd')}
                 </div>
@@ -89,8 +89,8 @@ const WeekView: React.FC<WeekViewProps> = ({
             return (
               <div 
                 key={day.toString()} 
-                className={`p-4 min-h-[100px] hover:bg-gray-700/30 cursor-pointer transition-colors duration-200 ${
-                  days.indexOf(day) >= 5 ? 'bg-gray-800/30 hover:bg-gray-700/50' : ''
+                className={`p-4 min-h-[100px] hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
+                  days.indexOf(day) >= 5 ? 'bg-gray-100 hover:bg-gray-200' : ''
                 }`}
                 onClick={() => onSelectDay(day)}
               >
@@ -101,8 +101,8 @@ const WeekView: React.FC<WeekViewProps> = ({
                         key={activity.id} 
                         className={`text-sm p-1 rounded-sm flex items-start gap-1 transition-colors duration-200 ${
                           activity.completed || activity.status === 'done' 
-                            ? 'bg-green-900/50 text-green-300 hover:bg-green-900/70' 
-                            : 'bg-gray-700/30 text-gray-200 hover:bg-gray-700/50'
+                            ? 'bg-green-50 text-green-700 hover:bg-green-100' 
+                            : 'bg-gray-50 hover:bg-gray-100'
                         }`}
                       >
                         {(activity.completed || activity.status === 'done') && (
@@ -118,7 +118,7 @@ const WeekView: React.FC<WeekViewProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground text-center">
+                  <div className="text-sm text-gray-400 text-center">
                     No activities
                   </div>
                 )}
