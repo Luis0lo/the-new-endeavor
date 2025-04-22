@@ -26,7 +26,7 @@ export const blogPosts: BlogPost[] = [
     content: `
 # Growing Vegetables UK: How Millions Are Turning Gardens Into Grocery Stores
 
-![Vegetable garden in the UK](https://yourdomain.com/lovable-uploads/f91bb07f-397e-490f-ba72-bc87022de39d.png)
+![Vegetable garden in the UK](/lovable-uploads/f91bb07f-397e-490f-ba72-bc87022de39d.png)
 
 As the cost of living continues to rise and the desire for healthier, eco-friendly lifestyles grows, more UK households are turning to their own gardens—and even balconies—to cultivate fresh vegetables, herbs, and fruits. Discover why this movement is booming, the benefits it brings, and how you can get started with your own vegetable patch.
 
@@ -81,7 +81,7 @@ Focusing on UK-friendly crops boosts your harvest. Top choices:
 ### Step 4: Join a Gardening Community
 
 - **Seed swaps:** Exchange seeds and tips with local growers.
-- **Garden-sharing:** Don’t have space? Partner with neighbors or join a shared scheme.
+- **Garden-sharing:** Don't have space? Partner with neighbors or join a shared scheme.
 
 ## 💰 How Much Can You Save?
 
@@ -116,7 +116,7 @@ Start with 30–60 minutes a week for a few pots or a small plot. You can expand
 
 ---
 
-By growing your own food, you’ll save money, eat healthier, help the environment, and join a nation of proud gardeners. As more Brits turn their homes into edible oases, it’s the perfect time to start your own gardening adventure.
+By growing your own food, you'll save money, eat healthier, help the environment, and join a nation of proud gardeners. As more Brits turn their homes into edible oases, it's the perfect time to start your own gardening adventure.
 
 *Ready to transform your garden—and your dinner plate? Start sowing today!*
     `,

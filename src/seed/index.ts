@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { blogPosts } from './blogPosts';
 import { plantData } from './plantData';
@@ -11,39 +10,38 @@ export const runSeedData = async () => {
     // Seed blog posts
     console.log("Seeding database with blog posts:", blogPosts.length);
     try {
-      // Check if blog posts already exist
-      const { count: blogCount, error: blogCountError } = await supabase
+      // First, clear existing blog posts to avoid duplicates
+      const { error: deleteError } = await supabase
         .from('blog_posts')
-        .select('*', { count: 'exact', head: true });
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // This ensures we delete all posts
         
-      if (blogCountError) {
-        console.error("Error checking blog posts count:", blogCountError);
-      } else if (!blogCount || blogCount < 5) {
-        console.log("Inserting blog posts data...");
-        const { error: blogError } = await supabase
-          .from('blog_posts')
-          .upsert(
-            blogPosts.map(post => ({
-              id: post.id,
-              title: post.title,
-              slug: post.slug,
-              excerpt: post.excerpt,
-              content: post.content,
-              author_id: post.author_id,
-              published: post.published,
-              published_at: post.published_at,
-              featured_image: post.featured_image
-            })),
-            { onConflict: 'id' }
-          );
+      if (deleteError) {
+        console.error("Error clearing existing blog posts:", deleteError);
+      }
+      
+      console.log("Inserting blog posts data...");
+      const { error: blogError } = await supabase
+        .from('blog_posts')
+        .insert(
+          blogPosts.map(post => ({
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt,
+            content: post.content,
+            author_id: post.author_id,
+            published: post.published,
+            published_at: post.published_at,
+            featured_image: post.featured_image,
+            category: post.category
+          }))
+        );
           
-        if (blogError) {
-          console.error("Error seeding blog posts:", blogError);
-        } else {
-          console.log("Successfully seeded blog posts database");
-        }
+      if (blogError) {
+        console.error("Error seeding blog posts:", blogError);
       } else {
-        console.log("Blog posts data already exists, skipping seed");
+        console.log("Successfully seeded blog posts database");
       }
     } catch (blogError) {
       console.error("Error in blog post seeding process:", blogError);

@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import MainLayout from '@/components/MainLayout';
 import { Search, ArrowRight, Carrot, Flower2, Leaf, Lightbulb, Wrench } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
+import { SEO } from '@/components/SEO';
 
 // Define the BlogPost interface to match what we expect from the database
 interface BlogPost {
@@ -188,41 +189,47 @@ const Blog = () => {
     if (activeCategory === 'all') {
       setFilteredPosts(allPosts);
     } else {
-      // Filter posts based on category
-      // In a real app, you would have actual category data
-      // For now, we'll simulate categories using the post content/title
-      const filtered = allPosts.filter(post => {
-        const titleAndExcerpt = `${post.title} ${post.excerpt || ''}`.toLowerCase();
-        
-        switch (activeCategory) {
-          case 'vegetables':
-            return titleAndExcerpt.includes('vegetable') || 
-                   titleAndExcerpt.includes('tomato') || 
-                   titleAndExcerpt.includes('carrot');
-          case 'flowers':
-            return titleAndExcerpt.includes('flower') || 
-                   titleAndExcerpt.includes('bloom') || 
-                   titleAndExcerpt.includes('petal');
-          case 'herbs':
-            return titleAndExcerpt.includes('herb') || 
-                   titleAndExcerpt.includes('basil') || 
-                   titleAndExcerpt.includes('mint');
-          case 'tips':
-            return titleAndExcerpt.includes('tip') || 
-                   titleAndExcerpt.includes('guide') || 
-                   titleAndExcerpt.includes('how to');
-          case 'tools':
-            return titleAndExcerpt.includes('tool') || 
-                   titleAndExcerpt.includes('equipment') || 
-                   titleAndExcerpt.includes('implement');
-          default:
-            return true;
-        }
-      });
+      // Filter posts based on category field directly
+      const filtered = allPosts.filter(post => 
+        post.category === activeCategory || 
+        (post.category === undefined && matchCategoryByContent(post, activeCategory))
+      );
       
       setFilteredPosts(filtered);
     }
   }, [activeCategory, allPosts]);
+  
+  // Helper function to match post to category based on content
+  const matchCategoryByContent = (post: BlogPost, category: string): boolean => {
+    const titleAndExcerpt = `${post.title} ${post.excerpt || ''}`.toLowerCase();
+    
+    switch (category) {
+      case 'vegetables':
+        return titleAndExcerpt.includes('vegetable') || 
+               titleAndExcerpt.includes('tomato') || 
+               titleAndExcerpt.includes('carrot') ||
+               titleAndExcerpt.includes('garden') ||
+               titleAndExcerpt.includes('grow');
+      case 'flowers':
+        return titleAndExcerpt.includes('flower') || 
+               titleAndExcerpt.includes('bloom') || 
+               titleAndExcerpt.includes('petal');
+      case 'herbs':
+        return titleAndExcerpt.includes('herb') || 
+               titleAndExcerpt.includes('basil') || 
+               titleAndExcerpt.includes('mint');
+      case 'tips':
+        return titleAndExcerpt.includes('tip') || 
+               titleAndExcerpt.includes('guide') || 
+               titleAndExcerpt.includes('how to');
+      case 'tools':
+        return titleAndExcerpt.includes('tool') || 
+               titleAndExcerpt.includes('equipment') || 
+               titleAndExcerpt.includes('implement');
+      default:
+        return false;
+    }
+  };
   
   const fetchPosts = async () => {
     try {
@@ -234,7 +241,8 @@ const Blog = () => {
           excerpt,
           slug,
           featured_image,
-          published_at
+          published_at,
+          category
         `)
         .eq('published', true)
         .order('published_at', { ascending: false });
@@ -249,15 +257,18 @@ const Blog = () => {
             excerpt: post.excerpt,
             slug: post.slug,
             featured_image: post.featured_image,
-            published_at: post.published_at
+            published_at: post.published_at,
+            category: post.category
           } as BlogPost;
         });
+        
+        console.log("Fetched posts:", formattedPosts);
         
         setAllPosts(formattedPosts);
         setFilteredPosts(formattedPosts);
         
         // For demonstration, we'll just use the first 3 posts as featured
-        setFeaturedPosts(formattedPosts.slice(0, 3));
+        setFeaturedPosts(formattedPosts.slice(0, Math.min(3, formattedPosts.length)));
       }
     } catch (error: any) {
       toast({
@@ -291,7 +302,8 @@ const Blog = () => {
           excerpt,
           slug,
           featured_image,
-          published_at
+          published_at,
+          category
         `)
         .eq('published', true)
         .or(`title.ilike.%${term}%,excerpt.ilike.%${term}%,content.ilike.%${term}%`)
@@ -307,7 +319,8 @@ const Blog = () => {
             excerpt: post.excerpt,
             slug: post.slug,
             featured_image: post.featured_image,
-            published_at: post.published_at
+            published_at: post.published_at,
+            category: post.category
           } as BlogPost;
         });
         
@@ -326,6 +339,11 @@ const Blog = () => {
 
   return (
     <MainLayout>
+      <SEO 
+        title="Garden Blog | Tips and Inspiration for Gardeners"
+        description="Find the latest gardening tips, techniques, and inspiration for your home garden. Articles on growing vegetables, flowers, herbs and more."
+      />
+      
       <BlogHero onSearch={handleSearch} />
       
       {/* Category Tabs - Now placed between hero and content */}
