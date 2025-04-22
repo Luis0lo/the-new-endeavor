@@ -42,6 +42,8 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { ItemDetailsDialog } from '@/components/inventory/ItemDetailsDialog';
+import { getShelfIcon } from "@/components/inventory/inventoryIcons";
+import { InventoryItemTable } from "@/components/inventory/InventoryItemTable";
 
 interface InventoryShelf {
   id: string;
@@ -191,19 +193,6 @@ export default function InventoryShelfPage() {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
       setDeleteWarning(null);
-    }
-  };
-  
-  const getShelfIcon = (type?: 'seeds' | 'plants' | 'tools') => {
-    switch (type) {
-      case 'seeds':
-        return <Archive className="h-6 w-6 text-yellow-500" />;
-      case 'plants':
-        return <Leaf className="h-6 w-6 text-green-500" />;
-      case 'tools':
-        return <Wrench className="h-6 w-6 text-blue-500" />;
-      default:
-        return <Archive className="h-6 w-6" />;
     }
   };
   
@@ -455,26 +444,17 @@ export default function InventoryShelfPage() {
             </CardContent>
           </Card>
         ) : (
+          // Refactored: use InventoryItemTable instead of local table logic
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              {tableBody}
-            </Table>
+            <InventoryItemTable
+              shelf={shelf}
+              items={items}
+              sorting={sorting}
+              setSorting={setSorting}
+              onEditItem={handleEditItem}
+              onDeleteItem={handleDeleteItem}
+              onRowClick={handleRowClick}
+            />
           </div>
         )}
 
