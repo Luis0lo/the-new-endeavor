@@ -84,7 +84,7 @@ const CompanionPlantsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="container py-8">
+      <div className="container py-8 bg-background"> {/* Changed background to use theme variable */}
         <h1 className="text-3xl font-bold mb-2 flex items-center">
           <Flower2 className="h-8 w-8 mr-2 text-primary" />
           Plant Compatibility Checker
@@ -94,8 +94,8 @@ const CompanionPlantsPage = () => {
         </p>
         
         {isSeedingData && (
-          <div className="bg-amber-100 dark:bg-amber-950/30 p-4 rounded-md mb-6">
-            <p className="text-amber-800 dark:text-amber-400 flex items-center">
+          <div className="bg-secondary/20 p-4 rounded-md mb-6"> {/* Replaced with a more subtle background */}
+            <p className="text-secondary-foreground flex items-center">
               <Flower2 className="h-4 w-4 mr-2 animate-pulse" />
               Preparing plant database... This may take a moment.
             </p>
