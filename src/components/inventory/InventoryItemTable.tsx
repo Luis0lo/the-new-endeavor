@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 import { flexRender, ColumnDef, useReactTable, getCoreRowModel, getSortedRowModel, SortingState } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InventoryItem {
   id: string;
@@ -61,7 +61,51 @@ export const InventoryItemTable: React.FC<InventoryItemTableProps> = ({
   onDeleteItem,
   onRowClick,
 }) => {
-  const columns: ColumnDef<InventoryItem>[] = [
+  const isMobile = useIsMobile();
+
+  const getMobileColumns = (): ColumnDef<InventoryItem>[] => [
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <div
+            className="flex items-center justify-end gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => onEditItem(e, item)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => onDeleteItem(e, item)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const getDesktopColumns = (): ColumnDef<InventoryItem>[] => [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -193,6 +237,8 @@ export const InventoryItemTable: React.FC<InventoryItemTableProps> = ({
       },
     },
   ];
+
+  const columns = isMobile ? getMobileColumns() : getDesktopColumns();
 
   const table = useReactTable({
     data: items,
