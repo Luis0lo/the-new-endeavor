@@ -393,20 +393,29 @@ export default function InventoryShelfPage() {
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-4 p-4 md:p-8">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => navigate('/dashboard/inventory')}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            {loading ? (
-              <div className="animate-pulse bg-muted h-8 w-40 rounded"></div>
-            ) : (
-              <>
-                {getShelfIcon(shelf?.type)}
-                {shelf?.name}
-              </>
-            )}
-          </h2>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={() => navigate('/dashboard/inventory')}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              {loading ? (
+                <div className="animate-pulse bg-muted h-8 w-40 rounded"></div>
+              ) : (
+                <>
+                  {getShelfIcon(shelf?.type)}
+                  {shelf?.name}
+                </>
+              )}
+            </h2>
+          </div>
+          
+          {!loading && shelf && (
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          )}
         </div>
         
         {!loading && shelf && (
@@ -416,10 +425,6 @@ export default function InventoryShelfPage() {
                 {shelf.description || `This shelf contains ${shelf.type}.`}
               </p>
             </div>
-            <Button onClick={() => setDialogOpen(true)} className="mt-4 md:mt-0">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
           </div>
         )}
         
