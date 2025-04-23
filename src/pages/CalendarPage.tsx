@@ -383,15 +383,13 @@ const CalendarPage = () => {
     <DashboardLayout>
       <div className="flex flex-col h-screen">
         {/* Calendar header */}
-        <div className="flex flex-col p-4 border-b space-y-2">
-          <div>
-            <h1 className="text-2xl font-bold">Garden Calendar</h1>
-            <p className="text-muted-foreground">Track your garden activities and events</p>
-          </div>
+        <div className="p-4">
+          <h1 className="text-3xl font-bold tracking-tight">Calendar</h1>
+          <p className="text-muted-foreground">Track your garden activities and events</p>
         </div>
         
         {/* Calendar toolbar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 border-b">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button onClick={goToToday} variant="outline" size="sm">
               Today
