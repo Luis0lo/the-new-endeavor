@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // Add useLocation
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -16,6 +15,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation(); // Get current location
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
@@ -38,9 +38,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     navigate('/');
   };
 
+  const navLinks = [
+    { name: 'Home', href: '/', path: '/' },
+    { name: 'SubGarden', href: '/blog', path: '/blog' },
+    { name: 'Dashboard', href: '/dashboard', path: '/dashboard' },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header/Navbar */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <div className="mr-4 hidden md:flex">
@@ -48,9 +53,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <span className="text-xl font-bold">2day garden</span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
-              <Link to="/" className="transition-colors hover:text-foreground/80">Home</Link>
-              <Link to="/blog" className="transition-colors hover:text-foreground/80" title="Blog">SubGarden</Link>
-              {user && <Link to="/dashboard" className="transition-colors hover:text-foreground/80">Dashboard</Link>}
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.name} 
+                  to={link.href} 
+                  className={`transition-colors hover:text-foreground/80 px-2 py-1 rounded-md ${
+                    location.pathname === link.path 
+                      ? 'bg-primary/10 text-primary font-semibold' 
+                      : ''
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
             </nav>
           </div>
 
@@ -100,12 +115,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {menuOpen && (
           <div className="container md:hidden">
             <nav className="flex flex-col space-y-3 pb-3 text-sm font-medium">
-              <Link to="/" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
-                Home
-              </Link>
-              <Link to="/blog" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
-                Blog
-              </Link>
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.name}
+                  to={link.href} 
+                  className={`transition-colors hover:text-foreground/80 px-2 py-1 rounded-md ${
+                    location.pathname === link.path 
+                      ? 'bg-primary/10 text-primary font-semibold' 
+                      : ''
+                  }`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
               {user && (
                 <Link to="/dashboard" className="transition-colors hover:text-foreground/80" onClick={() => setMenuOpen(false)}>
                   Dashboard
