@@ -20,9 +20,11 @@ const AdminLogin = () => {
         .select('password')
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      if (data.password === password) {
+      if (data?.password === password) {
         // Set a simple session state in localStorage
         localStorage.setItem('admin_logged_in', 'true');
         navigate('/admin/dashboard');
@@ -34,6 +36,7 @@ const AdminLogin = () => {
         });
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: 'Error',
         description: 'An error occurred during login',
