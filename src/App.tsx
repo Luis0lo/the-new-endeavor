@@ -22,9 +22,6 @@ import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
 import About from "./pages/About";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminCreatePost from "./pages/AdminCreatePost";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -60,12 +57,6 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/about" element={<About />} />
-
-            {/* Admin Blog Routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/create-post" element={<AdminCreatePost />} />
-            <Route path="/admin/edit-post/:postId" element={<AdminCreatePost />} />
 
             {/* Catch-all 404 route */}
             <Route path="*" element={<NotFound />} />
