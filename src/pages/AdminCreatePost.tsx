@@ -44,7 +44,7 @@ const AdminCreatePost = () => {
     if (isEditing) {
       const fetchPost = async () => {
         try {
-          const { data, error } = await supabase
+          const { data, error } = await (supabase as any)
             .from('admin_blog_posts')
             .select('*')
             .eq('id', postId)
@@ -88,7 +88,7 @@ const AdminCreatePost = () => {
         .getPublicUrl(uploadData.path);
 
       // Save image metadata to blog_images table
-      const { data: imageData, error: imageError } = await supabase
+      const { data: imageData, error: imageError } = await (supabase as any)
         .from('blog_images')
         .insert({
           name: file.name,
@@ -151,14 +151,14 @@ const AdminCreatePost = () => {
 
       // Insert or update post
       if (isEditing) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('admin_blog_posts')
           .update(postData)
           .eq('id', postId);
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('admin_blog_posts')
           .insert(postData);
 

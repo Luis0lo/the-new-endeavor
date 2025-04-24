@@ -30,7 +30,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { data, error } = await supabase
+        // Use type assertion to work around TypeScript issues with new tables
+        const { data, error } = await (supabase as any)
           .from('admin_blog_posts')
           .select('id, title, status');
 
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
   const togglePostStatus = async (postId: string, currentStatus: 'draft' | 'published') => {
     try {
       const newStatus = currentStatus === 'draft' ? 'published' : 'draft';
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('admin_blog_posts')
         .update({ status: newStatus })
         .eq('id', postId);
@@ -75,7 +76,7 @@ const AdminDashboard = () => {
   // Delete post
   const deletePost = async (postId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('admin_blog_posts')
         .delete()
         .eq('id', postId);
