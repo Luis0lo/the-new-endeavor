@@ -15,7 +15,7 @@ const AdminLogin = () => {
     
     try {
       // Verify admin password
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('admin_settings')
         .select('password')
         .single();
