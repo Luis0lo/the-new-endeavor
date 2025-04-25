@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export const seedBlogPosts = async () => {
@@ -103,35 +104,14 @@ export const seedBlogPosts = async () => {
       author_id: "00000000-0000-0000-0000-000000000000", // Replace with a valid author ID
       category: "tips"
     },
-  ];
-
-  for (const post of posts) {
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .upsert({
-        ...post,
-      }, {
-        onConflict: 'slug',
-      });
-
-    if (error) {
-      console.error('Error seeding blog post:', post.title, error);
-    } else {
-      console.log('Seeded blog post:', post.title);
-    }
-  }
-  
-  // Add our new UK gardening post
-  const { error: ukGardeningError } = await supabase
-    .from('blog_posts')
-    .upsert({
+    {
       title: "The Rise of Home Vegetable Gardens in the UK: A Growing Movement",
       slug: "uk-vegetable-gardening-trend",
       content: `
         <article class="prose lg:prose-xl">
           <p>The landscape of British gardens is undergoing a remarkable transformation. What was once dominated by ornamental plants and manicured lawns is increasingly giving way to productive vegetable patches and edible gardens. This shift represents more than just a change in gardening preferences; it's a movement towards sustainability, self-sufficiency, and reconnection with our food sources.</p>
 
-          <img src="/lovable-uploads/40f35f46-66a9-48c2-90f6-db32bbe58313.png" alt="Beautiful UK vegetable garden with raised beds" class="w-full rounded-lg my-8" />
+          <img src="/lovable-uploads/e735d80e-4216-424a-935a-792ac7951cbe.png" alt="Beautiful UK vegetable garden with raised beds" class="w-full rounded-lg my-8" />
 
           <h2>The Growing Trend</h2>
           <p>Recent years have seen a significant surge in the number of UK households growing their own vegetables. This increase has been particularly notable since 2020, with estimates suggesting that over 60% of British homes with gardens now dedicate some space to growing food.</p>
@@ -165,16 +145,45 @@ export const seedBlogPosts = async () => {
         </article>
       `,
       excerpt: "Discover how more UK residents are transforming their gardens into productive vegetable patches, reflecting a growing movement towards sustainable living and self-sufficiency.",
-      featured_image: "/lovable-uploads/40f35f46-66a9-48c2-90f6-db32bbe58313.png",
+      featured_image: "/lovable-uploads/e735d80e-4216-424a-935a-792ac7951cbe.png",
       published: true,
       published_at: new Date().toISOString(),
       author_id: "00000000-0000-0000-0000-000000000000", // Default author ID
       category: "vegetables"
-    }, {
-      onConflict: 'slug'
-    });
+    },
+  ];
 
-  if (ukGardeningError) {
-    console.error('Error seeding UK gardening blog post:', ukGardeningError);
+  console.log("Starting to seed blog posts, count:", posts.length);
+
+  // First let's check if we have any posts already
+  const { count, error: countError } = await supabase
+    .from('blog_posts')
+    .select('*', { count: 'exact', head: true });
+    
+  if (countError) {
+    console.error("Error checking blog posts count:", countError);
+    throw countError;
   }
+
+  console.log("Current blog post count:", count);
+
+  // Instead of deleting all posts, let's use upsert to update existing ones and add new ones
+  for (const post of posts) {
+    console.log(`Processing blog post: ${post.title}`);
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .upsert({
+        ...post,
+      }, {
+        onConflict: 'slug',
+      });
+
+    if (error) {
+      console.error('Error seeding blog post:', post.title, error);
+    } else {
+      console.log('Seeded blog post:', post.title);
+    }
+  }
+  
+  console.log("Completed blog post seeding");
 };

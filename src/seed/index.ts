@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { seedBlogPosts } from './blogPosts';
 import { plantData } from './plantData';

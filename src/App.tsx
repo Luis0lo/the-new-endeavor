@@ -22,6 +22,12 @@ import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
 import About from "./pages/About";
+import { runSeedData } from "./seed";
+
+// Run seed data when the app loads
+runSeedData().then(result => {
+  console.log("Seed data execution complete, result:", result);
+});
 
 // Create a client
 const queryClient = new QueryClient({

@@ -1,14 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import MainLayout from '@/components/MainLayout';
 import { Search, ArrowRight, Carrot, Flower2, Leaf, Lightbulb, Wrench } from 'lucide-react';
-import { Database } from '@/integrations/supabase/types';
 import { SEO } from '@/components/SEO';
 
 // Define the BlogPost interface to match what we expect from the database
@@ -234,6 +232,10 @@ const Blog = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
+      
+      // Add debug log to check what's happening
+      console.log("Fetching blog posts...");
+      
       const { data, error } = await supabase
         .from('blog_posts')
         .select(`
@@ -252,6 +254,8 @@ const Blog = () => {
         throw error;
       }
       
+      console.log("Fetched posts:", data); // Debug log to check what data is returned
+      
       if (data && Array.isArray(data)) {
         const formattedPosts = data.map(post => ({
           id: post.id,
@@ -263,7 +267,7 @@ const Blog = () => {
           category: post.category
         } as BlogPost));
         
-        console.log("Fetched posts:", formattedPosts);
+        console.log("Formatted posts:", formattedPosts);
         
         setAllPosts(formattedPosts);
         setFilteredPosts(formattedPosts);
@@ -427,6 +431,34 @@ const Blog = () => {
         </>
       )}
     </MainLayout>
+  );
+};
+
+// Fix the missing BlogCard component that was skipped above
+const BlogCard = ({ post }: { post: BlogPost }) => {
+  return (
+    <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
+      {post.featured_image && (
+        <div className="aspect-video w-full overflow-hidden">
+          <img 
+            src={post.featured_image} 
+            alt={post.title}
+            className="h-full w-full object-cover transition-transform hover:scale-105 duration-300"
+          />
+        </div>
+      )}
+      <CardHeader className="flex-grow">
+        <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow-0">
+        <p className="line-clamp-3">{post.excerpt || `Read this article about ${post.title}`}</p>
+      </CardContent>
+      <CardFooter className="pt-2">
+        <Link to={`/blog/${post.slug}`} className="w-full">
+          <Button variant="outline" className="w-full">Read More</Button>
+        </Link>
+      </CardFooter>
+    </Card>
   );
 };
 
