@@ -434,32 +434,4 @@ const Blog = () => {
   );
 };
 
-// Fix the missing BlogCard component that was skipped above
-const BlogCard = ({ post }: { post: BlogPost }) => {
-  return (
-    <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
-      {post.featured_image && (
-        <div className="aspect-video w-full overflow-hidden">
-          <img 
-            src={post.featured_image} 
-            alt={post.title}
-            className="h-full w-full object-cover transition-transform hover:scale-105 duration-300"
-          />
-        </div>
-      )}
-      <CardHeader className="flex-grow">
-        <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-grow-0">
-        <p className="line-clamp-3">{post.excerpt || `Read this article about ${post.title}`}</p>
-      </CardContent>
-      <CardFooter className="pt-2">
-        <Link to={`/blog/${post.slug}`} className="w-full">
-          <Button variant="outline" className="w-full">Read More</Button>
-        </Link>
-      </CardFooter>
-    </Card>
-  );
-};
-
 export default Blog;
