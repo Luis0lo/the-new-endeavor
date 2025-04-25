@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MainLayout from '@/components/MainLayout';
-import { Search, Book, Database, Tools, Video, Shopping, Users } from 'lucide-react';
+import { Search, Book, Database, Wrench, Video, ShoppingCart, Users } from 'lucide-react';
 import { SEO } from '@/components/SEO';
 
 interface ResourceLink {
@@ -64,7 +64,7 @@ const categories: ResourceCategory[] = [
   {
     id: 'tools',
     title: 'Garden Planning',
-    icon: <Tools className="w-6 h-6" />,
+    icon: <Wrench className="w-6 h-6" />,
     links: [
       {
         id: 5,
