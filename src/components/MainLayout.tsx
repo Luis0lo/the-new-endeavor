@@ -41,6 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navLinks = [
     { name: 'Home', href: '/', path: '/' },
     { name: 'SubGarden', href: '/blog', path: '/blog' },
+    { name: 'Resources', href: '/resources', path: '/resources' },
     { name: 'Dashboard', href: '/dashboard', path: '/dashboard' },
   ];
 

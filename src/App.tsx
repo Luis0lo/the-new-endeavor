@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
 import About from "./pages/About";
 import { runSeedData } from "./seed";
+import GardeningResources from "./pages/GardeningResources";
 
 // Run seed data when the app loads
 runSeedData().then(result => {
@@ -63,8 +63,7 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/about" element={<About />} />
-
-            {/* Catch-all 404 route */}
+            <Route path="/resources" element={<GardeningResources />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
