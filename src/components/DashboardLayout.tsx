@@ -11,7 +11,8 @@ import {
   Archive,
   BookOpen,
   Flower2,
-  ChevronLeft
+  ChevronLeft,
+  Sprout
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -93,6 +94,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       title: 'Calendar',
       icon: Calendar,
       path: '/dashboard/calendar'
+    },
+    {
+      title: 'Seed Calendar',
+      icon: Sprout,
+      path: '/dashboard/seed-calendar'
     },
     {
       title: 'Inventory',

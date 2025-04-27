@@ -23,6 +23,7 @@ import CookieConsent from "./components/CookieConsent";
 import About from "./pages/About";
 import { runSeedData } from "./seed";
 import Greenlink from "./pages/Greenlink";
+import SeedCalendarPage from "./pages/SeedCalendarPage";
 
 // Run seed data when the app loads
 runSeedData().then(result => {
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/about" element={<About />} />
             <Route path="/greenlink" element={<Greenlink />} />
+            <Route path="/dashboard/seed-calendar" element={<SeedCalendarPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
