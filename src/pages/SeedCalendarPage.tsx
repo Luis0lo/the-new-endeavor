@@ -43,6 +43,9 @@ const SeedCalendarPage = () => {
     setView('day');
   };
 
+  // Define empty callback functions to satisfy the component props
+  const noopCallback = () => {};
+  
   // Get events for the current month
   const events = getMonthEvents(date);
 
@@ -55,6 +58,7 @@ const SeedCalendarPage = () => {
             date={date}
             activities={[]}
             onSelectDay={handleDayClick}
+            onAddActivity={noopCallback}
           />
         );
       case 'week':
@@ -63,6 +67,7 @@ const SeedCalendarPage = () => {
             date={date}
             activities={[]}
             onSelectDay={handleDayClick}
+            onAddActivity={noopCallback}
           />
         );
       case 'day':
@@ -70,6 +75,10 @@ const SeedCalendarPage = () => {
           <DayView
             date={date}
             activities={[]}
+            onAddActivity={noopCallback}
+            onEditActivity={noopCallback}
+            onDeleteActivity={noopCallback}
+            onToggleComplete={noopCallback}
           />
         );
       default:
