@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Add useLocation
 import { supabase } from '@/integrations/supabase/client';

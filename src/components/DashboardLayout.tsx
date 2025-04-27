@@ -143,7 +143,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
             >
               <span className="text-primary text-xl font-bold">
-                {sidebarCollapsed ? "GA" : "Garden App"}
+                {sidebarCollapsed ? "GA" : "2day Garden"}
               </span>
             </Link>
             <Button
@@ -207,7 +207,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="fixed top-0 left-0 right-0 z-40 h-14 border-b bg-background px-4">
           <div className="flex h-full items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-semibold">Garden App</span>
+              <span className="font-semibold">2day Garden</span>
             </div>
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
@@ -217,7 +217,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </SheetTrigger>
               <SheetContent side="left" className="w-[80%] max-w-[300px] p-0">
                   <SheetHeader className="p-4 border-b">
-                    <SheetTitle>Garden App</SheetTitle>
+                    <SheetTitle>2day Garden</SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col py-2">
                     {navigationItems.map((item) => (
