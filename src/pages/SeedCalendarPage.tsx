@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import WeekView from '@/components/garden/WeekView';
 import DayView from '@/components/garden/DayView';
 import MonthView from '@/components/garden/MonthView';
+import { getMonthEvents } from '@/data/uk-seeding-data';
 
 const SeedCalendarPage = () => {
   const [date, setDate] = useState<Date>(new Date());
@@ -42,6 +43,9 @@ const SeedCalendarPage = () => {
     setView('day');
   };
 
+  // Get events for the current month
+  const events = getMonthEvents(date);
+
   // Render the current view
   const renderView = () => {
     switch (view) {
@@ -50,7 +54,6 @@ const SeedCalendarPage = () => {
           <MonthView
             date={date}
             activities={[]}
-            onAddActivity={() => {}}
             onSelectDay={handleDayClick}
           />
         );
@@ -59,7 +62,6 @@ const SeedCalendarPage = () => {
           <WeekView
             date={date}
             activities={[]}
-            onAddActivity={() => {}}
             onSelectDay={handleDayClick}
           />
         );
@@ -68,10 +70,6 @@ const SeedCalendarPage = () => {
           <DayView
             date={date}
             activities={[]}
-            onAddActivity={() => {}}
-            onEditActivity={() => {}}
-            onDeleteActivity={() => {}}
-            onToggleComplete={() => {}}
           />
         );
       default:
@@ -85,7 +83,7 @@ const SeedCalendarPage = () => {
         {/* Calendar header */}
         <div className="p-4">
           <h1 className="text-3xl font-bold tracking-tight">Seed Calendar</h1>
-          <p className="text-muted-foreground">Track your seeding and transplanting schedule</p>
+          <p className="text-muted-foreground">UK Seeding Guide: What to plant and when</p>
         </div>
         
         {/* Calendar toolbar */}
@@ -127,6 +125,19 @@ const SeedCalendarPage = () => {
           </div>
         </div>
         
+        {/* Current month events */}
+        <div className="px-4 mb-4">
+          <h3 className="text-lg font-semibold mb-2">What to Plant This Month:</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {events.map((event, index) => (
+              <div key={index} className="p-3 rounded-lg bg-card border">
+                <div className="font-medium">{event.name}</div>
+                <div className="text-sm text-muted-foreground capitalize">{event.type}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Calendar content */}
         <div className="flex-1 p-4 overflow-auto">
           {renderView()}
