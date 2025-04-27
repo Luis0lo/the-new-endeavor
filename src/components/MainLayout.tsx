@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Add useLocation
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navLinks = [
     { name: 'Home', href: '/', path: '/' },
     { name: 'SubGarden', href: '/blog', path: '/blog' },
-    { name: 'Resources', href: '/resources', path: '/resources' },
+    { name: 'Greenlink', href: '/greenlink', path: '/greenlink' },
     { name: 'Dashboard', href: '/dashboard', path: '/dashboard' },
   ];
 
