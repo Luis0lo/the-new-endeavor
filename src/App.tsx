@@ -22,7 +22,7 @@ import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
 import About from "./pages/About";
 import { runSeedData } from "./seed";
-import GardeningResources from "./pages/GardeningResources";
+import Greenlink from "./pages/Greenlink";
 
 // Run seed data when the app loads
 runSeedData().then(result => {
@@ -63,7 +63,7 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/about" element={<About />} />
-            <Route path="/resources" element={<GardeningResources />} />
+            <Route path="/greenlink" element={<Greenlink />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

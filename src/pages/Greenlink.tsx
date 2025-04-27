@@ -2,10 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import MainLayout from '@/components/MainLayout';
-import { Search, Book, Database, Wrench, Video, ShoppingCart, Users } from 'lucide-react';
+import { Book, Database, Wrench } from 'lucide-react';
 import { SEO } from '@/components/SEO';
 
 interface ResourceLink {
@@ -82,81 +80,69 @@ const categories: ResourceCategory[] = [
   },
 ];
 
-const ResourcesHero = () => {
+const ResourceHero = () => {
   return (
     <div className="relative py-24 bg-gradient-to-b from-primary/10 to-background">
       <div className="container mx-auto px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Gardening Resources</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">Greenlink</h1>
         <p className="text-xl mb-8 max-w-2xl mx-auto text-muted-foreground">
           Discover the best gardening websites, tools, and educational resources
         </p>
-        
-        <div className="max-w-md mx-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-            <Input
-              type="text"
-              placeholder="Search resources..."
-              className="pl-10 pr-4 py-6 rounded-full"
-            />
-            <Button 
-              type="submit" 
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full px-4"
-            >
-              Search
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
 
-const ResourceCard = ({ resource }: { resource: ResourceLink }) => {
+const ResourceCard = ({ category }: { category: ResourceCategory }) => {
   return (
-    <Card className="h-full hover:shadow-md transition-shadow">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-lg">{resource.title}</CardTitle>
+        <div className="flex items-center gap-2 mb-2">
+          {category.icon}
+          <CardTitle>{category.title}</CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">{resource.description}</p>
-        <Button asChild variant="outline" className="w-full">
-          <a href={resource.url} target="_blank" rel="noopener noreferrer">
-            Visit Website
-          </a>
-        </Button>
+        <ul className="space-y-4">
+          {category.links.map((link) => (
+            <li key={link.id} className="border-b pb-4 last:border-b-0 last:pb-0">
+              <h3 className="font-semibold mb-1">{link.title}</h3>
+              <p className="text-sm text-muted-foreground mb-2">{link.description}</p>
+              <a 
+                href={link.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline"
+              >
+                Visit Website →
+              </a>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );
 };
 
-const GardeningResources = () => {
+const Greenlink = () => {
   return (
     <MainLayout>
       <SEO 
-        title="Gardening Resources | Useful Links and Tools"
+        title="Greenlink | Useful Gardening Resources and Tools"
         description="Discover the best gardening websites, tools, and educational resources for your gardening journey."
       />
       
-      <ResourcesHero />
+      <ResourceHero />
       
       <div className="container mx-auto px-4 py-12">
-        {categories.map((category) => (
-          <div key={category.id} className="mb-12">
-            <div className="flex items-center gap-2 mb-6">
-              {category.icon}
-              <h2 className="text-2xl font-bold">{category.title}</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.links.map((link) => (
-                <ResourceCard key={link.id} resource={link} />
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <ResourceCard key={category.id} category={category} />
+          ))}
+        </div>
       </div>
     </MainLayout>
   );
 };
 
-export default GardeningResources;
+export default Greenlink;
