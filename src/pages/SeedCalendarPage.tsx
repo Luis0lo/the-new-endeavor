@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { format } from 'date-fns';
-import { List, Table } from 'lucide-react';
+import { Calendar, List, Table } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getMonthEvents } from '@/data/uk-seeding-data';
+import { getMonthEvents, ukPlantingCalendar } from '@/data/uk-seeding-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table as TableComponent,
@@ -14,21 +14,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import YearlyCalendarView from '@/components/garden/YearlyCalendarView';
+
+type ViewType = 'table' | 'list' | 'year';
 
 const SeedCalendarPage = () => {
   const [date, setDate] = useState<Date>(new Date());
-  const [viewType, setViewType] = useState<'table' | 'list'>('table');
+  const [viewType, setViewType] = useState<ViewType>('year');
 
   // Get events for the current month
   const events = getMonthEvents(date);
 
   const currentMonth = format(date, 'MMMM');
   const currentYear = format(date, 'yyyy');
-
-  // Toggle between table and list views
-  const toggleView = () => {
-    setViewType(viewType === 'table' ? 'list' : 'table');
-  };
 
   return (
     <DashboardLayout>
@@ -42,30 +40,39 @@ const SeedCalendarPage = () => {
         {/* Toolbar */}
         <div className="flex justify-between items-center p-4">
           <h2 className="text-xl font-semibold">
-            {currentMonth} {currentYear} - Planting Guide
+            {viewType === 'year' ? 'Annual Planting Guide' : `${currentMonth} ${currentYear} - Planting Guide`}
           </h2>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleView}
-          >
-            {viewType === 'table' ? (
-              <>
-                <List className="h-4 w-4 mr-2" />
-                List View
-              </>
-            ) : (
-              <>
-                <Table className="h-4 w-4 mr-2" />
-                Table View
-              </>
-            )}
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant={viewType === 'table' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => setViewType('table')}
+            >
+              <Table className="h-4 w-4 mr-2" />
+              Table
+            </Button>
+            <Button 
+              variant={viewType === 'list' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => setViewType('list')}
+            >
+              <List className="h-4 w-4 mr-2" />
+              List
+            </Button>
+            <Button 
+              variant={viewType === 'year' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => setViewType('year')}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Year
+            </Button>
+          </div>
         </div>
         
-        {/* Table/List Content */}
+        {/* Content */}
         <div className="p-4 flex-1 overflow-auto">
-          {viewType === 'table' ? (
+          {viewType === 'table' && (
             <Card>
               <CardHeader>
                 <CardTitle>What to Plant in {currentMonth}</CardTitle>
@@ -98,7 +105,9 @@ const SeedCalendarPage = () => {
                 </TableComponent>
               </CardContent>
             </Card>
-          ) : (
+          )}
+          
+          {viewType === 'list' && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {events.map((event, index) => (
                 <Card key={index}>
@@ -119,6 +128,10 @@ const SeedCalendarPage = () => {
                 </Card>
               )}
             </div>
+          )}
+
+          {viewType === 'year' && (
+            <YearlyCalendarView plants={ukPlantingCalendar} />
           )}
         </div>
       </div>
