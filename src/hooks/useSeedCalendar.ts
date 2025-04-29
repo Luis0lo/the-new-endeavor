@@ -30,7 +30,16 @@ export function useSeedCalendar() {
           throw error;
         }
         
-        setSeedData(data);
+        // Process the data to handle empty strings in arrays
+        const processedData = data.map((entry: SeedCalendarEntry) => ({
+          ...entry,
+          sow_indoors: entry.sow_indoors?.filter(Boolean) || [],
+          sow_outdoors: entry.sow_outdoors?.filter(Boolean) || [],
+          transplant_outdoors: entry.transplant_outdoors?.filter(Boolean) || [],
+          harvest_period: entry.harvest_period?.filter(Boolean) || [],
+        }));
+        
+        setSeedData(processedData);
       } catch (error: any) {
         console.error('Error fetching seed calendar:', error);
         setError(error);
