@@ -85,8 +85,8 @@ const SeedCalendarPage = () => {
         </div>
         
         {/* Calendar content */}
-        <div className="p-4 flex-1 overflow-auto">
-          <Card className="p-4">
+        <div className="p-4 flex-1 overflow-hidden">
+          <Card className="p-4 flex flex-col h-full">
             {loading ? (
               <div className="flex justify-center items-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -96,7 +96,7 @@ const SeedCalendarPage = () => {
                 Failed to load seed calendar data
               </div>
             ) : (
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-4 h-full">
                 {/* Legend */}
                 <div className="flex flex-wrap gap-4 mb-2">
                   {legendItems.map((item, i) => (
@@ -107,30 +107,37 @@ const SeedCalendarPage = () => {
                   ))}
                 </div>
                 
-                <ScrollArea className="h-[calc(100vh-220px)]">
-                  <div className="overflow-x-auto w-full">
-                    <Table>
-                      <TableHeader className="sticky top-0 z-10 bg-muted/50">
-                        <TableRow>
-                          <TableHead className="whitespace-nowrap font-medium border-r border-border">Vegetable</TableHead>
+                <div className="flex flex-col overflow-hidden h-full">
+                  {/* Fixed header */}
+                  <div className="bg-muted/50 border-b">
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className="whitespace-nowrap font-medium p-4 text-left border-r border-border">Vegetable</th>
                           {months.map((month, index) => (
-                            <TableHead 
+                            <th 
                               key={month} 
-                              className={`text-center w-20 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
+                              className={`text-center w-20 p-4 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
                             >
                               {month}
-                            </TableHead>
+                            </th>
                           ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
+                        </tr>
+                      </thead>
+                    </table>
+                  </div>
+                  
+                  {/* Scrollable body */}
+                  <div className="overflow-y-auto flex-1">
+                    <table className="w-full">
+                      <tbody>
                         {seedData.map((entry, idx) => (
-                          <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
-                            <TableCell className="font-medium whitespace-nowrap border-r border-border">
+                          <tr key={entry.id} className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}>
+                            <td className="font-medium whitespace-nowrap p-4 border-r border-border">
                               {entry.vegetable}
-                            </TableCell>
+                            </td>
                             {months.map((_, monthIdx) => (
-                              <TableCell 
+                              <td 
                                 key={monthIdx} 
                                 className={`p-0 h-12 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
                               >
@@ -168,14 +175,14 @@ const SeedCalendarPage = () => {
                                     ></div>
                                   )}
                                 </div>
-                              </TableCell>
+                              </td>
                             ))}
-                          </TableRow>
+                          </tr>
                         ))}
-                      </TableBody>
-                    </Table>
+                      </tbody>
+                    </table>
                   </div>
-                </ScrollArea>
+                </div>
               </div>
             )}
           </Card>
