@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar } from '@/hooks/useSeedCalendar';
@@ -107,17 +106,24 @@ const SeedCalendarPage = () => {
                   ))}
                 </div>
                 
+                {/* Main calendar table with fixed column widths */}
                 <div className="flex flex-col overflow-hidden h-full">
-                  {/* Fixed header */}
+                  {/* Fixed header with defined column widths */}
                   <div className="bg-muted/50 border-b">
-                    <table className="w-full">
+                    <table className="w-full table-fixed">
+                      <colgroup>
+                        <col style={{ width: '180px' }} /> {/* Vegetable column width */}
+                        {months.map((_, i) => (
+                          <col key={i} style={{ width: '60px' }} /> {/* Fixed width for each month */}
+                        ))}
+                      </colgroup>
                       <thead>
                         <tr>
                           <th className="whitespace-nowrap font-medium p-4 text-left border-r border-border">Vegetable</th>
                           {months.map((month, index) => (
                             <th 
                               key={month} 
-                              className={`text-center w-20 p-4 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
+                              className={`text-center p-4 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
                             >
                               {month}
                             </th>
@@ -127,9 +133,15 @@ const SeedCalendarPage = () => {
                     </table>
                   </div>
                   
-                  {/* Scrollable body */}
+                  {/* Scrollable body with same column structure */}
                   <div className="overflow-y-auto flex-1">
-                    <table className="w-full">
+                    <table className="w-full table-fixed">
+                      <colgroup>
+                        <col style={{ width: '180px' }} /> {/* Vegetable column width */}
+                        {months.map((_, i) => (
+                          <col key={i} style={{ width: '60px' }} /> {/* Fixed width for each month */}
+                        ))}
+                      </colgroup>
                       <tbody>
                         {seedData.map((entry, idx) => (
                           <tr key={entry.id} className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}>
@@ -142,11 +154,11 @@ const SeedCalendarPage = () => {
                                 className={`p-0 h-12 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
                               >
                                 <div className="flex flex-col h-full">
-                                  {/* Using absolute positioning to create straight horizontal lines */}
+                                  {/* Activity indicators with absolute positioning for consistent alignment */}
                                   {/* Sow Indoors */}
                                   {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
                                     <div 
-                                      className="absolute top-0 left-0 right-0 h-3" 
+                                      className="absolute inset-x-0 top-0 h-3" 
                                       style={{ backgroundColor: legendItems[0].color }}
                                     ></div>
                                   )}
@@ -154,7 +166,7 @@ const SeedCalendarPage = () => {
                                   {/* Sow Outdoors */}
                                   {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
                                     <div 
-                                      className="absolute top-3 left-0 right-0 h-3" 
+                                      className="absolute inset-x-0 top-3 h-3" 
                                       style={{ backgroundColor: legendItems[1].color }}
                                     ></div>
                                   )}
@@ -162,7 +174,7 @@ const SeedCalendarPage = () => {
                                   {/* Transplant/Plant Outdoors */}
                                   {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
                                     <div 
-                                      className="absolute top-6 left-0 right-0 h-3" 
+                                      className="absolute inset-x-0 top-6 h-3" 
                                       style={{ backgroundColor: legendItems[2].color }}
                                     ></div>
                                   )}
@@ -170,7 +182,7 @@ const SeedCalendarPage = () => {
                                   {/* Harvest Period */}
                                   {isMonthInPeriods(entry.harvest_period, monthIdx) && (
                                     <div 
-                                      className="absolute top-9 left-0 right-0 h-3" 
+                                      className="absolute inset-x-0 top-9 h-3" 
                                       style={{ backgroundColor: legendItems[3].color }}
                                     ></div>
                                   )}
