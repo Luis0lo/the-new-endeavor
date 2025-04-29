@@ -112,9 +112,12 @@ const SeedCalendarPage = () => {
                     <Table>
                       <TableHeader className="sticky top-0 z-10 bg-muted/50">
                         <TableRow>
-                          <TableHead className="whitespace-nowrap font-medium">Vegetable</TableHead>
-                          {months.map((month) => (
-                            <TableHead key={month} className="text-center w-20">
+                          <TableHead className="whitespace-nowrap font-medium border-r border-border">Vegetable</TableHead>
+                          {months.map((month, index) => (
+                            <TableHead 
+                              key={month} 
+                              className={`text-center w-20 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
+                            >
                               {month}
                             </TableHead>
                           ))}
@@ -123,11 +126,14 @@ const SeedCalendarPage = () => {
                       <TableBody>
                         {seedData.map((entry, idx) => (
                           <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
-                            <TableCell className="font-medium whitespace-nowrap">
+                            <TableCell className="font-medium whitespace-nowrap border-r border-border">
                               {entry.vegetable}
                             </TableCell>
                             {months.map((_, monthIdx) => (
-                              <TableCell key={monthIdx} className="p-0 h-12 relative">
+                              <TableCell 
+                                key={monthIdx} 
+                                className={`p-0 h-12 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                              >
                                 <div className="flex flex-col h-full">
                                   {/* Using absolute positioning to create straight horizontal lines */}
                                   {/* Sow Indoors */}
