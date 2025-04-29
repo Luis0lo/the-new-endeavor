@@ -166,42 +166,40 @@ const SeedCalendarPage = () => {
                             {months.map((_, monthIdx) => (
                               <td 
                                 key={monthIdx} 
-                                className={`p-0 h-12 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                                className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
                               >
-                                <div className="flex flex-col h-full">
-                                  {/* Activity indicators with absolute positioning for consistent alignment */}
-                                  {/* Sow Indoors */}
-                                  {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                    <div 
-                                      className="absolute inset-x-0 top-0 h-3" 
-                                      style={{ backgroundColor: legendItems[0].color }}
-                                    ></div>
-                                  )}
-                                  
-                                  {/* Sow Outdoors */}
-                                  {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                    <div 
-                                      className="absolute inset-x-0 top-3 h-3" 
-                                      style={{ backgroundColor: legendItems[1].color }}
-                                    ></div>
-                                  )}
-                                  
-                                  {/* Transplant/Plant Outdoors */}
-                                  {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                    <div 
-                                      className="absolute inset-x-0 top-6 h-3" 
-                                      style={{ backgroundColor: legendItems[2].color }}
-                                    ></div>
-                                  )}
-                                  
-                                  {/* Harvest Period */}
-                                  {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                    <div 
-                                      className="absolute inset-x-0 top-9 h-3" 
-                                      style={{ backgroundColor: legendItems[3].color }}
-                                    ></div>
-                                  )}
-                                </div>
+                                {/* Activity indicators stacked without gaps */}
+                                {/* Sow Indoors */}
+                                {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                  <div 
+                                    className="absolute inset-x-0 top-0 h-2.5" 
+                                    style={{ backgroundColor: legendItems[0].color }}
+                                  ></div>
+                                )}
+                                
+                                {/* Sow Outdoors */}
+                                {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                  <div 
+                                    className="absolute inset-x-0 top-2.5 h-2.5" 
+                                    style={{ backgroundColor: legendItems[1].color }}
+                                  ></div>
+                                )}
+                                
+                                {/* Transplant/Plant Outdoors */}
+                                {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                  <div 
+                                    className="absolute inset-x-0 top-5 h-2.5" 
+                                    style={{ backgroundColor: legendItems[2].color }}
+                                  ></div>
+                                )}
+                                
+                                {/* Harvest Period */}
+                                {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                  <div 
+                                    className="absolute inset-x-0 top-7.5 h-2.5" 
+                                    style={{ backgroundColor: legendItems[3].color }}
+                                  ></div>
+                                )}
                               </td>
                             ))}
                           </tr>
