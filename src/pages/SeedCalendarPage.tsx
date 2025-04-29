@@ -5,12 +5,20 @@ import { useSeedCalendar } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow 
+} from '@/components/ui/table';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Legend items with their colors
 const legendItems = [
-  { label: 'Take Cuttings & Growing Indoors', color: '#8B5CF6' }, // Purple
+  { label: 'Sow Indoors', color: '#8B5CF6' }, // Purple
   { label: 'Sow Outdoors', color: '#FBBF24' }, // Yellow
   { label: 'Plant Outdoors', color: '#10B981' }, // Green
   { label: 'Harvest', color: '#EF4444' }, // Red
@@ -101,67 +109,79 @@ const SeedCalendarPage = () => {
                 
                 <ScrollArea className="h-[calc(100vh-220px)]">
                   <div className="overflow-x-auto w-full">
-                    <table className="min-w-full border-collapse">
-                      <thead className="bg-muted/30 sticky top-0 z-10">
-                        <tr>
-                          <th className="border border-border p-2 text-left whitespace-nowrap bg-muted/50">Vegetable</th>
+                    <Table className="min-w-full">
+                      <TableHeader className="sticky top-0 z-10">
+                        <TableRow>
+                          <TableHead className="bg-muted/50 border border-border whitespace-nowrap">Vegetable</TableHead>
                           {months.map((month) => (
-                            <th 
+                            <TableHead 
                               key={month} 
-                              className="border border-border p-2 text-center w-20 bg-muted/50"
+                              className="bg-muted/50 border border-border p-2 text-center w-20"
                             >
                               {month}
-                            </th>
+                            </TableHead>
                           ))}
-                        </tr>
-                      </thead>
-                      <tbody>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {seedData.map((entry, idx) => (
-                          <tr key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
-                            <td className="border border-border p-2 text-left font-medium whitespace-nowrap">
+                          <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
+                            <TableCell className="border border-border p-2 font-medium whitespace-nowrap">
                               {entry.vegetable}
-                            </td>
-                            {months.map((_, monthIdx) => (
-                              <td key={monthIdx} className="border border-border p-0 h-8 relative">
-                                <div className="flex flex-col h-full">
-                                  {/* Sow Indoors */}
-                                  {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                    <div 
-                                      className="h-2 w-full" 
-                                      style={{ backgroundColor: legendItems[0].color }}
-                                    ></div>
-                                  )}
-                                  
-                                  {/* Sow Outdoors */}
-                                  {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                    <div 
-                                      className="h-2 w-full" 
-                                      style={{ backgroundColor: legendItems[1].color }}
-                                    ></div>
-                                  )}
-                                  
-                                  {/* Transplant/Plant Outdoors */}
-                                  {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                    <div 
-                                      className="h-2 w-full" 
-                                      style={{ backgroundColor: legendItems[2].color }}
-                                    ></div>
-                                  )}
-                                  
-                                  {/* Harvest Period */}
-                                  {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                    <div 
-                                      className="h-2 w-full" 
-                                      style={{ backgroundColor: legendItems[3].color }}
-                                    ></div>
-                                  )}
-                                </div>
-                              </td>
-                            ))}
-                          </tr>
+                            </TableCell>
+                            {months.map((_, monthIdx) => {
+                              // Calculate which activities happen in this month
+                              const hasIndoors = isMonthInPeriods(entry.sow_indoors, monthIdx);
+                              const hasOutdoors = isMonthInPeriods(entry.sow_outdoors, monthIdx);
+                              const hasTransplant = isMonthInPeriods(entry.transplant_outdoors, monthIdx);
+                              const hasHarvest = isMonthInPeriods(entry.harvest_period, monthIdx);
+                              
+                              // Calculate how many activities we need to display
+                              const activitiesCount = [hasIndoors, hasOutdoors, hasTransplant, hasHarvest].filter(Boolean).length;
+                              const heightClass = activitiesCount > 0 ? `h-${activitiesCount * 6}` : 'h-6';
+                              
+                              return (
+                                <TableCell key={monthIdx} className="border border-border p-0 relative">
+                                  <div className="flex flex-col h-full">
+                                    {/* Render activities in their respective positions */}
+                                    {hasIndoors && (
+                                      <div 
+                                        className="h-6 w-full" 
+                                        style={{ backgroundColor: legendItems[0].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {hasOutdoors && (
+                                      <div 
+                                        className="h-6 w-full" 
+                                        style={{ backgroundColor: legendItems[1].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {hasTransplant && (
+                                      <div 
+                                        className="h-6 w-full" 
+                                        style={{ backgroundColor: legendItems[2].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {hasHarvest && (
+                                      <div 
+                                        className="h-6 w-full" 
+                                        style={{ backgroundColor: legendItems[3].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {/* If no activities, still maintain height */}
+                                    {activitiesCount === 0 && <div className="h-6"></div>}
+                                  </div>
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </ScrollArea>
               </div>
