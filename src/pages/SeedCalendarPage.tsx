@@ -65,14 +65,37 @@ const SeedCalendarPage = () => {
     return monthIndices;
   };
 
-  // Helper function to check if a month is in period array
-  const isMonthInPeriods = (periods: string[], monthIndex: number): boolean => {
-    if (!periods || !periods.length) return false;
+  // Helper function to generate continuous spans for a specific activity type
+  const generateActivitySpans = (periods: string[], activityIndex: number) => {
+    if (!periods || !periods.length) return [];
     
-    return periods.some(period => {
+    const spans: {start: number, end: number}[] = [];
+    
+    periods.forEach(period => {
       const monthsInPeriod = getMonthsInPeriod(period);
-      return monthsInPeriod.includes(monthIndex);
+      if (monthsInPeriod.length === 0) return;
+      
+      // Sort months to ensure they're in order
+      monthsInPeriod.sort((a, b) => a - b);
+      
+      let currentSpan = { start: monthsInPeriod[0], end: monthsInPeriod[0] };
+      
+      for (let i = 1; i < monthsInPeriod.length; i++) {
+        // If month is consecutive, extend the span
+        if (monthsInPeriod[i] === currentSpan.end + 1) {
+          currentSpan.end = monthsInPeriod[i];
+        } else {
+          // Non-consecutive month, push the current span and start a new one
+          spans.push(currentSpan);
+          currentSpan = { start: monthsInPeriod[i], end: monthsInPeriod[i] };
+        }
+      }
+      
+      // Push the last span
+      spans.push(currentSpan);
     });
+    
+    return spans;
   };
 
   return (
@@ -124,62 +147,109 @@ const SeedCalendarPage = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {seedData.map((entry, idx) => (
-                          <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
-                            <TableCell className="border border-border p-2 font-medium whitespace-nowrap">
-                              {entry.vegetable}
-                            </TableCell>
-                            {months.map((_, monthIdx) => {
-                              // Calculate which activities happen in this month
-                              const hasIndoors = isMonthInPeriods(entry.sow_indoors, monthIdx);
-                              const hasOutdoors = isMonthInPeriods(entry.sow_outdoors, monthIdx);
-                              const hasTransplant = isMonthInPeriods(entry.transplant_outdoors, monthIdx);
-                              const hasHarvest = isMonthInPeriods(entry.harvest_period, monthIdx);
-                              
-                              // Calculate how many activities we need to display
-                              const activitiesCount = [hasIndoors, hasOutdoors, hasTransplant, hasHarvest].filter(Boolean).length;
-                              const heightClass = activitiesCount > 0 ? `h-${activitiesCount * 6}` : 'h-6';
-                              
-                              return (
-                                <TableCell key={monthIdx} className="border border-border p-0 relative">
-                                  <div className="flex flex-col h-full">
-                                    {/* Render activities in their respective positions */}
-                                    {hasIndoors && (
-                                      <div 
-                                        className="h-6 w-full" 
-                                        style={{ backgroundColor: legendItems[0].color }}
-                                      ></div>
-                                    )}
+                        {seedData.map((entry, idx) => {
+                          // Pre-calculate all spans for this entry
+                          const indoorsSpans = generateActivitySpans(entry.sow_indoors, 0);
+                          const outdoorsSpans = generateActivitySpans(entry.sow_outdoors, 1);
+                          const transplantSpans = generateActivitySpans(entry.transplant_outdoors, 2);
+                          const harvestSpans = generateActivitySpans(entry.harvest_period, 3);
+                          
+                          return (
+                            <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
+                              <TableCell className="border border-border p-2 font-medium whitespace-nowrap">
+                                {entry.vegetable}
+                              </TableCell>
+                              <TableCell colSpan={12} className="p-0 relative">
+                                <div className="grid grid-cols-12 h-24 relative">
+                                  {/* Create columns for each month */}
+                                  {months.map((_, monthIdx) => (
+                                    <div 
+                                      key={monthIdx} 
+                                      className="border border-border h-full"
+                                    />
+                                  ))}
+                                  
+                                  {/* Render continuous spans for each activity type */}
+                                  {/* Sow Indoors */}
+                                  {indoorsSpans.map((span, i) => {
+                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
+                                    const spanLeft = span.start * (100 / 12);
                                     
-                                    {hasOutdoors && (
-                                      <div 
-                                        className="h-6 w-full" 
-                                        style={{ backgroundColor: legendItems[1].color }}
-                                      ></div>
-                                    )}
+                                    return (
+                                      <div
+                                        key={`indoors-${i}`}
+                                        className="absolute h-6 z-10"
+                                        style={{
+                                          width: `${spanWidth}%`,
+                                          left: `${spanLeft}%`,
+                                          top: '0',
+                                          backgroundColor: legendItems[0].color
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                  
+                                  {/* Sow Outdoors */}
+                                  {outdoorsSpans.map((span, i) => {
+                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
+                                    const spanLeft = span.start * (100 / 12);
                                     
-                                    {hasTransplant && (
-                                      <div 
-                                        className="h-6 w-full" 
-                                        style={{ backgroundColor: legendItems[2].color }}
-                                      ></div>
-                                    )}
+                                    return (
+                                      <div
+                                        key={`outdoors-${i}`}
+                                        className="absolute h-6 z-10"
+                                        style={{
+                                          width: `${spanWidth}%`,
+                                          left: `${spanLeft}%`,
+                                          top: '6px',
+                                          backgroundColor: legendItems[1].color
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                  
+                                  {/* Plant Outdoors */}
+                                  {transplantSpans.map((span, i) => {
+                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
+                                    const spanLeft = span.start * (100 / 12);
                                     
-                                    {hasHarvest && (
-                                      <div 
-                                        className="h-6 w-full" 
-                                        style={{ backgroundColor: legendItems[3].color }}
-                                      ></div>
-                                    )}
+                                    return (
+                                      <div
+                                        key={`transplant-${i}`}
+                                        className="absolute h-6 z-10"
+                                        style={{
+                                          width: `${spanWidth}%`,
+                                          left: `${spanLeft}%`,
+                                          top: '12px',
+                                          backgroundColor: legendItems[2].color
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                  
+                                  {/* Harvest */}
+                                  {harvestSpans.map((span, i) => {
+                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
+                                    const spanLeft = span.start * (100 / 12);
                                     
-                                    {/* If no activities, still maintain height */}
-                                    {activitiesCount === 0 && <div className="h-6"></div>}
-                                  </div>
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        ))}
+                                    return (
+                                      <div
+                                        key={`harvest-${i}`}
+                                        className="absolute h-6 z-10"
+                                        style={{
+                                          width: `${spanWidth}%`,
+                                          left: `${spanLeft}%`,
+                                          top: '18px',
+                                          backgroundColor: legendItems[3].color
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
