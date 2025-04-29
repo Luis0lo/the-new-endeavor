@@ -1,18 +1,9 @@
 
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -26,6 +17,23 @@ const legendItems = [
 
 const SeedCalendarPage = () => {
   const { seedData, loading, error } = useSeedCalendar();
+  const [scrollbarWidth, setScrollbarWidth] = useState(0);
+  const scrollBodyRef = useRef<HTMLDivElement>(null);
+
+  // Calculate scrollbar width on mount and when data loads
+  useEffect(() => {
+    if (scrollBodyRef.current && !loading) {
+      const element = scrollBodyRef.current;
+      const hasVerticalScrollbar = element.scrollHeight > element.clientHeight;
+      if (hasVerticalScrollbar) {
+        // Calculate the width of the scrollbar
+        const width = element.offsetWidth - element.clientWidth;
+        setScrollbarWidth(width);
+      } else {
+        setScrollbarWidth(0);
+      }
+    }
+  }, [loading, seedData.length]);
 
   // Helper function to determine which months are included in a period
   const getMonthsInPeriod = (period: string): number[] => {
@@ -110,7 +118,7 @@ const SeedCalendarPage = () => {
                 {/* Main calendar table with fixed column widths */}
                 <div className="flex flex-col overflow-hidden h-full">
                   {/* Fixed header with defined column widths */}
-                  <div className="bg-muted/50 border-b">
+                  <div className="bg-muted/50 border-b" style={{ paddingRight: `${scrollbarWidth}px` }}>
                     <table className="w-full table-fixed">
                       <colgroup>
                         {/* Vegetable column width */}
@@ -137,7 +145,7 @@ const SeedCalendarPage = () => {
                   </div>
                   
                   {/* Scrollable body with same column structure */}
-                  <div className="overflow-y-auto flex-1">
+                  <div ref={scrollBodyRef} className="overflow-y-auto flex-1">
                     <table className="w-full table-fixed">
                       <colgroup>
                         {/* Vegetable column width */}
