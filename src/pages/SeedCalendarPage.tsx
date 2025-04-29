@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar } from '@/hooks/useSeedCalendar';
@@ -157,7 +156,10 @@ const SeedCalendarPage = () => {
                       </colgroup>
                       <tbody>
                         {seedData.map((entry, idx) => (
-                          <tr key={entry.id} className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}>
+                          <tr 
+                            key={entry.id} 
+                            className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                          >
                             <td className="font-medium whitespace-nowrap p-4 border-r border-border">
                               {entry.vegetable}
                             </td>
