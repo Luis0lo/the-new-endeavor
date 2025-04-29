@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar } from '@/hooks/useSeedCalendar';
@@ -112,9 +113,11 @@ const SeedCalendarPage = () => {
                   <div className="bg-muted/50 border-b">
                     <table className="w-full table-fixed">
                       <colgroup>
-                        <col style={{ width: '180px' }} /> {/* Vegetable column width */}
+                        {/* Vegetable column width */}
+                        <col style={{ width: '180px' }} />
                         {months.map((_, i) => (
-                          <col key={i} style={{ width: '60px' }} /> {/* Fixed width for each month */}
+                          /* Fixed width for each month */
+                          <col key={i} style={{ width: '60px' }} />
                         ))}
                       </colgroup>
                       <thead>
@@ -137,9 +140,11 @@ const SeedCalendarPage = () => {
                   <div className="overflow-y-auto flex-1">
                     <table className="w-full table-fixed">
                       <colgroup>
-                        <col style={{ width: '180px' }} /> {/* Vegetable column width */}
+                        {/* Vegetable column width */}
+                        <col style={{ width: '180px' }} />
                         {months.map((_, i) => (
-                          <col key={i} style={{ width: '60px' }} /> {/* Fixed width for each month */}
+                          /* Fixed width for each month */
+                          <col key={i} style={{ width: '60px' }} />
                         ))}
                       </colgroup>
                       <tbody>
