@@ -5,20 +5,12 @@ import { useSeedCalendar } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow 
-} from '@/components/ui/table';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Legend items with their colors
 const legendItems = [
-  { label: 'Sow Indoors', color: '#8B5CF6' }, // Purple
+  { label: 'Take Cuttings & Growing Indoors', color: '#8B5CF6' }, // Purple
   { label: 'Sow Outdoors', color: '#FBBF24' }, // Yellow
   { label: 'Plant Outdoors', color: '#10B981' }, // Green
   { label: 'Harvest', color: '#EF4444' }, // Red
@@ -65,37 +57,14 @@ const SeedCalendarPage = () => {
     return monthIndices;
   };
 
-  // Helper function to generate continuous spans for a specific activity type
-  const generateActivitySpans = (periods: string[], activityIndex: number) => {
-    if (!periods || !periods.length) return [];
+  // Helper function to check if a month is in period array
+  const isMonthInPeriods = (periods: string[], monthIndex: number): boolean => {
+    if (!periods || !periods.length) return false;
     
-    const spans: {start: number, end: number}[] = [];
-    
-    periods.forEach(period => {
+    return periods.some(period => {
       const monthsInPeriod = getMonthsInPeriod(period);
-      if (monthsInPeriod.length === 0) return;
-      
-      // Sort months to ensure they're in order
-      monthsInPeriod.sort((a, b) => a - b);
-      
-      let currentSpan = { start: monthsInPeriod[0], end: monthsInPeriod[0] };
-      
-      for (let i = 1; i < monthsInPeriod.length; i++) {
-        // If month is consecutive, extend the span
-        if (monthsInPeriod[i] === currentSpan.end + 1) {
-          currentSpan.end = monthsInPeriod[i];
-        } else {
-          // Non-consecutive month, push the current span and start a new one
-          spans.push(currentSpan);
-          currentSpan = { start: monthsInPeriod[i], end: monthsInPeriod[i] };
-        }
-      }
-      
-      // Push the last span
-      spans.push(currentSpan);
+      return monthsInPeriod.includes(monthIndex);
     });
-    
-    return spans;
   };
 
   return (
@@ -132,126 +101,67 @@ const SeedCalendarPage = () => {
                 
                 <ScrollArea className="h-[calc(100vh-220px)]">
                   <div className="overflow-x-auto w-full">
-                    <Table className="min-w-full">
-                      <TableHeader className="sticky top-0 z-10">
-                        <TableRow>
-                          <TableHead className="bg-muted/50 border border-border whitespace-nowrap">Vegetable</TableHead>
+                    <table className="min-w-full border-collapse">
+                      <thead className="bg-muted/30 sticky top-0 z-10">
+                        <tr>
+                          <th className="border border-border p-2 text-left whitespace-nowrap bg-muted/50">Vegetable</th>
                           {months.map((month) => (
-                            <TableHead 
+                            <th 
                               key={month} 
-                              className="bg-muted/50 border border-border p-2 text-center w-20"
+                              className="border border-border p-2 text-center w-20 bg-muted/50"
                             >
                               {month}
-                            </TableHead>
+                            </th>
                           ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {seedData.map((entry, idx) => {
-                          // Pre-calculate all spans for this entry
-                          const indoorsSpans = generateActivitySpans(entry.sow_indoors, 0);
-                          const outdoorsSpans = generateActivitySpans(entry.sow_outdoors, 1);
-                          const transplantSpans = generateActivitySpans(entry.transplant_outdoors, 2);
-                          const harvestSpans = generateActivitySpans(entry.harvest_period, 3);
-                          
-                          return (
-                            <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
-                              <TableCell className="border border-border p-2 font-medium whitespace-nowrap">
-                                {entry.vegetable}
-                              </TableCell>
-                              <TableCell colSpan={12} className="p-0 relative">
-                                <div className="grid grid-cols-12 h-24 relative">
-                                  {/* Create columns for each month */}
-                                  {months.map((_, monthIdx) => (
-                                    <div 
-                                      key={monthIdx} 
-                                      className="border border-border h-full"
-                                    />
-                                  ))}
-                                  
-                                  {/* Render continuous spans for each activity type */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {seedData.map((entry, idx) => (
+                          <tr key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
+                            <td className="border border-border p-2 text-left font-medium whitespace-nowrap">
+                              {entry.vegetable}
+                            </td>
+                            {months.map((_, monthIdx) => (
+                              <td key={monthIdx} className="border border-border p-0 h-8 relative">
+                                <div className="flex flex-col h-full">
                                   {/* Sow Indoors */}
-                                  {indoorsSpans.map((span, i) => {
-                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
-                                    const spanLeft = span.start * (100 / 12);
-                                    
-                                    return (
-                                      <div
-                                        key={`indoors-${i}`}
-                                        className="absolute h-6 z-10"
-                                        style={{
-                                          width: `${spanWidth}%`,
-                                          left: `${spanLeft}%`,
-                                          top: '0',
-                                          backgroundColor: legendItems[0].color
-                                        }}
-                                      />
-                                    );
-                                  })}
+                                  {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                    <div 
+                                      className="h-2 w-full" 
+                                      style={{ backgroundColor: legendItems[0].color }}
+                                    ></div>
+                                  )}
                                   
                                   {/* Sow Outdoors */}
-                                  {outdoorsSpans.map((span, i) => {
-                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
-                                    const spanLeft = span.start * (100 / 12);
-                                    
-                                    return (
-                                      <div
-                                        key={`outdoors-${i}`}
-                                        className="absolute h-6 z-10"
-                                        style={{
-                                          width: `${spanWidth}%`,
-                                          left: `${spanLeft}%`,
-                                          top: '6px',
-                                          backgroundColor: legendItems[1].color
-                                        }}
-                                      />
-                                    );
-                                  })}
+                                  {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                    <div 
+                                      className="h-2 w-full" 
+                                      style={{ backgroundColor: legendItems[1].color }}
+                                    ></div>
+                                  )}
                                   
-                                  {/* Plant Outdoors */}
-                                  {transplantSpans.map((span, i) => {
-                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
-                                    const spanLeft = span.start * (100 / 12);
-                                    
-                                    return (
-                                      <div
-                                        key={`transplant-${i}`}
-                                        className="absolute h-6 z-10"
-                                        style={{
-                                          width: `${spanWidth}%`,
-                                          left: `${spanLeft}%`,
-                                          top: '12px',
-                                          backgroundColor: legendItems[2].color
-                                        }}
-                                      />
-                                    );
-                                  })}
+                                  {/* Transplant/Plant Outdoors */}
+                                  {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                    <div 
+                                      className="h-2 w-full" 
+                                      style={{ backgroundColor: legendItems[2].color }}
+                                    ></div>
+                                  )}
                                   
-                                  {/* Harvest */}
-                                  {harvestSpans.map((span, i) => {
-                                    const spanWidth = (span.end - span.start + 1) * (100 / 12);
-                                    const spanLeft = span.start * (100 / 12);
-                                    
-                                    return (
-                                      <div
-                                        key={`harvest-${i}`}
-                                        className="absolute h-6 z-10"
-                                        style={{
-                                          width: `${spanWidth}%`,
-                                          left: `${spanLeft}%`,
-                                          top: '18px',
-                                          backgroundColor: legendItems[3].color
-                                        }}
-                                      />
-                                    );
-                                  })}
+                                  {/* Harvest Period */}
+                                  {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                    <div 
+                                      className="h-2 w-full" 
+                                      style={{ backgroundColor: legendItems[3].color }}
+                                    ></div>
+                                  )}
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </ScrollArea>
               </div>
