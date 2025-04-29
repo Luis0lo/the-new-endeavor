@@ -5,12 +5,20 @@ import { useSeedCalendar } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Legend items with their colors
 const legendItems = [
-  { label: 'Take Cuttings & Growing Indoors', color: '#8B5CF6' }, // Purple
+  { label: 'Sow Indoors', color: '#8B5CF6' }, // Purple
   { label: 'Sow Outdoors', color: '#FBBF24' }, // Yellow
   { label: 'Plant Outdoors', color: '#10B981' }, // Green
   { label: 'Harvest', color: '#EF4444' }, // Red
@@ -101,33 +109,31 @@ const SeedCalendarPage = () => {
                 
                 <ScrollArea className="h-[calc(100vh-220px)]">
                   <div className="overflow-x-auto w-full">
-                    <table className="min-w-full border-collapse">
-                      <thead className="bg-muted/30 sticky top-0 z-10">
-                        <tr>
-                          <th className="border border-border p-2 text-left whitespace-nowrap bg-muted/50">Vegetable</th>
+                    <Table>
+                      <TableHeader className="sticky top-0 z-10 bg-muted/50">
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap font-medium">Vegetable</TableHead>
                           {months.map((month) => (
-                            <th 
-                              key={month} 
-                              className="border border-border p-2 text-center w-20 bg-muted/50"
-                            >
+                            <TableHead key={month} className="text-center w-20">
                               {month}
-                            </th>
+                            </TableHead>
                           ))}
-                        </tr>
-                      </thead>
-                      <tbody>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {seedData.map((entry, idx) => (
-                          <tr key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
-                            <td className="border border-border p-2 text-left font-medium whitespace-nowrap">
+                          <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
+                            <TableCell className="font-medium whitespace-nowrap">
                               {entry.vegetable}
-                            </td>
+                            </TableCell>
                             {months.map((_, monthIdx) => (
-                              <td key={monthIdx} className="border border-border p-0 h-8 relative">
+                              <TableCell key={monthIdx} className="p-0 h-12 relative">
                                 <div className="flex flex-col h-full">
+                                  {/* Using absolute positioning to create straight horizontal lines */}
                                   {/* Sow Indoors */}
                                   {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
                                     <div 
-                                      className="h-2 w-full" 
+                                      className="absolute top-0 left-0 right-0 h-3" 
                                       style={{ backgroundColor: legendItems[0].color }}
                                     ></div>
                                   )}
@@ -135,7 +141,7 @@ const SeedCalendarPage = () => {
                                   {/* Sow Outdoors */}
                                   {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
                                     <div 
-                                      className="h-2 w-full" 
+                                      className="absolute top-3 left-0 right-0 h-3" 
                                       style={{ backgroundColor: legendItems[1].color }}
                                     ></div>
                                   )}
@@ -143,7 +149,7 @@ const SeedCalendarPage = () => {
                                   {/* Transplant/Plant Outdoors */}
                                   {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
                                     <div 
-                                      className="h-2 w-full" 
+                                      className="absolute top-6 left-0 right-0 h-3" 
                                       style={{ backgroundColor: legendItems[2].color }}
                                     ></div>
                                   )}
@@ -151,17 +157,17 @@ const SeedCalendarPage = () => {
                                   {/* Harvest Period */}
                                   {isMonthInPeriods(entry.harvest_period, monthIdx) && (
                                     <div 
-                                      className="h-2 w-full" 
+                                      className="absolute top-9 left-0 right-0 h-3" 
                                       style={{ backgroundColor: legendItems[3].color }}
                                     ></div>
                                   )}
                                 </div>
-                              </td>
+                              </TableCell>
                             ))}
-                          </tr>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </ScrollArea>
               </div>
