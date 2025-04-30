@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +19,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [resetPasswordMode, setResetPasswordMode] = useState(false);
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -142,6 +145,29 @@ const Auth = () => {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+      
+      if (error) throw error;
+      
+      setShowResetConfirmation(true);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send password reset email",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Show a loading state if we're processing an email verification
   if (verifying) {
     return (
@@ -184,6 +210,71 @@ const Auth = () => {
     );
   }
 
+  // Password reset mode
+  if (resetPasswordMode) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex items-center mb-2">
+              <Button 
+                variant="ghost" 
+                className="p-0 h-auto" 
+                onClick={() => setResetPasswordMode(false)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </div>
+            <CardTitle className="text-2xl text-center">Reset Your Password</CardTitle>
+            <CardDescription className="text-center">Enter your email address and we'll send you a password reset link</CardDescription>
+          </CardHeader>
+          <form onSubmit={handlePasswordReset}>
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input 
+                  id="reset-email" 
+                  placeholder="your@email.com" 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Sending reset link..." : "Send Reset Link"}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+
+        {/* Password reset confirmation dialog */}
+        <Dialog open={showResetConfirmation} onOpenChange={setShowResetConfirmation}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Password Reset Email Sent</DialogTitle>
+              <DialogDescription>
+                We've sent a password reset link to <strong>{email}</strong>. 
+                Please check your email and follow the instructions to reset your password.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => {
+                setShowResetConfirmation(false);
+                setResetPasswordMode(false);
+              }}>
+                Return to Login
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
       <Card className="w-full max-w-md">
@@ -212,7 +303,17 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-sm" 
+                      type="button"
+                      onClick={() => setResetPasswordMode(true)}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
                   <Input 
                     id="password" 
                     type="password" 
