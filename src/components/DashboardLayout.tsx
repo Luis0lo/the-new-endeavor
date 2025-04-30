@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +13,7 @@ import {
   BookOpen,
   Flower2,
   ChevronLeft,
+  ChevronRight,
   Sprout
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -167,7 +169,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 className="ml-auto"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               >
-                <ChevronLeft size={18} />
+                {/* Changed from ChevronLeft to ChevronRight to point right when collapsed */}
+                <ChevronRight size={18} />
               </Button>
             )}
           </div>
