@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +10,21 @@ import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+// Schema for the password reset form
+const resetPasswordSchema = z.object({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -21,12 +35,33 @@ const Auth = () => {
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [resetPasswordMode, setResetPasswordMode] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
+  const resetPasswordForm = useForm<ResetPasswordForm>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Check if the user is accessing with a reset token
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const resetToken = queryParams.get('reset') === 'true';
+    const type = queryParams.get('type');
+    
+    if (resetToken || type === 'recovery') {
+      // Show the password reset form if the user is accessing with a reset token
+      setShowNewPasswordForm(true);
+    }
+  }, [location]);
+  
   // Check if user is already logged in
   useEffect(() => {
-    // Special case for handling email confirmation
+    // Special case for handling email confirmation or reset password
     const handleEmailConfirmation = async () => {
       // Handle both code in query params and access_token in hash
       const hasCode = location.search.includes('code=');
@@ -68,17 +103,20 @@ const Auth = () => {
     };
 
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/dashboard');
-      } else {
-        // Try to handle email confirmation
-        handleEmailConfirmation();
+      // Only check for session if not in password reset mode
+      if (!showNewPasswordForm) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          navigate('/dashboard');
+        } else {
+          // Try to handle email confirmation
+          handleEmailConfirmation();
+        }
       }
     };
     
     checkSession();
-  }, [navigate, location]);
+  }, [navigate, location, showNewPasswordForm]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,6 +206,35 @@ const Auth = () => {
     }
   };
 
+  const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: values.password
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Your password has been updated successfully. Please sign in with your new password.",
+      });
+      
+      // Reset the form and go back to login
+      setShowNewPasswordForm(false);
+      resetPasswordForm.reset();
+    } catch (error: any) {
+      toast({
+        title: "Error updating password",
+        description: error.message || "Failed to update your password",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Show a loading state if we're processing an email verification
   if (verifying) {
     return (
@@ -205,6 +272,57 @@ const Auth = () => {
           <CardFooter className="flex justify-center">
             <Button onClick={() => navigate('/auth')}>Return to Login</Button>
           </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show new password form for password reset
+  if (showNewPasswordForm) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Set New Password</CardTitle>
+            <CardDescription className="text-center">Enter your new password below</CardDescription>
+          </CardHeader>
+          <Form {...resetPasswordForm}>
+            <form onSubmit={resetPasswordForm.handleSubmit(handleNewPasswordSubmit)}>
+              <CardContent className="space-y-4 pt-4">
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter new password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Confirm your password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating password...</> : "Update Password"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
         </Card>
       </div>
     );
