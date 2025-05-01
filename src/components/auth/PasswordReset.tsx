@@ -46,62 +46,64 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ email, setEmail, o
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <div className="flex items-center mb-2">
-          <Button 
-            variant="ghost" 
-            className="p-0 h-auto" 
-            onClick={onBack}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </div>
-        <CardTitle className="text-2xl text-center">Reset Your Password</CardTitle>
-        <CardDescription className="text-center">Enter your email address and we'll send you a password reset link</CardDescription>
-      </CardHeader>
-      <form onSubmit={handlePasswordReset}>
-        <CardContent className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="reset-email">Email</Label>
-            <Input 
-              id="reset-email" 
-              placeholder="your@email.com" 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required 
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending reset link...</> : "Send Reset Link"}
-          </Button>
-        </CardFooter>
-      </form>
-
-      {/* Password reset confirmation dialog */}
-      <Dialog open={showResetConfirmation} onOpenChange={setShowResetConfirmation}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Password Reset Email Sent</DialogTitle>
-            <DialogDescription>
-              We've sent a password reset link to <strong>{email}</strong>. 
-              Please check your email and follow the instructions to reset your password.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => {
-              setShowResetConfirmation(false);
-              onBack();
-            }}>
-              Return to Login
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex items-center mb-2">
+            <Button 
+              variant="ghost" 
+              className="p-0 h-auto" 
+              onClick={onBack}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Card>
+          </div>
+          <CardTitle className="text-2xl text-center">Reset Your Password</CardTitle>
+          <CardDescription className="text-center">Enter your email address and we'll send you a password reset link</CardDescription>
+        </CardHeader>
+        <form onSubmit={handlePasswordReset}>
+          <CardContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">Email</Label>
+              <Input 
+                id="reset-email" 
+                placeholder="your@email.com" 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending reset link...</> : "Send Reset Link"}
+            </Button>
+          </CardFooter>
+        </form>
+
+        {/* Password reset confirmation dialog */}
+        <Dialog open={showResetConfirmation} onOpenChange={setShowResetConfirmation}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Password Reset Email Sent</DialogTitle>
+              <DialogDescription>
+                We've sent a password reset link to <strong>{email}</strong>. 
+                Please check your email and follow the instructions to reset your password.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => {
+                setShowResetConfirmation(false);
+                onBack();
+              }}>
+                Return to Login
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </Card>
+    </div>
   );
 };
