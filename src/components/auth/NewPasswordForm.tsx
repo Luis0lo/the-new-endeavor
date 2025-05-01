@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
 export const NewPasswordForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   
   const resetPasswordForm = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -32,6 +33,24 @@ export const NewPasswordForm: React.FC = () => {
       confirmPassword: "",
     },
   });
+
+  // Ensure we're in password reset mode by signing out any existing session
+  useEffect(() => {
+    const ensureSignedOut = async () => {
+      setInitializing(true);
+      try {
+        // Sign out any existing user to ensure we're in password reset mode
+        await supabase.auth.signOut();
+        console.log("Signed out existing session for password reset");
+      } catch (error) {
+        console.error("Error signing out:", error);
+      } finally {
+        setInitializing(false);
+      }
+    };
+
+    ensureSignedOut();
+  }, []);
 
   const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
@@ -65,6 +84,22 @@ export const NewPasswordForm: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (initializing) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Preparing Password Reset</CardTitle>
+            <CardDescription className="text-center">Please wait while we prepare your password reset form</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-6">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
