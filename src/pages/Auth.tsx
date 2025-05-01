@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,6 +39,7 @@ const Auth = () => {
   const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   
   const resetPasswordForm = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -50,12 +51,15 @@ const Auth = () => {
 
   // Check for password reset or email verification
   useEffect(() => {
+    // Check for code in query parameters (used in password reset)
+    const code = searchParams.get('code');
+    
     // Parse URL parameters - Handle both query params and hash fragments
     const queryParams = new URLSearchParams(location.search);
     const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
     
     // Check for password reset type in query params
-    const resetToken = queryParams.get('type') === 'recovery';
+    const resetType = queryParams.get('type') === 'recovery';
     
     // Check for access_token in URL hash (happens with email verification and password reset)
     const hasToken = location.hash && (
@@ -66,12 +70,20 @@ const Auth = () => {
     console.log("URL check:", {
       search: location.search,
       hash: location.hash,
-      resetToken,
-      hasToken
+      resetType,
+      hasToken,
+      code
     });
     
-    // If this is a password reset flow
-    if (resetToken || (hasToken && queryParams.get('type') === 'recovery')) {
+    // If this is a password reset flow with a code
+    if (code) {
+      console.log("Password reset code detected:", code);
+      setShowNewPasswordForm(true);
+      return;
+    }
+    
+    // If this is a password reset flow with hash params
+    if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
       console.log("Showing password reset form");
       setShowNewPasswordForm(true);
       return;
@@ -81,7 +93,7 @@ const Auth = () => {
     if (hasToken) {
       handleEmailConfirmation();
     }
-  }, [location]);
+  }, [location, searchParams]);
   
   // Check if user is already logged in
   useEffect(() => {
@@ -207,7 +219,7 @@ const Auth = () => {
       const origin = window.location.origin;
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth?type=recovery`,
+        redirectTo: `${origin}/auth`,
       });
       
       if (error) throw error;
@@ -242,6 +254,11 @@ const Auth = () => {
       // Reset the form and go back to login
       setShowNewPasswordForm(false);
       resetPasswordForm.reset();
+      
+      // Small delay to show the success message before redirecting
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1500);
     } catch (error: any) {
       toast({
         title: "Error updating password",
