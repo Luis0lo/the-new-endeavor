@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,10 +51,9 @@ const Auth = () => {
   // Check if the user is accessing with a reset token
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const resetToken = queryParams.get('reset') === 'true';
-    const type = queryParams.get('type');
+    const resetToken = queryParams.get('type') === 'recovery';
     
-    if (resetToken || type === 'recovery') {
+    if (resetToken) {
       // Show the password reset form if the user is accessing with a reset token
       setShowNewPasswordForm(true);
     }
@@ -189,7 +189,7 @@ const Auth = () => {
     
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+        redirectTo: `${window.location.origin}/auth?type=recovery`,
       });
       
       if (error) throw error;
@@ -363,7 +363,7 @@ const Auth = () => {
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sending reset link..." : "Send Reset Link"}
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending reset link...</> : "Send Reset Link"}
               </Button>
             </CardFooter>
           </form>
@@ -423,14 +423,6 @@ const Auth = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto text-sm" 
-                      type="button"
-                      onClick={() => setResetPasswordMode(true)}
-                    >
-                      Forgot password?
-                    </Button>
                   </div>
                   <Input 
                     id="password" 
@@ -441,9 +433,17 @@ const Auth = () => {
                   />
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex-col space-y-4">
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign in"}
+                  {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : "Sign in"}
+                </Button>
+                <Button 
+                  variant="link" 
+                  type="button"
+                  className="w-full"
+                  onClick={() => setResetPasswordMode(true)}
+                >
+                  Forgot password?
                 </Button>
               </CardFooter>
             </form>
@@ -492,7 +492,7 @@ const Auth = () => {
               </CardContent>
               <CardFooter>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Create account"}
+                  {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : "Create account"}
                 </Button>
               </CardFooter>
             </form>
