@@ -48,75 +48,90 @@ const Auth = () => {
     },
   });
 
-  // Check if the user is accessing with a reset token
+  // Check for password reset or email verification
   useEffect(() => {
+    // Parse URL parameters - Handle both query params and hash fragments
     const queryParams = new URLSearchParams(location.search);
+    const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+    
+    // Check for password reset type in query params
     const resetToken = queryParams.get('type') === 'recovery';
     
-    if (resetToken) {
-      // Show the password reset form if the user is accessing with a reset token
+    // Check for access_token in URL hash (happens with email verification and password reset)
+    const hasToken = location.hash && (
+      location.hash.includes('access_token') || 
+      location.hash.includes('refresh_token')
+    );
+    
+    console.log("URL check:", {
+      search: location.search,
+      hash: location.hash,
+      resetToken,
+      hasToken
+    });
+    
+    // If this is a password reset flow
+    if (resetToken || (hasToken && queryParams.get('type') === 'recovery')) {
+      console.log("Showing password reset form");
       setShowNewPasswordForm(true);
+      return;
+    }
+    
+    // Handle email verification flow
+    if (hasToken) {
+      handleEmailConfirmation();
     }
   }, [location]);
   
   // Check if user is already logged in
   useEffect(() => {
-    // Special case for handling email confirmation or reset password
-    const handleEmailConfirmation = async () => {
-      // Handle both code in query params and access_token in hash
-      const hasCode = location.search.includes('code=');
-      const hasToken = location.hash && (location.hash.includes('access_token') || location.hash.includes('refresh_token'));
-      
-      if (hasCode || hasToken) {
-        setVerifying(true);
-        setVerificationError(null);
-        
-        try {
-          // The PKCE flow will automatically exchange the code for a session
-          const { data, error } = await supabase.auth.getSession();
-          
-          if (error) throw error;
-          
-          if (data.session) {
-            toast({
-              title: "Authentication successful!",
-              description: "Your account has been verified successfully.",
-            });
-            
-            navigate('/dashboard');
-          } else {
-            throw new Error("No session found after verification");
-          }
-        } catch (error: any) {
-          console.error("Verification error:", error);
-          setVerificationError(error.message || "Failed to verify your email");
-          
-          toast({
-            title: "Verification error",
-            description: error.message || "Failed to verify your email",
-            variant: "destructive"
-          });
-        } finally {
-          setVerifying(false);
-        }
-      }
-    };
-
-    const checkSession = async () => {
-      // Only check for session if not in password reset mode
-      if (!showNewPasswordForm) {
+    // Only check for session if not in password reset mode
+    if (!showNewPasswordForm) {
+      const checkSession = async () => {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           navigate('/dashboard');
-        } else {
-          // Try to handle email confirmation
-          handleEmailConfirmation();
         }
-      }
-    };
+      };
+      
+      checkSession();
+    }
+  }, [navigate, showNewPasswordForm]);
+
+  // Handle email confirmation
+  const handleEmailConfirmation = async () => {
+    setVerifying(true);
+    setVerificationError(null);
     
-    checkSession();
-  }, [navigate, location, showNewPasswordForm]);
+    try {
+      // The PKCE flow will automatically exchange the code for a session
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) throw error;
+      
+      if (data.session) {
+        toast({
+          title: "Authentication successful!",
+          description: "Your account has been verified successfully.",
+        });
+        
+        navigate('/dashboard');
+      } else {
+        throw new Error("No session found after verification");
+      }
+    } catch (error: any) {
+      console.error("Verification error:", error);
+      setVerificationError(error.message || "Failed to verify your email");
+      
+      toast({
+        title: "Verification error",
+        description: error.message || "Failed to verify your email",
+        variant: "destructive"
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,8 +203,11 @@ const Auth = () => {
     setLoading(true);
     
     try {
+      // Get the current URL origin (domain)
+      const origin = window.location.origin;
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
+        redirectTo: `${origin}/auth?type=recovery`,
       });
       
       if (error) throw error;
