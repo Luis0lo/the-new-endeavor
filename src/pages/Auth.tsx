@@ -62,8 +62,8 @@ const Auth = () => {
       return;
     }
     
-    // Handle email verification flow
-    if (hasToken) {
+    // Handle email verification flow - only if not a password reset
+    if (hasToken && !resetType && !queryParams.get('type')) {
       handleEmailConfirmation();
     }
   }, [location, searchParams]);
