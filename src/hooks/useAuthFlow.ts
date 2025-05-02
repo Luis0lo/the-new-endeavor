@@ -58,7 +58,7 @@ export const useAuthFlow = () => {
       }
       
       // Handle email verification flow - only if not a password reset
-      if (hasToken && !resetType && !currentView === 'newPassword') {
+      if (hasToken && !resetType && currentView !== 'newPassword') {
         handleEmailConfirmation();
       } else if (currentView !== 'newPassword') {
         // Only check for existing session if not in password reset mode
