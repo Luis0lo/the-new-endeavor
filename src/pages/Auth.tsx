@@ -26,14 +26,11 @@ const Auth = () => {
   useEffect(() => {
     const handleAuthFlow = async () => {
       // First check if this is a password reset request
-      // Check for code in query parameters
-      const code = searchParams.get('code');
-      
-      // Parse URL parameters - Handle both query params and hash fragments
       const queryParams = new URLSearchParams(location.search);
       
       // Check for password reset type in query params
       const resetType = queryParams.get('type') === 'recovery';
+      const hasCode = queryParams.get('code') !== null;
       
       // Check for access_token in URL hash
       const hasToken = location.hash && (
@@ -46,11 +43,11 @@ const Auth = () => {
         hash: location.hash,
         resetType,
         hasToken,
-        code
+        hasCode
       });
 
-      // Password reset detection - check multiple conditions
-      if (code || resetType || (hasToken && queryParams.get('type') === 'recovery')) {
+      // Password reset detection
+      if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
         console.log("Password reset flow detected, showing password form");
         // Sign out any existing session to prevent auto-redirect
         await supabase.auth.signOut();
