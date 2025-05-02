@@ -70,6 +70,9 @@ export const NewPasswordForm: React.FC = () => {
       // Reset the form and go back to login
       resetPasswordForm.reset();
       
+      // Sign out to ensure user needs to login with new password
+      await supabase.auth.signOut();
+      
       // Small delay to show the success message before redirecting
       setTimeout(() => {
         window.location.href = '/auth';

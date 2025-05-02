@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,64 +23,59 @@ const Auth = () => {
 
   // Check for password reset or email verification
   useEffect(() => {
-    // Check for code in query parameters (used in password reset)
-    const code = searchParams.get('code');
-    
-    // Parse URL parameters - Handle both query params and hash fragments
-    const queryParams = new URLSearchParams(location.search);
-    const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
-    
-    // Check for password reset type in query params
-    const resetType = queryParams.get('type') === 'recovery';
-    
-    // Check for access_token in URL hash (happens with email verification and password reset)
-    const hasToken = location.hash && (
-      location.hash.includes('access_token') || 
-      location.hash.includes('refresh_token')
-    );
-    
-    console.log("URL check:", {
-      search: location.search,
-      hash: location.hash,
-      resetType,
-      hasToken,
-      code
-    });
-    
-    // If this is a password reset flow with a code
-    if (code) {
-      console.log("Password reset code detected:", code);
-      setShowNewPasswordForm(true);
-      return;
-    }
-    
-    // If this is a password reset flow with hash params
-    if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
-      console.log("Showing password reset form");
-      setShowNewPasswordForm(true);
-      return;
-    }
-    
-    // Handle email verification flow - only if not a password reset
-    if (hasToken && !resetType && !queryParams.get('type')) {
-      handleEmailConfirmation();
-    }
-  }, [location, searchParams]);
-  
-  // Check if user is already logged in
-  useEffect(() => {
-    // Only check for session if not in password reset mode
-    if (!showNewPasswordForm) {
-      const checkSession = async () => {
+    const handleAuthFlow = async () => {
+      // Check for code in query parameters (used in password reset)
+      const code = searchParams.get('code');
+      
+      // Parse URL parameters - Handle both query params and hash fragments
+      const queryParams = new URLSearchParams(location.search);
+      const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+      
+      // Check for password reset type in query params
+      const resetType = queryParams.get('type') === 'recovery';
+      
+      // Check for access_token in URL hash (happens with email verification and password reset)
+      const hasToken = location.hash && (
+        location.hash.includes('access_token') || 
+        location.hash.includes('refresh_token')
+      );
+      
+      console.log("URL check:", {
+        search: location.search,
+        hash: location.hash,
+        resetType,
+        hasToken,
+        code
+      });
+
+      // If this is a password reset flow with a code
+      if (code) {
+        console.log("Password reset code detected:", code);
+        setShowNewPasswordForm(true);
+        return;
+      }
+      
+      // If this is a password reset flow with hash params
+      if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
+        console.log("Showing password reset form");
+        setShowNewPasswordForm(true);
+        return;
+      }
+      
+      // Handle email verification flow - only if not a password reset
+      if (hasToken && !resetType && !showNewPasswordForm) {
+        handleEmailConfirmation();
+      } else if (!showNewPasswordForm) {
+        // Only check for session if not in password reset mode
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           navigate('/dashboard');
         }
-      };
-      
-      checkSession();
-    }
-  }, [navigate, showNewPasswordForm]);
+      }
+    };
+
+    handleAuthFlow();
+  }, [location, searchParams, navigate, showNewPasswordForm]);
 
   // Handle email confirmation
   const handleEmailConfirmation = async () => {
