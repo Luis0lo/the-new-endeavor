@@ -37,11 +37,12 @@ export const NewPasswordForm: React.FC = () => {
     },
   });
 
+  // Ensure we're not already logged in
   useEffect(() => {
     const prepareResetFlow = async () => {
       setInitializing(true);
       
-      // Sign out any existing session to prevent conflicts
+      // Force sign out any existing session to prevent auto-redirect
       await supabase.auth.signOut();
       
       setInitializing(false);
@@ -54,11 +55,17 @@ export const NewPasswordForm: React.FC = () => {
     setLoading(true);
     
     try {
-      // For password reset, check for both hash fragment and query parameters
-      console.log("Starting password reset with new password");
+      // For password reset, we need to extract the code from URL
+      const code = searchParams.get('code');
       
-      // Using updateUser directly with the access token
-      const { error } = await supabase.auth.updateUser({
+      if (!code) {
+        throw new Error("Reset code not found in URL. Please request a new password reset link.");
+      }
+      
+      console.log("Starting password reset with code and new password");
+      
+      // Use the updateUser with resetToken parameter
+      const { error } = await supabase.auth.updateUser({ 
         password: values.password
       });
       

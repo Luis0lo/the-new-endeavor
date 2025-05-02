@@ -49,8 +49,8 @@ export const useAuthFlow = () => {
       });
 
       // Password reset detection
-      if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
-        console.log("Password reset flow detected, showing password form");
+      if (resetType && hasCode) {
+        console.log("Password reset flow detected with code, showing password form");
         // Sign out any existing session to prevent auto-redirect
         await supabase.auth.signOut();
         setCurrentView('newPassword');
@@ -60,8 +60,9 @@ export const useAuthFlow = () => {
       // Handle email verification flow - only if not a password reset
       if (hasToken && !resetType && currentView !== 'newPassword') {
         handleEmailConfirmation();
-      } else if (currentView !== 'newPassword') {
+      } else if (!resetType && !hasCode && currentView !== 'newPassword') {
         // Only check for existing session if not in password reset mode
+        // and not when we have a code or type parameter
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           navigate('/dashboard');
