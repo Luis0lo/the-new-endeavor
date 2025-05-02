@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,17 +25,17 @@ const Auth = () => {
   // Check for password reset or email verification
   useEffect(() => {
     const handleAuthFlow = async () => {
-      // Check for code in query parameters (used in password reset)
+      // First check if this is a password reset request
+      // Check for code in query parameters
       const code = searchParams.get('code');
       
       // Parse URL parameters - Handle both query params and hash fragments
       const queryParams = new URLSearchParams(location.search);
-      const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
       
       // Check for password reset type in query params
       const resetType = queryParams.get('type') === 'recovery';
       
-      // Check for access_token in URL hash (happens with email verification and password reset)
+      // Check for access_token in URL hash
       const hasToken = location.hash && (
         location.hash.includes('access_token') || 
         location.hash.includes('refresh_token')
@@ -48,16 +49,11 @@ const Auth = () => {
         code
       });
 
-      // If this is a password reset flow with a code
-      if (code) {
-        console.log("Password reset code detected:", code);
-        setShowNewPasswordForm(true);
-        return;
-      }
-      
-      // If this is a password reset flow with hash params
-      if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
-        console.log("Showing password reset form");
+      // Password reset detection - check multiple conditions
+      if (code || resetType || (hasToken && queryParams.get('type') === 'recovery')) {
+        console.log("Password reset flow detected, showing password form");
+        // Sign out any existing session to prevent auto-redirect
+        await supabase.auth.signOut();
         setShowNewPasswordForm(true);
         return;
       }
@@ -66,7 +62,7 @@ const Auth = () => {
       if (hasToken && !resetType && !showNewPasswordForm) {
         handleEmailConfirmation();
       } else if (!showNewPasswordForm) {
-        // Only check for session if not in password reset mode
+        // Only check for existing session if not in password reset mode
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           navigate('/dashboard');
@@ -112,6 +108,7 @@ const Auth = () => {
     }
   };
 
+  // Sign up handler
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -151,6 +148,7 @@ const Auth = () => {
     }
   };
 
+  // Sign in handler
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

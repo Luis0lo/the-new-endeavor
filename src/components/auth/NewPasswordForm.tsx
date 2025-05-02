@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useSearchParams } from "react-router-dom";
 
 // Schema for the password reset form
 const resetPasswordSchema = z.object({
@@ -25,6 +26,7 @@ type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 export const NewPasswordForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [searchParams] = useSearchParams();
   
   const resetPasswordForm = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -34,28 +36,27 @@ export const NewPasswordForm: React.FC = () => {
     },
   });
 
-  // Ensure we're in password reset mode by signing out any existing session
   useEffect(() => {
-    const ensureSignedOut = async () => {
+    const prepareResetFlow = async () => {
       setInitializing(true);
-      try {
-        // Sign out any existing user to ensure we're in password reset mode
-        await supabase.auth.signOut();
-        console.log("Signed out existing session for password reset");
-      } catch (error) {
-        console.error("Error signing out:", error);
-      } finally {
-        setInitializing(false);
-      }
+      
+      // We don't need to sign out here. In password reset flow, we'll use the access token
+      // from the URL, which is automatically processed by supabase client
+      
+      setInitializing(false);
     };
 
-    ensureSignedOut();
+    prepareResetFlow();
   }, []);
 
   const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
     
     try {
+      // For password reset, we need to extract the token from the URL if it's there
+      const hash = window.location.hash;
+      console.log("URL hash during password reset:", hash);
+      
       const { error } = await supabase.auth.updateUser({
         password: values.password
       });
@@ -67,7 +68,7 @@ export const NewPasswordForm: React.FC = () => {
         description: "Your password has been updated successfully. Please sign in with your new password.",
       });
       
-      // Reset the form and go back to login
+      // Reset the form
       resetPasswordForm.reset();
       
       // Sign out to ensure user needs to login with new password
@@ -78,6 +79,7 @@ export const NewPasswordForm: React.FC = () => {
         window.location.href = '/auth';
       }, 1500);
     } catch (error: any) {
+      console.error("Password reset error:", error);
       toast({
         title: "Error updating password",
         description: error.message || "Failed to update your password",
