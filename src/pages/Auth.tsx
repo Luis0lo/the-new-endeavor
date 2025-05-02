@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from "@/hooks/use-toast";
+import React from 'react';
+import { useAuthFlow, AuthViewType } from '@/hooks/useAuthFlow';
 import { AuthTabs } from '@/components/auth/AuthTabs';
 import { PasswordReset } from '@/components/auth/PasswordReset';
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
@@ -10,189 +8,42 @@ import { EmailVerificationLoading } from '@/components/auth/EmailVerificationLoa
 import { EmailVerificationError } from '@/components/auth/EmailVerificationError';
 
 const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [verificationError, setVerificationError] = useState<string | null>(null);
-  const [resetPasswordMode, setResetPasswordMode] = useState(false);
-  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-
-  // Check for password reset or email verification
-  useEffect(() => {
-    const handleAuthFlow = async () => {
-      // First check if this is a password reset request
-      const queryParams = new URLSearchParams(location.search);
-      
-      // Check for password reset type in query params
-      const resetType = queryParams.get('type') === 'recovery';
-      const hasCode = queryParams.get('code') !== null;
-      
-      // Check for access_token in URL hash
-      const hasToken = location.hash && (
-        location.hash.includes('access_token') || 
-        location.hash.includes('refresh_token')
-      );
-      
-      console.log("URL check:", {
-        search: location.search,
-        hash: location.hash,
-        resetType,
-        hasToken,
-        hasCode
-      });
-
-      // Password reset detection
-      if (resetType || (hasToken && queryParams.get('type') === 'recovery')) {
-        console.log("Password reset flow detected, showing password form");
-        // Sign out any existing session to prevent auto-redirect
-        await supabase.auth.signOut();
-        setShowNewPasswordForm(true);
-        return;
-      }
-      
-      // Handle email verification flow - only if not a password reset
-      if (hasToken && !resetType && !showNewPasswordForm) {
-        handleEmailConfirmation();
-      } else if (!showNewPasswordForm) {
-        // Only check for existing session if not in password reset mode
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          navigate('/dashboard');
-        }
-      }
-    };
-
-    handleAuthFlow();
-  }, [location, searchParams, navigate, showNewPasswordForm]);
-
-  // Handle email confirmation
-  const handleEmailConfirmation = async () => {
-    setVerifying(true);
-    setVerificationError(null);
-    
-    try {
-      // The PKCE flow will automatically exchange the code for a session
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) throw error;
-      
-      if (data.session) {
-        toast({
-          title: "Authentication successful!",
-          description: "Your account has been verified successfully.",
-        });
-        
-        navigate('/dashboard');
-      } else {
-        throw new Error("No session found after verification");
-      }
-    } catch (error: any) {
-      console.error("Verification error:", error);
-      setVerificationError(error.message || "Failed to verify your email");
-      
-      toast({
-        title: "Verification error",
-        description: error.message || "Failed to verify your email",
-        variant: "destructive"
-      });
-    } finally {
-      setVerifying(false);
-    }
-  };
-
-  // Sign up handler
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            username
-          }
-        }
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Account created",
-        description: "Please check your email for verification.",
-      });
-      
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        toast({
-          title: "Account already exists",
-          description: "Please sign in instead.",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create account",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Sign in handler
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Welcome back!",
-        description: "Successfully logged in.",
-      });
-      
-      navigate('/dashboard');
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Invalid login credentials",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    username,
+    setUsername,
+    loading,
+    verificationError,
+    currentView,
+    setCurrentView,
+    handleSignIn,
+    handleSignUp,
+  } = useAuthFlow();
 
   // Show a loading state if we're processing an email verification
-  if (verifying) {
+  if (currentView === 'verifying') {
     return <EmailVerificationLoading />;
   }
 
   // Show verification error if any
-  if (verificationError) {
-    return <EmailVerificationError error={verificationError} />;
+  if (currentView === 'verificationError') {
+    return <EmailVerificationError error={verificationError || ''} />;
   }
 
   // Show new password form for password reset
-  if (showNewPasswordForm) {
+  if (currentView === 'newPassword') {
     return <NewPasswordForm />;
   }
 
   // Password reset mode
-  if (resetPasswordMode) {
+  if (currentView === 'passwordReset') {
     return <PasswordReset 
       email={email} 
       setEmail={setEmail} 
-      onBack={() => setResetPasswordMode(false)} 
+      onBack={() => setCurrentView('default')} 
     />;
   }
 
@@ -207,7 +58,7 @@ const Auth = () => {
       loading={loading}
       handleSignIn={handleSignIn}
       handleSignUp={handleSignUp}
-      setResetPasswordMode={setResetPasswordMode}
+      setResetPasswordMode={() => setCurrentView('passwordReset')}
     />
   );
 };
