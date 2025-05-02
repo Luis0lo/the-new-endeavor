@@ -48,24 +48,29 @@ export const useAuthFlow = () => {
         hasCode
       });
 
-      // Password reset detection
+      // Password reset detection - takes highest priority
       if (resetType && hasCode) {
         console.log("Password reset flow detected with code, showing password form");
+        
+        // CRITICAL: We need to prevent automatic token redemption for password reset
+        setCurrentView('newPassword');
+        
         // Sign out any existing session to prevent auto-redirect
         await supabase.auth.signOut();
-        setCurrentView('newPassword');
-        return;
+        return; // Exit early to prevent other flows from executing
       }
       
-      // Handle email verification flow - only if not a password reset
-      if (hasToken && !resetType && currentView !== 'newPassword') {
-        handleEmailConfirmation();
-      } else if (!resetType && !hasCode && currentView !== 'newPassword') {
-        // Only check for existing session if not in password reset mode
-        // and not when we have a code or type parameter
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          navigate('/dashboard');
+      // Only proceed with these checks if we're not in password reset mode
+      if (!resetType && !hasCode) {
+        // Handle email verification flow - only if not a password reset
+        if (hasToken && currentView !== 'newPassword') {
+          handleEmailConfirmation();
+        } else if (currentView !== 'newPassword') {
+          // Only check for existing session if not in password reset mode
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            navigate('/dashboard');
+          }
         }
       }
     };

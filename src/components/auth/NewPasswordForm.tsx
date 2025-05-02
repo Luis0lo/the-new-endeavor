@@ -37,19 +37,36 @@ export const NewPasswordForm: React.FC = () => {
     },
   });
 
-  // Ensure we're not already logged in
+  // Ensure we're not already logged in - this runs once when component mounts
   useEffect(() => {
     const prepareResetFlow = async () => {
       setInitializing(true);
       
+      // Get the reset code - we need this for the password update
+      const code = searchParams.get('code');
+      
+      if (!code) {
+        toast({
+          title: "Error",
+          description: "Reset code not found in URL. Please request a new password reset link.",
+          variant: "destructive"
+        });
+        navigate('/auth');
+        return;
+      }
+      
       // Force sign out any existing session to prevent auto-redirect
+      // This is crucial to ensure we stay on the password reset page
       await supabase.auth.signOut();
       
-      setInitializing(false);
+      // Delay to ensure the UI updates
+      setTimeout(() => {
+        setInitializing(false);
+      }, 500);
     };
 
     prepareResetFlow();
-  }, []);
+  }, [searchParams, navigate]);
 
   const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
@@ -64,7 +81,17 @@ export const NewPasswordForm: React.FC = () => {
       
       console.log("Starting password reset with code and new password");
       
-      // Use the updateUser with resetToken parameter
+      // IMPORTANT: We need to first verify the recovery code before updating the password
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: code,
+        type: 'recovery'
+      });
+      
+      if (verifyError) {
+        throw verifyError;
+      }
+      
+      // Now that we've verified the code, update the user's password
       const { error } = await supabase.auth.updateUser({ 
         password: values.password
       });
