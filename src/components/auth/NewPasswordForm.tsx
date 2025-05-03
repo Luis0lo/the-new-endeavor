@@ -59,7 +59,12 @@ export const NewPasswordForm: React.FC = () => {
       }
 
       // Force sign out any existing session to prevent auto-redirect
-      await supabase.auth.signOut();
+      try {
+        await supabase.auth.signOut();
+        console.log("Successfully signed out before password reset");
+      } catch (signOutError) {
+        console.error("Error signing out:", signOutError);
+      }
       
       // Short delay to ensure UI updates
       setTimeout(() => {
@@ -84,7 +89,19 @@ export const NewPasswordForm: React.FC = () => {
       
       console.log("Starting password reset with code");
 
-      // Update the user's password using the new recommended approach
+      // Per Supabase docs, we should verify the OTP (one-time password) first
+      // This will exchange the recovery token for a session
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: code,
+        type: 'recovery',
+      });
+      
+      if (verifyError) {
+        console.error("OTP verification error:", verifyError);
+        throw verifyError;
+      }
+      
+      // Now update the user's password
       const { error: updateError } = await supabase.auth.updateUser({
         password: values.password
       });

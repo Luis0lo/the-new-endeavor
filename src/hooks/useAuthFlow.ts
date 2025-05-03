@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,13 +27,6 @@ export const useAuthFlow = () => {
   // Check for password reset or email verification
   useEffect(() => {
     const handleAuthFlow = async () => {
-      // Sign out any existing session first to prevent conflicts
-      // This is crucial for password reset flow
-      if (location.search.includes('type=recovery')) {
-        console.log("Password reset detected, signing out first");
-        await supabase.auth.signOut();
-      }
-      
       // Parse URL parameters
       const queryParams = new URLSearchParams(location.search);
       
@@ -49,7 +41,7 @@ export const useAuthFlow = () => {
         location.hash.includes('refresh_token')
       );
       
-      console.log("URL check:", {
+      console.log("Auth flow URL check:", {
         search: location.search,
         hash: location.hash,
         resetType,
@@ -60,9 +52,14 @@ export const useAuthFlow = () => {
 
       // Password reset flow detection (highest priority)
       if (hasResetParams) {
-        console.log("Password reset flow detected, showing password form");
+        console.log("Password reset flow detected - forcing sign out first");
+        
+        // Critical: Immediately sign out any existing session
+        // This prevents auto-login and ensures the reset flow works properly
+        await supabase.auth.signOut();
+        
         setCurrentView('newPassword');
-        return; // Exit early - crucial to prevent other flows
+        return; // Exit early to prevent other flows from running
       }
       
       // Email verification flow (second priority)
