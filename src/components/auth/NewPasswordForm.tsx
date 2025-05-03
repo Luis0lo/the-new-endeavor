@@ -11,6 +11,7 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 // Schema for the password reset form
 const resetPasswordSchema = z.object({
@@ -26,6 +27,7 @@ type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 export const NewPasswordForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -37,42 +39,40 @@ export const NewPasswordForm: React.FC = () => {
     },
   });
 
-  // Ensure we're not already logged in and extract the reset code
+  // Validate the reset parameters and prepare
   useEffect(() => {
-    const prepareResetFlow = async () => {
+    const validateResetParams = async () => {
       setInitializing(true);
+      setError(null);
       
-      // Get the reset code from URL
-      const code = searchParams.get('code');
+      // Get the reset parameters from URL
       const type = searchParams.get('type');
+      const code = searchParams.get('code');
       
-      console.log("Reset params check:", { code, type });
+      console.log("Reset params check:", { type, code });
       
+      // Validate reset parameters
       if (!code || type !== 'recovery') {
-        toast({
-          title: "Invalid Reset Link",
-          description: "The password reset link is invalid or has expired. Please request a new one.",
-          variant: "destructive"
-        });
-        navigate('/auth');
+        setError("The password reset link is invalid or has expired. Please request a new one.");
+        setInitializing(false);
         return;
       }
-      
+
       // Force sign out any existing session to prevent auto-redirect
-      console.log("Signing out any existing session");
       await supabase.auth.signOut();
       
       // Short delay to ensure UI updates
       setTimeout(() => {
         setInitializing(false);
-      }, 500);
+      }, 300);
     };
 
-    prepareResetFlow();
+    validateResetParams();
   }, [searchParams, navigate]);
 
   const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
+    setError(null);
     
     try {
       // Get the reset code from URL
@@ -83,26 +83,15 @@ export const NewPasswordForm: React.FC = () => {
       }
       
       console.log("Starting password reset with code");
-      
-      // First verify the recovery code
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash: code,
-        type: 'recovery'
-      });
-      
-      if (verifyError) {
-        console.error("Verification error:", verifyError);
-        throw verifyError;
-      }
-      
-      // Now update the user's password
-      const { error } = await supabase.auth.updateUser({ 
+
+      // Update the user's password using the new recommended approach
+      const { error: updateError } = await supabase.auth.updateUser({
         password: values.password
       });
       
-      if (error) {
-        console.error("Password update error:", error);
-        throw error;
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        throw updateError;
       }
       
       toast({
@@ -113,18 +102,20 @@ export const NewPasswordForm: React.FC = () => {
       // Reset form
       resetPasswordForm.reset();
       
-      // Sign out to ensure clean state
-      await supabase.auth.signOut();
-      
       // Small delay to show the success message
       setTimeout(() => {
-        navigate('/auth');
+        // Sign out to ensure clean state
+        supabase.auth.signOut().then(() => {
+          navigate('/auth');
+        });
       }, 1500);
     } catch (error: any) {
       console.error("Password reset error:", error);
+      setError(error.message || "Failed to update your password. Please try again or request a new reset link.");
+      
       toast({
         title: "Error updating password",
-        description: error.message || "Failed to update your password. Please try again or request a new reset link.",
+        description: error.message || "Failed to update your password.",
         variant: "destructive"
       });
     } finally {
@@ -142,6 +133,27 @@ export const NewPasswordForm: React.FC = () => {
           </CardHeader>
           <CardContent className="flex justify-center py-6">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Password Reset Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <div className="flex justify-center mt-4">
+              <Button onClick={() => navigate('/auth')}>Return to login</Button>
+            </div>
           </CardContent>
         </Card>
       </div>

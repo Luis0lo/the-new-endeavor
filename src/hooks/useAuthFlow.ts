@@ -28,6 +28,13 @@ export const useAuthFlow = () => {
   // Check for password reset or email verification
   useEffect(() => {
     const handleAuthFlow = async () => {
+      // Sign out any existing session first to prevent conflicts
+      // This is crucial for password reset flow
+      if (location.search.includes('type=recovery')) {
+        console.log("Password reset detected, signing out first");
+        await supabase.auth.signOut();
+      }
+      
       // Parse URL parameters
       const queryParams = new URLSearchParams(location.search);
       
@@ -46,22 +53,20 @@ export const useAuthFlow = () => {
         search: location.search,
         hash: location.hash,
         resetType,
+        resetCode,
         hasToken,
         hasResetParams
       });
 
       // Password reset flow detection (highest priority)
       if (hasResetParams) {
-        console.log("Password reset flow detected with code, showing password form");
+        console.log("Password reset flow detected, showing password form");
         setCurrentView('newPassword');
-        
-        // Sign out any existing session
-        await supabase.auth.signOut();
-        return; // Exit early
+        return; // Exit early - crucial to prevent other flows
       }
       
       // Email verification flow (second priority)
-      if (hasToken && currentView !== 'newPassword') {
+      if (hasToken && !hasResetParams) {
         console.log("Email verification flow detected");
         handleEmailConfirmation();
         return; // Exit early
@@ -69,7 +74,7 @@ export const useAuthFlow = () => {
       
       // Default login check - lowest priority
       // Only check if not handling password reset or verification
-      if (!hasResetParams && !hasToken) {
+      if (!hasResetParams && !hasToken && currentView === 'default') {
         console.log("Checking existing session");
         const { data } = await supabase.auth.getSession();
         if (data.session) {
