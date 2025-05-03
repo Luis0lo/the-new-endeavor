@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuthFlow, AuthViewType } from '@/hooks/useAuthFlow';
+import { useAuthFlow } from '@/hooks/auth/useAuthFlow';
 import { AuthTabs } from '@/components/auth/AuthTabs';
 import { PasswordReset } from '@/components/auth/PasswordReset';
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
@@ -21,10 +21,12 @@ const Auth = () => {
     setCurrentView,
     handleSignIn,
     handleSignUp,
+    handleEmailConfirmation,
   } = useAuthFlow();
 
-  // Show a loading state if we're processing an email verification
+  // If we're processing an email verification, show the loading screen
   if (currentView === 'verifying') {
+    handleEmailConfirmation();
     return <EmailVerificationLoading />;
   }
 
@@ -47,6 +49,7 @@ const Auth = () => {
     />;
   }
 
+  // Default login/signup view
   return (
     <AuthTabs
       email={email}
