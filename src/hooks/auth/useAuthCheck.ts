@@ -30,19 +30,25 @@ export const useAuthCheck = () => {
         hash: location.hash,
         resetType,
         resetCode,
+        hasResetParams,
         hasToken,
-        hasResetParams
+        currentView
       });
 
       // Password reset flow detection (highest priority)
       if (hasResetParams) {
         console.log("Password reset flow detected - forcing sign out first");
         
-        // Critical: Immediately sign out any existing session
-        // This prevents auto-login and ensures the reset flow works properly
-        await supabase.auth.signOut();
-        
-        setCurrentView('newPassword');
+        try {
+          // Critical: Immediately sign out any existing session
+          // This prevents auto-login and ensures the reset flow works properly
+          await supabase.auth.signOut();
+          console.log("Signed out successfully before password reset flow");
+          
+          setCurrentView('newPassword');
+        } catch (error) {
+          console.error("Error signing out before password reset:", error);
+        }
         return; // Exit early to prevent other flows from running
       }
       
@@ -58,6 +64,7 @@ export const useAuthCheck = () => {
       if (!hasResetParams && !hasToken && currentView === 'default') {
         console.log("Checking existing session");
         const { data } = await supabase.auth.getSession();
+        console.log("Session check result:", !!data.session);
         if (data.session) {
           navigate('/dashboard');
         }

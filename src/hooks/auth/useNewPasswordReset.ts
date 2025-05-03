@@ -26,6 +26,7 @@ export const useNewPasswordReset = () => {
       
       // Validate reset parameters
       if (!code || type !== 'recovery') {
+        console.error("Invalid reset parameters:", { type, code });
         setError("The password reset link is invalid or has expired. Please request a new one.");
         setInitializing(false);
         return;
@@ -33,10 +34,16 @@ export const useNewPasswordReset = () => {
 
       // Force sign out any existing session to prevent auto-redirect
       try {
-        await supabase.auth.signOut();
-        console.log("Successfully signed out before password reset");
+        console.log("Attempting to sign out before password reset form loads");
+        const { error: signOutError } = await supabase.auth.signOut();
+        
+        if (signOutError) {
+          console.error("Error signing out:", signOutError);
+        } else {
+          console.log("Successfully signed out before password reset");
+        }
       } catch (signOutError) {
-        console.error("Error signing out:", signOutError);
+        console.error("Exception signing out:", signOutError);
       }
       
       // Short delay to ensure UI updates
@@ -64,10 +71,12 @@ export const useNewPasswordReset = () => {
 
       // Per Supabase docs, we should verify the OTP (one-time password) first
       // This will exchange the recovery token for a session
-      const { error: verifyError } = await supabase.auth.verifyOtp({
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
         token_hash: code,
         type: 'recovery',
       });
+      
+      console.log("Verify OTP result:", { success: !verifyError, error: verifyError?.message });
       
       if (verifyError) {
         console.error("OTP verification error:", verifyError);
@@ -75,9 +84,12 @@ export const useNewPasswordReset = () => {
       }
       
       // Now update the user's password
-      const { error: updateError } = await supabase.auth.updateUser({
+      console.log("Updating user password");
+      const { data: updateData, error: updateError } = await supabase.auth.updateUser({
         password: values.password
       });
+      
+      console.log("Update password result:", { success: !updateError, error: updateError?.message });
       
       if (updateError) {
         console.error("Password update error:", updateError);
@@ -89,12 +101,13 @@ export const useNewPasswordReset = () => {
         description: "Your password has been updated successfully. Please sign in with your new password.",
       });
       
-      // Small delay to show the success message
+      // Sign out to ensure clean state before redirecting to login
+      console.log("Signing out after password update");
+      await supabase.auth.signOut();
+      
+      // Small delay to show the success message before redirecting
       setTimeout(() => {
-        // Sign out to ensure clean state
-        supabase.auth.signOut().then(() => {
-          navigate('/auth');
-        });
+        navigate('/auth');
       }, 1500);
     } catch (error: any) {
       console.error("Password reset error:", error);

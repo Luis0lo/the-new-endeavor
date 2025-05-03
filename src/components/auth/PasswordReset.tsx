@@ -24,17 +24,25 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ email, setEmail, o
     setLoading(true);
     
     try {
+      console.log("Starting password reset request for email:", email);
+      
       // Get the current URL origin (domain)
       const origin = window.location.origin;
+      console.log("Using origin for redirectTo:", origin);
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${origin}/auth`,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Password reset request error:", error);
+        throw error;
+      }
       
+      console.log("Password reset email sent successfully");
       setShowResetConfirmation(true);
     } catch (error: any) {
+      console.error("Exception in password reset:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to send password reset email",
