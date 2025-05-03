@@ -6,8 +6,11 @@ import { PasswordReset } from '@/components/auth/PasswordReset';
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
 import { EmailVerificationLoading } from '@/components/auth/EmailVerificationLoading';
 import { EmailVerificationError } from '@/components/auth/EmailVerificationError';
+import { useSearchParams } from 'react-router-dom';
 
 const Auth = () => {
+  const [searchParams] = useSearchParams();
+  
   const {
     email,
     setEmail,
@@ -23,6 +26,26 @@ const Auth = () => {
     handleSignUp,
     handleEmailConfirmation,
   } = useAuthFlow();
+
+  // Effect to check for reset=true parameter directly in Auth component
+  useEffect(() => {
+    const isResetRedirect = searchParams.get('reset') === 'true';
+    const resetType = searchParams.get('type') === 'recovery';
+    const resetCode = searchParams.get('code');
+    
+    console.log("Auth component checking reset params:", {
+      isResetRedirect,
+      resetType,
+      resetCode,
+      currentView
+    });
+    
+    // If we have the reset URL parameter but no code yet (first stage of reset flow)
+    if (isResetRedirect && !resetType && !resetCode) {
+      console.log("Detected reset redirect without code, showing password reset form");
+      setCurrentView('passwordReset');
+    }
+  }, [searchParams, currentView, setCurrentView]);
 
   useEffect(() => {
     console.log("Auth component rendered with view:", currentView);

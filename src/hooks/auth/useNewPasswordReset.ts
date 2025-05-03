@@ -25,7 +25,9 @@ export const useNewPasswordReset = () => {
       console.log("Password reset params check:", { 
         type, 
         code,
-        allParams: Object.fromEntries(searchParams.entries())
+        allParams: Object.fromEntries(searchParams.entries()),
+        pathname: window.location.pathname,
+        fullUrl: window.location.href
       });
       
       // Validate reset parameters
