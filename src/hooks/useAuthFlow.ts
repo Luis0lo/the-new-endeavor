@@ -28,11 +28,13 @@ export const useAuthFlow = () => {
   // Check for password reset or email verification
   useEffect(() => {
     const handleAuthFlow = async () => {
+      // Parse URL parameters
       const queryParams = new URLSearchParams(location.search);
       
-      // Check for password reset type in query params
+      // Check for password reset parameters (type=recovery and code)
       const resetType = queryParams.get('type') === 'recovery';
-      const hasCode = queryParams.get('code') !== null;
+      const resetCode = queryParams.get('code');
+      const hasResetParams = resetType && resetCode;
       
       // Check for access_token in URL hash
       const hasToken = location.hash && (
@@ -45,32 +47,33 @@ export const useAuthFlow = () => {
         hash: location.hash,
         resetType,
         hasToken,
-        hasCode
+        hasResetParams
       });
 
-      // Password reset detection - takes highest priority
-      if (resetType && hasCode) {
+      // Password reset flow detection (highest priority)
+      if (hasResetParams) {
         console.log("Password reset flow detected with code, showing password form");
-        
-        // CRITICAL: We need to prevent automatic token redemption for password reset
         setCurrentView('newPassword');
         
-        // Sign out any existing session to prevent auto-redirect
+        // Sign out any existing session
         await supabase.auth.signOut();
-        return; // Exit early to prevent other flows from executing
+        return; // Exit early
       }
       
-      // Only proceed with these checks if we're not in password reset mode
-      if (!resetType && !hasCode) {
-        // Handle email verification flow - only if not a password reset
-        if (hasToken && currentView !== 'newPassword') {
-          handleEmailConfirmation();
-        } else if (currentView !== 'newPassword') {
-          // Only check for existing session if not in password reset mode
-          const { data } = await supabase.auth.getSession();
-          if (data.session) {
-            navigate('/dashboard');
-          }
+      // Email verification flow (second priority)
+      if (hasToken && currentView !== 'newPassword') {
+        console.log("Email verification flow detected");
+        handleEmailConfirmation();
+        return; // Exit early
+      }
+      
+      // Default login check - lowest priority
+      // Only check if not handling password reset or verification
+      if (!hasResetParams && !hasToken) {
+        console.log("Checking existing session");
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          navigate('/dashboard');
         }
       }
     };
