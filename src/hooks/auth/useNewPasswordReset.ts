@@ -22,7 +22,11 @@ export const useNewPasswordReset = () => {
       const type = searchParams.get('type');
       const code = searchParams.get('code');
       
-      console.log("Reset params check:", { type, code });
+      console.log("Password reset params check:", { 
+        type, 
+        code,
+        allParams: Object.fromEntries(searchParams.entries())
+      });
       
       // Validate reset parameters
       if (!code || type !== 'recovery') {
@@ -67,7 +71,7 @@ export const useNewPasswordReset = () => {
         throw new Error("Reset code not found. Please request a new password reset link.");
       }
       
-      console.log("Starting password reset with code");
+      console.log("Starting password reset with code:", code);
 
       // Per Supabase docs, we should verify the OTP (one-time password) first
       // This will exchange the recovery token for a session
@@ -76,7 +80,11 @@ export const useNewPasswordReset = () => {
         type: 'recovery',
       });
       
-      console.log("Verify OTP result:", { success: !verifyError, error: verifyError?.message });
+      console.log("Verify OTP result:", { 
+        success: !verifyError, 
+        error: verifyError?.message,
+        data: verifyData
+      });
       
       if (verifyError) {
         console.error("OTP verification error:", verifyError);
@@ -89,7 +97,11 @@ export const useNewPasswordReset = () => {
         password: values.password
       });
       
-      console.log("Update password result:", { success: !updateError, error: updateError?.message });
+      console.log("Update password result:", { 
+        success: !updateError, 
+        error: updateError?.message,
+        data: updateData
+      });
       
       if (updateError) {
         console.error("Password update error:", updateError);

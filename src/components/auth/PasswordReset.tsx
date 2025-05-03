@@ -30,8 +30,12 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ email, setEmail, o
       const origin = window.location.origin;
       console.log("Using origin for redirectTo:", origin);
       
+      // Add a specific route for password reset to prevent auto-login
+      const resetRedirectTo = `${origin}/auth?reset=true`;
+      console.log("Using specific reset redirect:", resetRedirectTo);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth`,
+        redirectTo: resetRedirectTo,
       });
       
       if (error) {
