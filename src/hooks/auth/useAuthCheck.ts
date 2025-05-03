@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,8 +40,8 @@ export const useAuthCheck = () => {
       });
 
       // Password reset flow detection (highest priority)
-      if (hasResetParams || isResetRedirect) {
-        console.log("Password reset flow detected - forcing sign out first");
+      if (hasResetParams) {
+        console.log("Password reset with code flow detected - showing new password form");
         
         try {
           // Critical: Immediately sign out any existing session
@@ -48,15 +49,17 @@ export const useAuthCheck = () => {
           await supabase.auth.signOut();
           console.log("Signed out successfully before password reset flow");
           
-          // If we have actual reset parameters (code + type), show the new password form
-          // Otherwise, just keep on the default view (this helps with our custom redirect)
-          if (hasResetParams) {
-            setCurrentView('newPassword');
-          }
+          // Display new password form
+          setCurrentView('newPassword');
         } catch (error) {
           console.error("Error signing out before password reset:", error);
         }
         return; // Exit early to prevent other flows from running
+      } else if (isResetRedirect) {
+        // This handles our custom redirect without code (first phase of reset)
+        console.log("Initial password reset request detected");
+        setCurrentView('passwordReset');
+        return; // Exit early
       }
       
       // Email verification flow (second priority)

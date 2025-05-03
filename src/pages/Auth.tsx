@@ -45,7 +45,13 @@ const Auth = () => {
       console.log("Detected reset redirect without code, showing password reset form");
       setCurrentView('passwordReset');
     }
-  }, [searchParams, currentView, setCurrentView]);
+    
+    // If we have both type=recovery and code parameters, show the new password form
+    if (resetType && resetCode) {
+      console.log("Detected reset link with code, showing new password form");
+      setCurrentView('newPassword');
+    }
+  }, [searchParams, setCurrentView]);
 
   useEffect(() => {
     console.log("Auth component rendered with view:", currentView);
