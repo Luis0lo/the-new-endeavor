@@ -1,19 +1,34 @@
 
 import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 const ResetPassword = () => {
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
-  // Extract query parameters for debug purposes
-  const searchParams = new URLSearchParams(location.search);
+  // Extract query parameters
   const type = searchParams.get('type');
   const code = searchParams.get('code');
+  
+  useEffect(() => {
+    // Sign out any existing session immediately to prevent auto-redirect
+    const signOutExistingSession = async () => {
+      try {
+        await supabase.auth.signOut();
+        console.log("Signed out existing session on reset password page");
+      } catch (error) {
+        console.error("Error signing out on reset page:", error);
+      }
+    };
+
+    signOutExistingSession();
+  }, []);
   
   console.log("Reset Password page accessed with:", {
     search: location.search,

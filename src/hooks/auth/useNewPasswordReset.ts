@@ -76,7 +76,7 @@ export const useNewPasswordReset = () => {
       
       console.log("Starting password reset with code:", code);
 
-      // Per Supabase docs, we should verify the OTP (one-time password) first
+      // Per Supabase docs, we need to verify the OTP (one-time password) first
       // This will exchange the recovery token for a session
       const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
         token_hash: code,

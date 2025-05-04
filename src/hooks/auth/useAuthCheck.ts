@@ -44,7 +44,8 @@ export const useAuthCheck = () => {
         hasResetParams,
         hasToken,
         isResetRedirect,
-        currentView
+        currentView,
+        fullUrl: window.location.href
       });
 
       // Password reset flow detection (highest priority)
@@ -58,7 +59,7 @@ export const useAuthCheck = () => {
           console.log("Signed out before password reset flow");
           
           // Redirect to dedicated reset password page
-          navigate('/auth/reset-password' + location.search);
+          navigate('/auth/reset-password' + location.search, { replace: true });
           return;
         } catch (error) {
           console.error("Error signing out before password reset:", error);
