@@ -58,7 +58,7 @@ export const useAuthCheck = () => {
           await supabase.auth.signOut();
           console.log("Signed out before password reset flow");
           
-          // Redirect to dedicated reset password page
+          // Redirect to dedicated reset password page with replace:true to avoid back button issues
           navigate('/auth/reset-password' + location.search, { replace: true });
           return;
         } catch (error) {

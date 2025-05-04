@@ -30,12 +30,11 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ email, setEmail, o
       const origin = window.location.origin;
       console.log("Using origin for redirectTo:", origin);
       
-      // Create a specific URL for the new password form
-      // The ?type=recovery part will be automatically added by Supabase
+      // Create a specific URL for the new password form with FULL path
       const resetRedirectTo = `${origin}/auth/reset-password`;
       console.log("Using reset redirect:", resetRedirectTo);
       
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: resetRedirectTo,
       });
       
@@ -44,7 +43,7 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ email, setEmail, o
         throw error;
       }
       
-      console.log("Password reset email sent successfully");
+      console.log("Password reset email sent successfully:", data);
       setShowResetConfirmation(true);
     } catch (error: any) {
       console.error("Exception in password reset:", error);

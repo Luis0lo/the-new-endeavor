@@ -122,7 +122,7 @@ export const useNewPasswordReset = () => {
       
       // Small delay to show the success message before redirecting
       setTimeout(() => {
-        navigate('/auth');
+        navigate('/auth', { replace: true });
       }, 1500);
     } catch (error: any) {
       console.error("Password reset error:", error);
