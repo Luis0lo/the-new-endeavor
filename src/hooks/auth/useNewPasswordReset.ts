@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 import { ResetPasswordForm } from "@/components/auth/password-reset/PasswordResetForm";
@@ -10,6 +10,7 @@ export const useNewPasswordReset = () => {
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   // Validate the reset parameters and prepare
@@ -26,8 +27,9 @@ export const useNewPasswordReset = () => {
         type, 
         code,
         allParams: Object.fromEntries(searchParams.entries()),
-        pathname: window.location.pathname,
-        fullUrl: window.location.href
+        pathname: location.pathname,
+        fullUrl: location.href,
+        hash: location.hash
       });
       
       // Validate reset parameters
@@ -59,7 +61,7 @@ export const useNewPasswordReset = () => {
     };
 
     validateResetParams();
-  }, [searchParams]);
+  }, [searchParams, location]);
 
   const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);

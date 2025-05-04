@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +25,7 @@ import About from "./pages/About";
 import { runSeedData } from "./seed";
 import Greenlink from "./pages/Greenlink";
 import SeedCalendarPage from "./pages/SeedCalendarPage";
+import ResetPassword from "./pages/ResetPassword";
 
 // Run seed data when the app loads
 runSeedData().then(result => {
@@ -51,6 +53,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/calendar" element={<CalendarPage />} />
             <Route path="/dashboard/settings" element={<AccountSettings />} />

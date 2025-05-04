@@ -11,6 +11,13 @@ export const useAuthCheck = () => {
 
   useEffect(() => {
     const handleAuthFlow = async () => {
+      // Don't do any auth checks if we're on the reset-password path
+      // This allows the reset password page to handle the auth flow
+      if (location.pathname === '/auth/reset-password') {
+        console.log("On reset password path, skipping auth checks");
+        return;
+      }
+      
       // Parse URL parameters
       const queryParams = new URLSearchParams(location.search);
       
@@ -29,6 +36,7 @@ export const useAuthCheck = () => {
       );
       
       console.log("Auth flow URL check:", {
+        path: location.pathname,
         search: location.search,
         hash: location.hash,
         resetType,

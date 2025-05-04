@@ -30,9 +30,9 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ email, setEmail, o
       const origin = window.location.origin;
       console.log("Using origin for redirectTo:", origin);
       
-      // Add a specific route for password reset to prevent auto-login
-      // We're explicitly NOT using the reset=true here so it can handle the recovery code
-      const resetRedirectTo = `${origin}/auth`;
+      // Create a specific URL for the new password form
+      // The ?type=recovery part will be automatically added by Supabase
+      const resetRedirectTo = `${origin}/auth/reset-password`;
       console.log("Using reset redirect:", resetRedirectTo);
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
