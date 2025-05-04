@@ -1,15 +1,56 @@
 
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ResetPassword = () => {
   const location = useLocation();
-  console.log("Reset Password page accessed with query:", location.search);
-  console.log("Reset Password page accessed with hash:", location.hash);
+  const navigate = useNavigate();
   
-  // We don't need any extra logic here as the NewPasswordForm component
-  // already handles all the reset password functionality
+  // Extract query parameters for debug purposes
+  const searchParams = new URLSearchParams(location.search);
+  const type = searchParams.get('type');
+  const code = searchParams.get('code');
+  
+  console.log("Reset Password page accessed with:", {
+    search: location.search,
+    hash: location.hash,
+    type,
+    code,
+    fullUrl: window.location.href
+  });
+  
+  // Check if we have the required parameters
+  const hasValidParams = type === 'recovery' && code;
+  
+  // If parameters are missing, show error instead of the form
+  if (!hasValidParams) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Password Reset Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                The password reset link is invalid or has expired. Please request a new one.
+              </AlertDescription>
+            </Alert>
+            <div className="flex justify-center mt-4">
+              <Button onClick={() => navigate('/auth')}>Return to login</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // If parameters are valid, render the password reset form
   return <NewPasswordForm />;
 };
 

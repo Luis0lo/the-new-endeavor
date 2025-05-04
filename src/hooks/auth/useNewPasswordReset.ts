@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 import { ResetPasswordForm } from "@/components/auth/password-reset/PasswordResetForm";
@@ -10,7 +10,6 @@ export const useNewPasswordReset = () => {
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
-  const location = useLocation();
   const navigate = useNavigate();
 
   // Validate the reset parameters and prepare
@@ -23,13 +22,13 @@ export const useNewPasswordReset = () => {
       const type = searchParams.get('type');
       const code = searchParams.get('code');
       
-      console.log("Password reset params check:", { 
+      console.log("Password reset parameters:", { 
         type, 
         code,
         allParams: Object.fromEntries(searchParams.entries()),
-        pathname: location.pathname,
-        fullUrl: window.location.href, // Using window.location.href instead of location.href
-        hash: location.hash
+        search: window.location.search,
+        fullUrl: window.location.href,
+        hash: window.location.hash
       });
       
       // Validate reset parameters
@@ -42,7 +41,7 @@ export const useNewPasswordReset = () => {
 
       // Force sign out any existing session to prevent auto-redirect
       try {
-        console.log("Attempting to sign out before password reset form loads");
+        console.log("Signing out before password reset form loads");
         const { error: signOutError } = await supabase.auth.signOut();
         
         if (signOutError) {
@@ -61,7 +60,7 @@ export const useNewPasswordReset = () => {
     };
 
     validateResetParams();
-  }, [searchParams, location]);
+  }, [searchParams]);
 
   const handleNewPasswordSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
@@ -84,7 +83,7 @@ export const useNewPasswordReset = () => {
         type: 'recovery',
       });
       
-      console.log("Verify OTP result:", { 
+      console.log("OTP verification result:", { 
         success: !verifyError, 
         error: verifyError?.message,
         data: verifyData
@@ -101,7 +100,7 @@ export const useNewPasswordReset = () => {
         password: values.password
       });
       
-      console.log("Update password result:", { 
+      console.log("Password update result:", { 
         success: !updateError, 
         error: updateError?.message,
         data: updateData

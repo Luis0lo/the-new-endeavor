@@ -35,7 +35,7 @@ export const useAuthCheck = () => {
         location.hash.includes('refresh_token')
       );
       
-      console.log("Auth flow URL check:", {
+      console.log("Auth flow check:", {
         path: location.pathname,
         search: location.search,
         hash: location.hash,
@@ -49,16 +49,17 @@ export const useAuthCheck = () => {
 
       // Password reset flow detection (highest priority)
       if (hasResetParams) {
-        console.log("Password reset with code flow detected - showing new password form");
+        console.log("Password reset with code flow detected");
         
         try {
           // Critical: Immediately sign out any existing session
           // This prevents auto-login and ensures the reset flow works properly
           await supabase.auth.signOut();
-          console.log("Signed out successfully before password reset flow");
+          console.log("Signed out before password reset flow");
           
-          // Display new password form
-          setCurrentView('newPassword');
+          // Redirect to dedicated reset password page
+          navigate('/auth/reset-password' + location.search);
+          return;
         } catch (error) {
           console.error("Error signing out before password reset:", error);
         }
