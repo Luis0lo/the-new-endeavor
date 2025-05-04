@@ -28,21 +28,28 @@ const ResetPassword = () => {
     };
 
     signOutExistingSession();
-  }, []);
-  
-  console.log("Reset Password page accessed with:", {
-    search: location.search,
-    hash: location.hash,
-    type,
-    code,
-    fullUrl: window.location.href
-  });
+    
+    // Log complete URL information for debugging
+    console.log("Reset Password URL details:", {
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+      fullUrl: window.location.href,
+      type,
+      code,
+      allParams: Object.fromEntries(searchParams.entries())
+    });
+    
+  }, [searchParams, location]);
   
   // Check if we have the required parameters
   const hasValidParams = type === 'recovery' && code;
   
-  // If parameters are missing, show error instead of the form
+  // If parameters are missing, show detailed error instead of the form
   if (!hasValidParams) {
+    const missingType = !type;
+    const missingCode = !code;
+    
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
         <Card className="w-full max-w-md">
@@ -51,9 +58,15 @@ const ResetPassword = () => {
           </CardHeader>
           <CardContent>
             <Alert variant="destructive" className="mb-4">
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Invalid Reset Link</AlertTitle>
               <AlertDescription>
-                The password reset link is invalid or has expired. Please request a new one.
+                <p className="mb-2">The password reset link is invalid or has expired.</p>
+                <p className="text-sm font-medium">Missing parameters: 
+                  {missingType && " type=recovery"} 
+                  {missingType && missingCode && " and "} 
+                  {missingCode && " code"}
+                </p>
+                <p className="mt-2 text-sm">Please request a new password reset link.</p>
               </AlertDescription>
             </Alert>
             <div className="flex justify-center mt-4">

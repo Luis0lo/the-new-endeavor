@@ -39,8 +39,8 @@ export const useAuthCheck = () => {
         path: location.pathname,
         search: location.search,
         hash: location.hash,
-        resetType,
-        resetCode,
+        resetType: resetType ? 'recovery' : null,
+        resetCode: resetCode ? 'present' : null,
         hasResetParams,
         hasToken,
         isResetRedirect,
@@ -58,8 +58,12 @@ export const useAuthCheck = () => {
           await supabase.auth.signOut();
           console.log("Signed out before password reset flow");
           
+          // Build the complete redirect URL preserving all query parameters
+          const resetUrl = '/auth/reset-password' + location.search;
+          console.log("Redirecting to reset password page:", resetUrl);
+          
           // Redirect to dedicated reset password page with replace:true to avoid back button issues
-          navigate('/auth/reset-password' + location.search, { replace: true });
+          navigate(resetUrl, { replace: true });
           return;
         } catch (error) {
           console.error("Error signing out before password reset:", error);
