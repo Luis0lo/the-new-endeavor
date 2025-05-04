@@ -28,7 +28,7 @@ export const useNewPasswordReset = () => {
         code,
         allParams: Object.fromEntries(searchParams.entries()),
         pathname: location.pathname,
-        fullUrl: location.href,
+        fullUrl: window.location.href, // Using window.location.href instead of location.href
         hash: location.hash
       });
       
