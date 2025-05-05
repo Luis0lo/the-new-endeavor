@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover';
+import { SEO } from '@/components/SEO';
 
 interface BlogPost {
   id: string;
@@ -173,6 +175,14 @@ const BlogPost = () => {
 
   return (
     <MainLayout>
+      {post && (
+        <SEO 
+          title={`${post.title} | Garden Blog`}
+          description={`Read our gardening article: ${post.title}`}
+          ogImage={post.featured_image || undefined}
+        />
+      )}
+      
       <div className="container mx-auto px-4 py-12">
         <Link to="/blog">
           <Button variant="ghost" size="sm" className="mb-6">
@@ -260,7 +270,7 @@ const BlogPost = () => {
                     </div>
                   </div>
                   
-                  {/* Share Button - Updated to remove redundant "Share" text */}
+                  {/* Share Button */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="sm" className="gap-1">
