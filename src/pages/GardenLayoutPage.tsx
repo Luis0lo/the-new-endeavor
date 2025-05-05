@@ -26,7 +26,8 @@ import {
   Copy, 
   Save, 
   Layers,
-  PenTool
+  PenTool,
+  FolderOpen
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -35,10 +36,34 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type ShapeType = 'rect' | 'circle' | 'line' | 'text';
 type GardenUnit = 'cm' | 'in' | 'ft' | 'm';
 type BackgroundPattern = 'none' | 'soil' | 'grass' | 'concrete' | 'wood';
+
+interface SavedShape {
+  id: string;
+  name: string;
+  data: string; // JSON string of the shape
+  createdAt: number;
+  preview?: string; // Optional base64 thumbnail
+}
 
 const GardenLayoutPage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,8 +82,23 @@ const GardenLayoutPage = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [hasSelection, setHasSelection] = useState(false);
   const [fontSize, setFontSize] = useState(16);
+  const [savedShapes, setSavedShapes] = useState<SavedShape[]>([]);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [shapeName, setShapeName] = useState('');
 
   const navigate = useNavigate();
+
+  // Load saved shapes from localStorage on component mount
+  useEffect(() => {
+    const storedShapes = localStorage.getItem('savedShapes');
+    if (storedShapes) {
+      try {
+        setSavedShapes(JSON.parse(storedShapes));
+      } catch (error) {
+        console.error("Error loading saved shapes:", error);
+      }
+    }
+  }, []);
 
   // Initialize canvas
   useEffect(() => {
@@ -725,6 +765,216 @@ const GardenLayoutPage = () => {
     navigate('/dashboard/custom-shape');
   };
 
+  // Save the selected object as a named shape
+  const handleSaveSelectedShape = () => {
+    if (!canvas) return;
+
+    const selectedObjects = canvas.getActiveObjects();
+    
+    if (selectedObjects.length === 0) {
+      toast({
+        title: "No shape selected",
+        description: "Please select a shape to save.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSaveDialogOpen(true);
+  };
+
+  // Complete saving shape with name
+  const completeSaveShape = () => {
+    if (!canvas || !shapeName.trim()) return;
+
+    try {
+      // Get selected objects
+      const selectedObjects = canvas.getActiveObjects();
+      
+      if (selectedObjects.length === 0) return;
+
+      // Create a temporary canvas to store just this object
+      const tempCanvas = new fabric.Canvas(document.createElement('canvas'), {
+        width: canvas.width,
+        height: canvas.height
+      });
+
+      // Clone the selected objects to the temp canvas
+      const clonedGroup: fabric.Object[] = [];
+      
+      selectedObjects.forEach(obj => {
+        obj.clone((clone: fabric.Object) => {
+          tempCanvas.add(clone);
+          clonedGroup.push(clone);
+        });
+      });
+      
+      // Create a group if multiple objects
+      const group = selectedObjects.length > 1 ? 
+        new fabric.Group(clonedGroup, {
+          left: 0, 
+          top: 0,
+          objectCaching: false
+        }) : clonedGroup[0];
+      
+      // Store the JSON of just this object/group
+      const shapeJson = JSON.stringify(group.toJSON(['data']));
+      
+      // Generate a thumbnail preview (base64)
+      const dataUrl = tempCanvas.toDataURL({
+        format: 'png',
+        quality: 0.5,
+        width: 100,
+        height: 100
+      });
+      
+      // Create new saved shape
+      const newShape: SavedShape = {
+        id: Date.now().toString(),
+        name: shapeName,
+        data: shapeJson,
+        createdAt: Date.now(),
+        preview: dataUrl
+      };
+      
+      // Update saved shapes
+      const updatedShapes = [...savedShapes, newShape];
+      setSavedShapes(updatedShapes);
+      localStorage.setItem('savedShapes', JSON.stringify(updatedShapes));
+      
+      // Clean up
+      tempCanvas.dispose();
+      setShapeName('');
+      setSaveDialogOpen(false);
+      
+      toast({
+        title: "Shape saved",
+        description: `"${shapeName}" has been saved to your collection.`,
+      });
+    } catch (error) {
+      console.error("Error saving shape:", error);
+      toast({
+        title: "Save failed",
+        description: "There was a problem saving your shape.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Load a saved shape to the canvas
+  const loadSavedShape = (shape: SavedShape) => {
+    if (!canvas) return;
+
+    try {
+      // Parse the shape JSON
+      const shapeData = JSON.parse(shape.data);
+      
+      // Add it to the canvas
+      fabric.util.enlivenObjects([shapeData], (objects: fabric.Object[]) => {
+        const obj = objects[0];
+        
+        // Position in the center of the visible area
+        obj.set({
+          left: 200,
+          top: 200
+        });
+        
+        canvas.add(obj);
+        canvas.setActiveObject(obj);
+        
+        // If it's not a text object, add size label
+        if (!(obj instanceof fabric.IText)) {
+          updateShapeSizeLabel(obj);
+        }
+        
+        canvas.renderAll();
+        
+        toast({
+          title: "Shape loaded",
+          description: `"${shape.name}" has been added to your layout.`,
+        });
+      });
+    } catch (error) {
+      console.error("Error loading shape:", error);
+      toast({
+        title: "Load failed",
+        description: "There was a problem loading your shape.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Delete a saved shape
+  const deleteSavedShape = (id: string) => {
+    try {
+      const shapeIndex = savedShapes.findIndex(s => s.id === id);
+      if (shapeIndex === -1) return;
+      
+      const shapeName = savedShapes[shapeIndex].name;
+      const updatedShapes = [...savedShapes];
+      updatedShapes.splice(shapeIndex, 1);
+      
+      setSavedShapes(updatedShapes);
+      localStorage.setItem('savedShapes', JSON.stringify(updatedShapes));
+      
+      toast({
+        title: "Shape deleted",
+        description: `"${shapeName}" has been removed from your collection.`,
+      });
+    } catch (error) {
+      console.error("Error deleting shape:", error);
+    }
+  };
+
+  // Load all saved shapes
+  const loadAllShapes = () => {
+    if (!canvas || savedShapes.length === 0) return;
+
+    try {
+      // Clear existing selections
+      canvas.discardActiveObject();
+      
+      // Load each shape with some offset to avoid overlap
+      let offsetX = 20;
+      let offsetY = 20;
+      
+      savedShapes.forEach((shape, index) => {
+        const shapeData = JSON.parse(shape.data);
+        
+        fabric.util.enlivenObjects([shapeData], (objects: fabric.Object[]) => {
+          const obj = objects[0];
+          
+          // Position with offset
+          obj.set({
+            left: 100 + (index % 3) * offsetX,
+            top: 100 + Math.floor(index / 3) * offsetY
+          });
+          
+          canvas.add(obj);
+          
+          // If it's not a text object, add size label
+          if (!(obj instanceof fabric.IText)) {
+            updateShapeSizeLabel(obj);
+          }
+        });
+      });
+      
+      canvas.renderAll();
+      
+      toast({
+        title: "All shapes loaded",
+        description: `Loaded ${savedShapes.length} shapes into your layout.`,
+      });
+    } catch (error) {
+      console.error("Error loading all shapes:", error);
+      toast({
+        title: "Load failed",
+        description: "There was a problem loading your shapes.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex-1 p-4 md:p-8 space-y-4">
@@ -735,10 +985,11 @@ const GardenLayoutPage = () => {
           </p>
           
           <Tabs defaultValue="shapes" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4">
+            <TabsList className="grid grid-cols-4 mb-4">
               <TabsTrigger value="shapes">Shapes & Tools</TabsTrigger>
               <TabsTrigger value="styling">Styling</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="saved">Saved Shapes</TabsTrigger>
             </TabsList>
             
             <TabsContent value="shapes" className="space-y-4">
@@ -853,16 +1104,26 @@ const GardenLayoutPage = () => {
                   >
                     <Layers size={16} />
                   </Button>
+                  <Button
+                    onClick={handleSaveSelectedShape}
+                    variant="outline"
+                    disabled={!hasSelection}
+                    title="Save selected shape"
+                  >
+                    <Save size={16} />
+                    <span className="ml-1">Save Shape</span>
+                  </Button>
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-2">
                 <Button onClick={saveLayout} variant="outline" title="Save layout">
                   <Save size={16} className="mr-1" />
-                  <span>Save</span>
+                  <span>Save Layout</span>
                 </Button>
                 <Button onClick={loadLayout} variant="outline" title="Load layout">
-                  <span>Load</span>
+                  <FolderOpen size={16} className="mr-1" />
+                  <span>Load Layout</span>
                 </Button>
                 <Button onClick={clearCanvas} variant="outline" title="Clear canvas">
                   <span>Clear All</span>
@@ -1010,6 +1271,86 @@ const GardenLayoutPage = () => {
                 </div>
               </div>
             </TabsContent>
+            
+            <TabsContent value="saved" className="space-y-4">
+              {savedShapes.length > 0 ? (
+                <>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">Your Saved Shapes</h3>
+                    <Button onClick={loadAllShapes} variant="outline" size="sm">
+                      <span>Load All Shapes</span>
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {savedShapes.map((shape) => (
+                      <div 
+                        key={shape.id} 
+                        className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          {shape.preview && (
+                            <div className="w-20 h-20 border mb-2 rounded flex items-center justify-center bg-white">
+                              <img 
+                                src={shape.preview} 
+                                alt={shape.name} 
+                                className="max-w-full max-h-full object-contain"
+                              />
+                            </div>
+                          )}
+                          <h4 className="font-semibold">{shape.name}</h4>
+                          <div className="flex gap-2 mt-2">
+                            <Button 
+                              onClick={() => loadSavedShape(shape)}
+                              size="sm" 
+                              variant="secondary"
+                            >
+                              Load
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost">
+                                  <span className="sr-only">Open menu</span>
+                                  <svg
+                                    width="15"
+                                    height="15"
+                                    viewBox="0 0 15 15"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                  >
+                                    <path
+                                      d="M3.625 7.5C3.625 8.12132 3.12132 8.625 2.5 8.625C1.87868 8.625 1.375 8.12132 1.375 7.5C1.375 6.87868 1.87868 6.375 2.5 6.375C3.12132 6.375 3.625 6.87868 3.625 7.5ZM8.625 7.5C8.625 8.12132 8.12132 8.625 7.5 8.625C6.87868 8.625 6.375 8.12132 6.375 7.5C6.375 6.87868 6.87868 6.375 7.5 6.375C8.12132 6.375 8.625 6.87868 8.625 7.5ZM13.625 7.5C13.625 8.12132 13.1213 8.625 12.5 8.625C11.8787 8.625 11.375 8.12132 11.375 7.5C11.375 6.87868 11.8787 6.375 12.5 6.375C13.1213 6.375 13.625 6.87868 13.625 7.5Z"
+                                      fill="currentColor"
+                                      fillRule="evenodd"
+                                      clipRule="evenodd"
+                                    ></path>
+                                  </svg>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => deleteSavedShape(shape.id)}
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center p-8 border rounded-lg bg-muted/50">
+                  <h3 className="text-lg font-medium">No Saved Shapes Yet</h3>
+                  <p className="text-muted-foreground mt-2">
+                    Select a shape on the canvas and save it to add it to your collection.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
           </Tabs>
           
           <div className="border rounded-lg overflow-hidden bg-white">
@@ -1021,6 +1362,34 @@ const GardenLayoutPage = () => {
           </div>
         </div>
       </div>
+      
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save Shape</DialogTitle>
+            <DialogDescription>
+              Give your shape a name so you can reuse it in other garden layouts.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="shape-name">Shape Name</Label>
+              <Input 
+                id="shape-name" 
+                value={shapeName} 
+                onChange={(e) => setShapeName(e.target.value)} 
+                placeholder="Enter a name for this shape"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={completeSaveShape} disabled={!shapeName.trim()}>Save Shape</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
