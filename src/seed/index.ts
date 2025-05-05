@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { seedBlogPosts } from './blogPosts';
 import { plantData } from './plantData';
 
 export const runSeedData = async () => {
@@ -8,15 +7,6 @@ export const runSeedData = async () => {
   const { data } = await supabase.auth.getSession();
   
   if (data?.session?.user) {
-    // Seed blog posts
-    console.log("Seeding database with blog posts");
-    try {
-      await seedBlogPosts();
-      console.log("Successfully seeded blog posts database");
-    } catch (blogError) {
-      console.error("Error in blog post seeding process:", blogError);
-    }
-    
     // Seed plant data
     console.log("Seeding database with plants:", plantData.length);
     try {

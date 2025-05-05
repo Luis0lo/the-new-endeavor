@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom'; // Add useLocation
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -15,7 +16,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation(); // Get current location
+  const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
@@ -40,7 +41,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const navLinks = [
     { name: 'Home', href: '/', path: '/' },
-    { name: 'SubGarden', href: '/blog', path: '/blog' },
     { name: 'Greenlink', href: '/greenlink', path: '/greenlink' },
     { name: 'Dashboard', href: '/dashboard', path: '/dashboard' },
   ];
