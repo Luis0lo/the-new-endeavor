@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { fabric } from 'fabric';
@@ -1016,4 +1017,12 @@ const GardenLayoutPage = () => {
           </div>
           
           <div className="text-sm text-muted-foreground">
-            <p>Tip:
+            <p>Tip: Click to add shapes, then drag to position them. Use the Custom Shape tool for complex garden boundaries.</p>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default GardenLayoutPage;
