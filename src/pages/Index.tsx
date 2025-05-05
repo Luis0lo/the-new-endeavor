@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -53,11 +54,6 @@ const Index = () => {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link to="/blog">
-                  <Button variant="outline" size="lg">
-                    Read Our Blog
-                  </Button>
-                </Link>
               </div>
             </div>
             <div className="flex items-center justify-center">
@@ -107,9 +103,9 @@ const Index = () => {
               <div className="rounded-full border bg-background p-3">
                 <Book className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold">Gardening Blog</h3>
+              <h3 className="text-xl font-bold">Gardening Guide</h3>
               <p className="text-center text-gray-500 dark:text-gray-400">
-                Learn from our community of garden experts with regular articles and tips.
+                Access helpful gardening guides and tips from our plant care experts.
               </p>
             </div>
           </div>
@@ -138,77 +134,6 @@ const Index = () => {
           </div>
         </section>
       )}
-
-      {/* Blog Preview Section */}
-      <section className="py-20">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Latest from Our Blog</h2>
-              <p className="max-w-[700px] text-gray-500 md:text-xl/relaxed dark:text-gray-400">
-                Discover gardening tips, plant care guides, and seasonal advice from our experts.
-              </p>
-            </div>
-          </div>
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Blog Card 1 */}
-            <Link to="/blog" className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary">
-              <div className="aspect-video overflow-hidden rounded-lg">
-                <img
-                  src="https://images.unsplash.com/photo-1599685315640-8e2a53210971?q=80&w=400&auto=format&fit=crop"
-                  alt="Vegetables"
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
-              <div className="pt-4">
-                <h3 className="font-bold">Growing Vegetables for Beginners</h3>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  Learn how to start your own vegetable garden with these simple tips.
-                </p>
-              </div>
-            </Link>
-            
-            {/* Blog Card 2 */}
-            <Link to="/blog" className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary">
-              <div className="aspect-video overflow-hidden rounded-lg">
-                <img
-                  src="https://images.unsplash.com/photo-1635314924426-6a0358bd0bbd?q=80&w=400&auto=format&fit=crop"
-                  alt="Herb Garden"
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
-              <div className="pt-4">
-                <h3 className="font-bold">Creating an Indoor Herb Garden</h3>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  Fresh herbs year-round: How to create and maintain your indoor herb garden.
-                </p>
-              </div>
-            </Link>
-            
-            {/* Blog Card 3 */}
-            <Link to="/blog" className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary">
-              <div className="aspect-video overflow-hidden rounded-lg">
-                <img
-                  src="https://images.unsplash.com/photo-1603436326446-74f0ea425d34?q=80&w=400&auto=format&fit=crop"
-                  alt="Seasonal Flowers"
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
-              <div className="pt-4">
-                <h3 className="font-bold">Best Seasonal Flowers for Your Region</h3>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  Discover which flowers thrive in your climate during each season of the year.
-                </p>
-              </div>
-            </Link>
-          </div>
-          <div className="flex justify-center">
-            <Link to="/blog">
-              <Button variant="outline">View All Articles</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
     </MainLayout>
   );
 };
