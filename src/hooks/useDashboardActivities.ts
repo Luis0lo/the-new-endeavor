@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, getYear } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,7 @@ interface Activity {
   description: string | null;
   scheduled_date: string;
   completed: boolean | null;
+  status: string | null;
 }
 
 // Handles all fetching, mutation, edit logic for dashboard activities.
@@ -55,6 +55,7 @@ export function useDashboardActivities() {
             description: activity.description,
             scheduled_date: activity.scheduled_date,
             completed: activity.completed,
+            status: activity.status
           }))
         );
       } else setActivities([]);
@@ -156,16 +157,31 @@ export function useDashboardActivities() {
   // Toggle activity complete/incomplete
   const toggleActivityStatus = async (id: string, currentStatus: boolean | null) => {
     try {
+      // Get the current status value
+      const newCompletedStatus = !currentStatus;
+      
+      // Update the status field to match the completed field - "done" when completed, "pending" when not
+      const newStatusValue = newCompletedStatus ? "done" : "pending";
+      
       const { error } = await supabase
         .from('garden_activities')
         .update({
-          completed: !currentStatus
-        } as any)
+          completed: newCompletedStatus,
+          status: newStatusValue
+        })
         .eq('id', id);
+      
       if (error) throw error;
+      
+      // Update local state to reflect the change
       setActivities(activities.map(activity =>
-        activity.id === id ? { ...activity, completed: !currentStatus } : activity
+        activity.id === id ? { 
+          ...activity, 
+          completed: newCompletedStatus,
+          status: newStatusValue
+        } : activity
       ));
+      
       toast({
         title: !currentStatus ? "Activity completed" : "Activity marked incomplete",
         description: "Activity status updated successfully.",
