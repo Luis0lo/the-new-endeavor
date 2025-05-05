@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,6 @@ import {
   LogOut,
   Menu,
   Archive,
-  BookOpen,
   Flower2,
   ChevronLeft,
   ChevronRight,
@@ -111,11 +109,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       title: 'Companion Plants',
       icon: Flower2,
       path: '/dashboard/companions'
-    },
-    {
-      title: 'Garden Resources',
-      icon: BookOpen,
-      path: '/blog'
     },
     {
       title: 'Account Settings',
