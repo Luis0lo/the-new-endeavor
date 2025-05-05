@@ -17,6 +17,8 @@ import StylingControls from '@/components/garden-layout/StylingControls';
 import SettingsControls from '@/components/garden-layout/SettingsControls';
 import SavedShapesTab from '@/components/garden-layout/SavedShapesTab';
 import SaveShapeDialog from '@/components/garden-layout/SaveShapeDialog';
+// Import canvasUtils for direct access to updateShapeSizeLabel
+import { updateShapeSizeLabel } from '@/components/garden-layout/utils/canvasUtils';
 
 const GardenLayoutPage = () => {
   const [selectedShape, setSelectedShape] = useState<ShapeType>('rect');
@@ -189,10 +191,8 @@ const GardenLayoutPage = () => {
         
         // If it's not a text object, add size label
         if (!(obj instanceof fabric.IText)) {
-          // Using the imported functions directly
-          import('./utils/canvasUtils').then(utils => {
-            utils.updateShapeSizeLabel(obj, canvas, unit);
-          });
+          // Use the directly imported updateShapeSizeLabel
+          updateShapeSizeLabel(obj, canvas, unit);
         }
         
         canvas.renderAll();
@@ -262,10 +262,8 @@ const GardenLayoutPage = () => {
           
           // If it's not a text object, add size label
           if (!(obj instanceof fabric.IText)) {
-            // Using the imported functions directly
-            import('./utils/canvasUtils').then(utils => {
-              utils.updateShapeSizeLabel(obj, canvas, unit);
-            });
+            // Use the directly imported updateShapeSizeLabel
+            updateShapeSizeLabel(obj, canvas, unit);
           }
         });
       });
