@@ -13,6 +13,7 @@ import AccountSettings from "./pages/AccountSettings";
 import InventoryPage from "./pages/InventoryPage";
 import InventoryShelfPage from "./pages/InventoryShelfPage";
 import CompanionPlantsPage from "./pages/CompanionPlantsPage";
+import GardenLayoutPage from "./pages/GardenLayoutPage";
 import Sitemap from "./pages/Sitemap";
 import CookiePolicy from "./pages/CookiePolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/dashboard/inventory" element={<InventoryPage />} />
             <Route path="/dashboard/inventory/:shelfId" element={<InventoryShelfPage />} />
             <Route path="/dashboard/companions" element={<CompanionPlantsPage />} />
+            <Route path="/dashboard/garden-layout" element={<GardenLayoutPage />} />
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

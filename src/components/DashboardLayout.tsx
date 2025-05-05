@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +13,8 @@ import {
   Flower2,
   ChevronLeft,
   ChevronRight,
-  Sprout
+  Sprout,
+  LayoutGrid
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -104,6 +106,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       title: 'Inventory',
       icon: Archive,
       path: '/dashboard/inventory'
+    },
+    {
+      title: 'Garden Layout',
+      icon: LayoutGrid,
+      path: '/dashboard/garden-layout'
     },
     {
       title: 'Companion Plants',
