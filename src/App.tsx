@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import InventoryPage from "./pages/InventoryPage";
 import InventoryShelfPage from "./pages/InventoryShelfPage";
 import CompanionPlantsPage from "./pages/CompanionPlantsPage";
 import GardenLayoutPage from "./pages/GardenLayoutPage";
+import CustomShapeDrawerPage from "./pages/CustomShapeDrawerPage";
 import Sitemap from "./pages/Sitemap";
 import CookiePolicy from "./pages/CookiePolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -59,6 +61,7 @@ const App = () => (
             <Route path="/dashboard/inventory/:shelfId" element={<InventoryShelfPage />} />
             <Route path="/dashboard/companions" element={<CompanionPlantsPage />} />
             <Route path="/dashboard/garden-layout" element={<GardenLayoutPage />} />
+            <Route path="/dashboard/custom-shape" element={<CustomShapeDrawerPage />} />
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

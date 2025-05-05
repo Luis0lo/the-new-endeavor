@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { fabric } from 'fabric';
@@ -25,8 +24,10 @@ import {
   Trash,
   Copy, 
   Save, 
-  Layers 
+  Layers,
+  PenTool
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Tabs,
   TabsContent,
@@ -55,6 +56,8 @@ const GardenLayoutPage = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [hasSelection, setHasSelection] = useState(false);
   const [fontSize, setFontSize] = useState(16);
+
+  const navigate = useNavigate();
 
   // Initialize canvas
   useEffect(() => {
@@ -131,6 +134,35 @@ const GardenLayoutPage = () => {
 
     // Set initial history state
     saveCanvasState(fabricCanvas);
+
+    // Check for custom shapes from the custom shape drawer
+    const customShapesJson = localStorage.getItem('customShapes');
+    if (customShapesJson && fabricCanvas) {
+      try {
+        const customShapes = JSON.parse(customShapesJson);
+        
+        customShapes.forEach((shapeData: any) => {
+          // Create a fabric.js path from the custom shape data
+          const path = createCustomShapePath(shapeData, fabricCanvas);
+          if (path) {
+            fabricCanvas.add(path);
+            path.center();
+            fabricCanvas.setActiveObject(path);
+            fabricCanvas.renderAll();
+          }
+        });
+        
+        // Clear the localStorage after importing
+        localStorage.removeItem('customShapes');
+        
+        toast({
+          title: "Custom shapes imported",
+          description: "Your custom shapes have been added to the layout."
+        });
+      } catch (error) {
+        console.error("Error importing custom shapes:", error);
+      }
+    }
 
     return () => {
       fabricCanvas.dispose();
@@ -634,6 +666,64 @@ const GardenLayoutPage = () => {
     }
   };
 
+  // Create a fabric.js path from custom shape data
+  const createCustomShapePath = (shapeData: any, canvas: fabric.Canvas) => {
+    try {
+      const points = shapeData.points;
+      const curves = shapeData.curves || [];
+      const color = shapeData.color;
+      
+      if (!points || points.length < 3) return null;
+      
+      // Generate SVG path data
+      let pathData = `M ${points[0].x} ${points[0].y}`;
+      
+      for (let i = 1; i <= points.length; i++) {
+        const nextIndex = i % points.length;
+        const prevIndex = i - 1;
+        
+        const curveData = curves.find((c: any) => 
+          (c.startIndex === prevIndex && c.endIndex === nextIndex) || 
+          (c.startIndex === nextIndex && c.endIndex === prevIndex)
+        );
+        
+        if (curveData) {
+          // Quadratic curve
+          pathData += ` Q ${curveData.controlPoint.x},${curveData.controlPoint.y} ${points[nextIndex].x},${points[nextIndex].y}`;
+        } else {
+          // Straight line
+          pathData += ` L ${points[nextIndex].x} ${points[nextIndex].y}`;
+        }
+      }
+      
+      pathData += ' Z'; // Close path
+      
+      // Create the fabric path
+      const path = new fabric.Path(pathData, {
+        fill: color + '40',
+        stroke: color,
+        strokeWidth: 2,
+        opacity: 0.9,
+        objectCaching: false,
+        transparentCorners: false,
+        cornerColor: 'rgba(102,153,255,0.8)',
+      });
+      
+      // Add data attribute to identify this as a custom shape
+      path.data = { isCustomShape: true };
+      
+      return path;
+    } catch (error) {
+      console.error("Error creating custom shape path:", error);
+      return null;
+    }
+  };
+
+  // Open custom shape drawer
+  const openCustomShapeDrawer = () => {
+    navigate('/dashboard/custom-shape');
+  };
+
   return (
     <DashboardLayout>
       <div className="flex-1 p-4 md:p-8 space-y-4">
@@ -702,6 +792,17 @@ const GardenLayoutPage = () => {
                 
                 <div className="space-y-2">
                   <Button onClick={addShape}>Add Shape</Button>
+                </div>
+                
+                <div className="space-y-2">
+                  <Button 
+                    onClick={openCustomShapeDrawer}
+                    variant="secondary"
+                    className="flex items-center gap-2"
+                  >
+                    <PenTool size={16} />
+                    <span>Custom Shape</span>
+                  </Button>
                 </div>
                 
                 <div className="flex gap-2">
@@ -915,13 +1016,4 @@ const GardenLayoutPage = () => {
           </div>
           
           <div className="text-sm text-muted-foreground">
-            <p>Tip: Click and drag to move objects. Use the corner handles to resize.</p>
-            <p>Objects are sized according to the grid measurement: {gridSize} {unit} per grid square.</p>
-          </div>
-        </div>
-      </div>
-    </DashboardLayout>
-  );
-};
-
-export default GardenLayoutPage;
+            <p>Tip:
