@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/use-theme";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -62,13 +62,14 @@ const App = () => (
             <Route path="/dashboard/companions" element={<CompanionPlantsPage />} />
             <Route path="/dashboard/garden-layout" element={<GardenLayoutPage />} />
             <Route path="/dashboard/custom-shape" element={<CustomShapeDrawerPage />} />
+            <Route path="/dashboard/resources" element={<Greenlink />} />
+            <Route path="/dashboard/seed-calendar" element={<SeedCalendarPage />} />
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/about" element={<About />} />
             <Route path="/greenlink" element={<Greenlink />} />
-            <Route path="/dashboard/seed-calendar" element={<SeedCalendarPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

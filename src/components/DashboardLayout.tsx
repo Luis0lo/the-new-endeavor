@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Sprout,
-  LayoutGrid
+  LayoutGrid,
+  BookOpen
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -116,6 +117,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       title: 'Companion Plants',
       icon: Flower2,
       path: '/dashboard/companions'
+    },
+    {
+      title: 'Garden Resources',
+      icon: BookOpen,
+      path: '/dashboard/resources'
     },
     {
       title: 'Account Settings',
