@@ -13,10 +13,30 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
+import { 
+  Undo2, 
+  Redo2, 
+  Square, 
+  Circle, 
+  Minus, 
+  Type, 
+  Trash,
+  Copy, 
+  Save, 
+  Layers 
+} from 'lucide-react';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 
-type ShapeType = 'rect' | 'circle' | 'line';
+type ShapeType = 'rect' | 'circle' | 'line' | 'text';
 type GardenUnit = 'cm' | 'in' | 'ft' | 'm';
+type BackgroundPattern = 'none' | 'soil' | 'grass' | 'concrete' | 'wood';
 
 const GardenLayoutPage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,6 +46,15 @@ const GardenLayoutPage = () => {
   const [unit, setUnit] = useState<GardenUnit>('cm');
   const [gridSize, setGridSize] = useState(10);
   const [objectsCount, setObjectsCount] = useState(0);
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [strokeWidth, setStrokeWidth] = useState(2);
+  const [opacity, setOpacity] = useState(100);
+  const [backgroundPattern, setBackgroundPattern] = useState<BackgroundPattern>('none');
+  const [textValue, setTextValue] = useState('Label');
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [hasSelection, setHasSelection] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
 
   // Initialize canvas
   useEffect(() => {
@@ -35,14 +64,62 @@ const GardenLayoutPage = () => {
       width: 800,
       height: 600,
       backgroundColor: '#E6EFC8',
+      preserveObjectStacking: true,
     });
 
     fabricCanvas.on('object:added', () => {
       setObjectsCount(prev => prev + 1);
+      saveCanvasState(fabricCanvas);
     });
 
     fabricCanvas.on('object:removed', () => {
       setObjectsCount(prev => Math.max(0, prev - 1));
+      saveCanvasState(fabricCanvas);
+    });
+
+    fabricCanvas.on('object:modified', () => {
+      saveCanvasState(fabricCanvas);
+    });
+
+    fabricCanvas.on('selection:created', () => {
+      setHasSelection(true);
+    });
+
+    fabricCanvas.on('selection:cleared', () => {
+      setHasSelection(false);
+    });
+
+    // Object moving with snap to grid
+    fabricCanvas.on('object:moving', (e) => {
+      if (!snapToGrid || !e.target) return;
+      
+      const t = e.target;
+      const grid = gridSize;
+      
+      // Snap position to grid
+      t.set({
+        left: Math.round(t.left! / grid) * grid,
+        top: Math.round(t.top! / grid) * grid
+      });
+    });
+    
+    // Object scaling with snap
+    fabricCanvas.on('object:scaling', (e) => {
+      if (!snapToGrid || !e.target) return;
+      
+      const t = e.target;
+      const w = t.getScaledWidth();
+      const h = t.getScaledHeight();
+      const grid = gridSize;
+      
+      // Snap size to grid
+      if (t.scaleX && t.width) {
+        t.scaleX = Math.round(w / grid) * grid / t.width!;
+      }
+      
+      if (t.scaleY && t.height) {
+        t.scaleY = Math.round(h / grid) * grid / t.height!;
+      }
     });
 
     setCanvas(fabricCanvas);
@@ -51,6 +128,9 @@ const GardenLayoutPage = () => {
       title: "Garden Layout Designer",
       description: "Start designing your garden layout!",
     });
+
+    // Set initial history state
+    saveCanvasState(fabricCanvas);
 
     return () => {
       fabricCanvas.dispose();
@@ -63,6 +143,58 @@ const GardenLayoutPage = () => {
       drawGrid(canvas, gridSize, unit);
     }
   }, [gridSize, unit]);
+  
+  // Update background pattern
+  useEffect(() => {
+    if (canvas) {
+      applyBackgroundPattern(canvas, backgroundPattern);
+    }
+  }, [backgroundPattern]);
+
+  // Save canvas state for undo/redo
+  const saveCanvasState = (canvas: fabric.Canvas) => {
+    if (!canvas) return;
+    
+    // If we're not at the end of the history array,
+    // truncate the history to remove future states
+    if (historyIndex < history.length - 1) {
+      setHistory(history.slice(0, historyIndex + 1));
+    }
+    
+    const json = JSON.stringify(canvas.toJSON(['data']));
+    
+    setHistory(prev => [...prev, json]);
+    setHistoryIndex(prev => prev + 1);
+  };
+
+  // Apply background pattern to canvas
+  const applyBackgroundPattern = (canvas: fabric.Canvas, pattern: BackgroundPattern) => {
+    if (pattern === 'none') {
+      canvas.setBackgroundColor('#E6EFC8', canvas.renderAll.bind(canvas));
+      return;
+    }
+    
+    let fillPattern;
+    
+    switch (pattern) {
+      case 'soil':
+        fillPattern = '#8B4513';
+        break;
+      case 'grass':
+        fillPattern = '#7CFC00';
+        break;
+      case 'concrete':
+        fillPattern = '#C0C0C0';
+        break;
+      case 'wood':
+        fillPattern = '#DEB887';
+        break;
+      default:
+        fillPattern = '#E6EFC8';
+    }
+    
+    canvas.setBackgroundColor(fillPattern, canvas.renderAll.bind(canvas));
+  };
 
   // Draw grid on canvas
   const drawGrid = (canvas: fabric.Canvas, size: number, unit: GardenUnit) => {
@@ -125,6 +257,7 @@ const GardenLayoutPage = () => {
     if (!canvas) return;
 
     let shape: fabric.Object;
+    const adjustedColor = color + Math.floor(opacity * 255 / 100).toString(16).padStart(2, '0');
 
     switch (selectedShape) {
       case 'rect':
@@ -133,8 +266,8 @@ const GardenLayoutPage = () => {
           top: 100,
           width: 100,
           height: 150,
-          fill: color,
-          strokeWidth: 2,
+          fill: adjustedColor,
+          strokeWidth,
           stroke: 'black',
           cornerColor: 'black',
           transparentCorners: false
@@ -145,8 +278,8 @@ const GardenLayoutPage = () => {
           left: 100,
           top: 100,
           radius: 50,
-          fill: color,
-          strokeWidth: 2,
+          fill: adjustedColor,
+          strokeWidth,
           stroke: 'black',
           cornerColor: 'black',
           transparentCorners: false
@@ -157,9 +290,22 @@ const GardenLayoutPage = () => {
           left: 100,
           top: 100,
           stroke: color,
-          strokeWidth: 5,
+          strokeWidth: strokeWidth + 3,
           cornerColor: 'black',
           transparentCorners: false
+        });
+        break;
+      case 'text':
+        shape = new fabric.IText(textValue, {
+          left: 100,
+          top: 100,
+          fontSize,
+          fontFamily: 'Arial',
+          fill: color,
+          strokeWidth: 0,
+          cornerColor: 'black',
+          transparentCorners: false,
+          editingBorderColor: 'rgba(0,0,0,0.3)',
         });
         break;
       default:
@@ -169,8 +315,10 @@ const GardenLayoutPage = () => {
     canvas.add(shape);
     canvas.setActiveObject(shape);
     
-    // Add a label to the shape indicating its size
-    updateShapeSizeLabel(shape);
+    // Add a label to shapes except for text
+    if (selectedShape !== 'text') {
+      updateShapeSizeLabel(shape);
+    }
     
     canvas.renderAll();
     
@@ -187,19 +335,19 @@ const GardenLayoutPage = () => {
       let height = 0;
       
       if (shape instanceof fabric.Rect) {
-        width = shape.width || 0;
-        height = shape.height || 0;
+        width = (shape.width || 0) * (shape.scaleX || 1);
+        height = (shape.height || 0) * (shape.scaleY || 1);
       } else if (shape instanceof fabric.Circle) {
-        width = (shape.radius || 0) * 2;
-        height = (shape.radius || 0) * 2;
+        width = (shape.radius || 0) * 2 * (shape.scaleX || 1);
+        height = (shape.radius || 0) * 2 * (shape.scaleY || 1);
       } else if (shape instanceof fabric.Line) {
         const x1 = shape.x1 || 0;
         const y1 = shape.y1 || 0;
         const x2 = shape.x2 || 0;
         const y2 = shape.y2 || 0;
         
-        width = Math.abs(x2 - x1);
-        height = Math.abs(y2 - y1);
+        width = Math.abs(x2 - x1) * (shape.scaleX || 1);
+        height = Math.abs(y2 - y1) * (shape.scaleY || 1);
       }
       
       // Round dimensions for display
@@ -248,6 +396,95 @@ const GardenLayoutPage = () => {
     
     // Initial label
     updateLabel();
+  };
+
+  // Duplicate selected objects
+  const duplicateSelected = () => {
+    if (!canvas) return;
+    
+    const activeObjects = canvas.getActiveObjects();
+    
+    if (activeObjects.length) {
+      // Clone each object
+      activeObjects.forEach(obj => {
+        obj.clone((clone: fabric.Object) => {
+          // Position clone slightly offset from original
+          clone.set({
+            left: (obj.left || 0) + 20,
+            top: (obj.top || 0) + 20,
+            evented: true,
+          });
+          
+          // Set a new ID for the clone
+          if (!clone.data) clone.data = {};
+          clone.data.id = Date.now().toString();
+          
+          canvas.add(clone);
+          
+          // If it's not a text object, add size label
+          if (!(obj instanceof fabric.IText)) {
+            updateShapeSizeLabel(clone);
+          }
+          
+          canvas.renderAll();
+        });
+      });
+      
+      toast({
+        title: "Duplicated",
+        description: `Duplicated ${activeObjects.length} item(s) in your garden layout.`,
+      });
+    } else {
+      toast({
+        title: "No selection",
+        description: "Please select an object to duplicate.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Undo last action
+  const handleUndo = () => {
+    if (historyIndex <= 0 || !canvas) return;
+    
+    const newIndex = historyIndex - 1;
+    
+    canvas.loadFromJSON(history[newIndex], () => {
+      setHistoryIndex(newIndex);
+      setObjectsCount(
+        canvas.getObjects().filter(obj => 
+          !obj.data?.isGrid && !obj.data?.isLabel
+        ).length
+      );
+      
+      canvas.renderAll();
+      toast({
+        title: "Undo",
+        description: "Previous action undone.",
+      });
+    });
+  };
+
+  // Redo last undone action
+  const handleRedo = () => {
+    if (historyIndex >= history.length - 1 || !canvas) return;
+    
+    const newIndex = historyIndex + 1;
+    
+    canvas.loadFromJSON(history[newIndex], () => {
+      setHistoryIndex(newIndex);
+      setObjectsCount(
+        canvas.getObjects().filter(obj => 
+          !obj.data?.isGrid && !obj.data?.isLabel
+        ).length
+      );
+      
+      canvas.renderAll();
+      toast({
+        title: "Redo",
+        description: "Action redone successfully.",
+      });
+    });
   };
 
   // Remove selected objects
@@ -323,6 +560,9 @@ const GardenLayoutPage = () => {
             canvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length
           );
           
+          // Update history after loading
+          saveCanvasState(canvas);
+          
           toast({
             title: "Layout loaded",
             description: "Your saved garden layout has been loaded.",
@@ -364,6 +604,36 @@ const GardenLayoutPage = () => {
     });
   };
 
+  // Bring selected object to front
+  const bringToFront = () => {
+    if (!canvas) return;
+    
+    const activeObject = canvas.getActiveObject();
+    if (activeObject) {
+      activeObject.bringToFront();
+      canvas.renderAll();
+    }
+  };
+
+  // Send selected object to back
+  const sendToBack = () => {
+    if (!canvas) return;
+    
+    const activeObject = canvas.getActiveObject();
+    if (activeObject) {
+      activeObject.sendToBack();
+      
+      // Make sure grid stays at the very back
+      canvas.getObjects().forEach(obj => {
+        if (obj.data?.isGrid) {
+          obj.sendToBack();
+        }
+      });
+      
+      canvas.renderAll();
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex-1 p-4 md:p-8 space-y-4">
@@ -373,74 +643,272 @@ const GardenLayoutPage = () => {
             Design your garden beds, plots, and containers with accurate measurements.
           </p>
           
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="space-y-2">
-              <Label htmlFor="shape-select">Shape</Label>
-              <Select value={selectedShape} onValueChange={(value: ShapeType) => setSelectedShape(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select shape" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rect">Rectangle/Bed</SelectItem>
-                  <SelectItem value="circle">Circle/Container</SelectItem>
-                  <SelectItem value="line">Line/Path</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <Tabs defaultValue="shapes" className="w-full">
+            <TabsList className="grid grid-cols-3 mb-4">
+              <TabsTrigger value="shapes">Shapes & Tools</TabsTrigger>
+              <TabsTrigger value="styling">Styling</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
             
-            <div className="space-y-2">
-              <Label htmlFor="color-input">Color</Label>
-              <Input
-                id="color-input"
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-[100px] h-10"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="unit-select">Unit</Label>
-              <Select value={unit} onValueChange={(value: GardenUnit) => setUnit(value as GardenUnit)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select unit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cm">Centimeters (cm)</SelectItem>
-                  <SelectItem value="in">Inches (in)</SelectItem>
-                  <SelectItem value="ft">Feet (ft)</SelectItem>
-                  <SelectItem value="m">Meters (m)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2 flex-1 max-w-xs">
-              <div className="flex justify-between">
-                <Label htmlFor="grid-size">Grid Size: {gridSize} {unit}</Label>
+            <TabsContent value="shapes" className="space-y-4">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="shape-select">Shape</Label>
+                  <Select value={selectedShape} onValueChange={(value: ShapeType) => setSelectedShape(value)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select shape" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rect">
+                        <div className="flex items-center gap-2">
+                          <Square size={16} />
+                          <span>Rectangle/Bed</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="circle">
+                        <div className="flex items-center gap-2">
+                          <Circle size={16} />
+                          <span>Circle/Container</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="line">
+                        <div className="flex items-center gap-2">
+                          <Minus size={16} />
+                          <span>Line/Path</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="text">
+                        <div className="flex items-center gap-2">
+                          <Type size={16} />
+                          <span>Text/Label</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedShape === 'text' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="text-input">Text</Label>
+                    <Input
+                      id="text-input"
+                      value={textValue}
+                      onChange={(e) => setTextValue(e.target.value)}
+                      className="w-[180px]"
+                      placeholder="Enter text"
+                    />
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <Button onClick={addShape}>Add Shape</Button>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleUndo} 
+                    variant="outline" 
+                    disabled={historyIndex <= 0}
+                    title="Undo"
+                  >
+                    <Undo2 size={16} />
+                  </Button>
+                  <Button 
+                    onClick={handleRedo} 
+                    variant="outline" 
+                    disabled={historyIndex >= history.length - 1}
+                    title="Redo"
+                  >
+                    <Redo2 size={16} />
+                  </Button>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={removeSelected} 
+                    variant="destructive"
+                    disabled={!hasSelection}
+                    title="Delete"
+                  >
+                    <Trash size={16} />
+                  </Button>
+                  <Button 
+                    onClick={duplicateSelected} 
+                    variant="outline"
+                    disabled={!hasSelection}
+                    title="Duplicate"
+                  >
+                    <Copy size={16} />
+                  </Button>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={bringToFront} 
+                    variant="outline"
+                    disabled={!hasSelection}
+                    title="Bring to front"
+                  >
+                    <Layers size={16} />
+                  </Button>
+                </div>
               </div>
-              <Slider
-                id="grid-size"
-                min={5}
-                max={50}
-                step={5}
-                value={[gridSize]}
-                onValueChange={(value) => setGridSize(value[0])}
-              />
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={addShape}>Add Shape</Button>
-            <Button onClick={removeSelected} variant="destructive">Remove Selected</Button>
-            <Button onClick={saveLayout} variant="outline">Save Layout</Button>
-            <Button onClick={loadLayout} variant="outline">Load Layout</Button>
-            <Button onClick={clearCanvas} variant="outline">Clear All</Button>
-            <div className="flex-1 text-right flex items-center justify-end">
-              <span className="text-sm text-muted-foreground">
-                {objectsCount} {objectsCount === 1 ? 'item' : 'items'} in layout
-              </span>
-            </div>
-          </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={saveLayout} variant="outline" title="Save layout">
+                  <Save size={16} className="mr-1" />
+                  <span>Save</span>
+                </Button>
+                <Button onClick={loadLayout} variant="outline" title="Load layout">
+                  <span>Load</span>
+                </Button>
+                <Button onClick={clearCanvas} variant="outline" title="Clear canvas">
+                  <span>Clear All</span>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="styling" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="color-input">Color</Label>
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        id="color-input"
+                        type="color"
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        className="w-[100px] h-10"
+                      />
+                      <div 
+                        className="w-10 h-10 rounded-md border" 
+                        style={{ backgroundColor: color }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label htmlFor="opacity">Opacity: {opacity}%</Label>
+                    </div>
+                    <Slider
+                      id="opacity"
+                      min={10}
+                      max={100}
+                      step={5}
+                      value={[opacity]}
+                      onValueChange={(value) => setOpacity(value[0])}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label htmlFor="stroke-width">Border width: {strokeWidth}px</Label>
+                    </div>
+                    <Slider
+                      id="stroke-width"
+                      min={0}
+                      max={10}
+                      step={1}
+                      value={[strokeWidth]}
+                      onValueChange={(value) => setStrokeWidth(value[0])}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="background-select">Background</Label>
+                    <Select 
+                      value={backgroundPattern} 
+                      onValueChange={(value: BackgroundPattern) => setBackgroundPattern(value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select background" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Default</SelectItem>
+                        <SelectItem value="soil">Soil</SelectItem>
+                        <SelectItem value="grass">Grass</SelectItem>
+                        <SelectItem value="concrete">Concrete</SelectItem>
+                        <SelectItem value="wood">Wood</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {selectedShape === 'text' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
+                      </div>
+                      <Slider
+                        id="font-size"
+                        min={10}
+                        max={72}
+                        step={2}
+                        value={[fontSize]}
+                        onValueChange={(value) => setFontSize(value[0])}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="settings" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="unit-select">Unit</Label>
+                    <Select value={unit} onValueChange={(value: GardenUnit) => setUnit(value as GardenUnit)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cm">Centimeters (cm)</SelectItem>
+                        <SelectItem value="in">Inches (in)</SelectItem>
+                        <SelectItem value="ft">Feet (ft)</SelectItem>
+                        <SelectItem value="m">Meters (m)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label htmlFor="grid-size">Grid Size: {gridSize} {unit}</Label>
+                    </div>
+                    <Slider
+                      id="grid-size"
+                      min={5}
+                      max={50}
+                      step={5}
+                      value={[gridSize]}
+                      onValueChange={(value) => setGridSize(value[0])}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="snap-to-grid"
+                      checked={snapToGrid}
+                      onCheckedChange={setSnapToGrid}
+                    />
+                    <Label htmlFor="snap-to-grid">Snap to grid</Label>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <div className="text-sm text-muted-foreground">
+                      <p>Objects in layout: {objectsCount}</p>
+                      <p>Canvas size: 800 × 600 pixels</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
           
           <div className="border rounded-lg overflow-hidden bg-white">
             <canvas ref={canvasRef} className="w-full" />
