@@ -10,6 +10,7 @@ interface Activity {
   description: string | null;
   scheduled_date: string;
   completed: boolean | null;
+  status: string | null;
 }
 
 interface ActivityListProps {
@@ -25,6 +26,19 @@ const ActivityList: React.FC<ActivityListProps> = ({
   loading,
   onToggleActivityStatus
 }) => {
+  // Process activities to ensure consistent status handling
+  const processedActivities = activities.map(activity => {
+    // If activity has status "done", ensure completed is true
+    if (activity.status === 'done' && !activity.completed) {
+      return { ...activity, completed: true };
+    }
+    // If activity has completed as true, ensure status is "done"
+    if (activity.completed && activity.status !== 'done') {
+      return { ...activity, status: 'done' };
+    }
+    return activity;
+  });
+
   return (
     <Card className="col-span-1 md:col-span-1 lg:col-span-2">
       <CardHeader>
@@ -35,14 +49,14 @@ const ActivityList: React.FC<ActivityListProps> = ({
       <CardContent>
         {loading ? (
           <div className="text-center py-8">Loading activities...</div>
-        ) : activities.length === 0 ? (
+        ) : processedActivities.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No activities scheduled for this day.</p>
             <p className="text-sm mt-2">Click "Add Activity" to schedule something.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {activities.map((activity) => (
+            {processedActivities.map((activity) => (
               <ActivityItem
                 key={activity.id}
                 id={activity.id}

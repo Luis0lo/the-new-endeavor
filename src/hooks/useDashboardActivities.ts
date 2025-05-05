@@ -48,16 +48,29 @@ export function useDashboardActivities() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (actRes) {
-        setActivities(
-          actRes.map((activity: any) => ({
+        // Process activities to ensure status and completed fields are synchronized
+        const processedActivities = actRes.map((activity: any) => {
+          let completed = activity.completed;
+          let status = activity.status;
+          
+          // Ensure completed and status are consistent
+          if (status === 'done' && !completed) {
+            completed = true;
+          } else if (completed && status !== 'done') {
+            status = 'done';
+          }
+          
+          return {
             id: activity.id,
             title: activity.title,
             description: activity.description,
             scheduled_date: activity.scheduled_date,
-            completed: activity.completed,
-            status: activity.status
-          }))
-        );
+            completed: completed,
+            status: status
+          };
+        });
+        
+        setActivities(processedActivities);
       } else setActivities([]);
     } catch (error: any) {
       toast({
