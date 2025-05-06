@@ -40,8 +40,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   const navLinks = [
-    { name: 'Home', href: '/', path: '/' },
-    { name: 'Greenlink', href: '/greenlink', path: '/greenlink' },
+    { name: 'Home', href: '/home', path: '/home' },
+    { name: 'Resources', href: '/greenlink', path: '/greenlink' },
     { name: 'Dashboard', href: '/dashboard', path: '/dashboard' },
   ];
 
@@ -50,7 +50,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <div className="mr-4 hidden md:flex">
-            <Link to="/" className="mr-6 flex items-center space-x-2">
+            <Link to="/dashboard" className="mr-6 flex items-center space-x-2">
               <span className="text-xl font-bold">2day garden</span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
