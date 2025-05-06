@@ -49,7 +49,7 @@ export function useSeedCalendar() {
           .from('user_seed_calendar')
           .select('*')
           .eq('user_id', userId)
-          .order('vegetable');
+          .order('vegetable'); // Sort alphabetically
         
         if (userError) throw userError;
         
@@ -66,7 +66,7 @@ export function useSeedCalendar() {
       const { data: defaultData, error: defaultError } = await supabase
         .from('seed_calendar_uk')
         .select('*')
-        .order('vegetable');
+        .order('vegetable'); // Sort alphabetically
       
       if (defaultError) throw defaultError;
       

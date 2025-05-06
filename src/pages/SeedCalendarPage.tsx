@@ -1,12 +1,12 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { useSeedCalendar } from '@/hooks/useSeedCalendar';
+import { useSeedCalendar, SeedCalendarEntry } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Trash2 } from 'lucide-react';
 import AddVegetableDialog from '@/components/seed-calendar/AddVegetableDialog';
 import EditVegetableDialog from '@/components/seed-calendar/EditVegetableDialog';
+import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -22,6 +22,10 @@ const SeedCalendarPage = () => {
   const { seedData, loading, error, refetch, deleteEntry, userId } = useSeedCalendar();
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
+  
+  // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [vegetableToDelete, setVegetableToDelete] = useState<{ id: string, name: string } | null>(null);
 
   // Calculate scrollbar width on mount and when data loads
   useEffect(() => {
@@ -86,9 +90,16 @@ const SeedCalendarPage = () => {
     });
   };
 
-  const handleDeleteEntry = (id: string, vegetableName: string) => {
-    if (window.confirm(`Are you sure you want to delete ${vegetableName}?`)) {
-      deleteEntry(id);
+  const handleDeleteClick = (id: string, vegetableName: string) => {
+    setVegetableToDelete({ id, name: vegetableName });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (vegetableToDelete) {
+      deleteEntry(vegetableToDelete.id);
+      setDeleteDialogOpen(false);
+      setVegetableToDelete(null);
     }
   };
 
@@ -188,7 +199,7 @@ const SeedCalendarPage = () => {
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8"
-                                    onClick={() => handleDeleteEntry(entry.id, entry.vegetable)}
+                                    onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
                                   >
                                     <Trash2 size={16} className="text-destructive" />
                                   </Button>
@@ -245,6 +256,15 @@ const SeedCalendarPage = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Vegetable"
+        description={`Are you sure you want to delete ${vegetableToDelete?.name || ''}? This action cannot be undone.`}
+        onConfirm={confirmDelete}
+      />
     </DashboardLayout>
   );
 };
