@@ -3,8 +3,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Trash2 } from 'lucide-react';
 import AddVegetableDialog from '@/components/seed-calendar/AddVegetableDialog';
+import EditVegetableDialog from '@/components/seed-calendar/EditVegetableDialog';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -17,7 +19,7 @@ const legendItems = [
 ];
 
 const SeedCalendarPage = () => {
-  const { seedData, loading, error, refetch } = useSeedCalendar();
+  const { seedData, loading, error, refetch, deleteEntry, userId } = useSeedCalendar();
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +86,12 @@ const SeedCalendarPage = () => {
     });
   };
 
+  const handleDeleteEntry = (id: string, vegetableName: string) => {
+    if (window.confirm(`Are you sure you want to delete ${vegetableName}?`)) {
+      deleteEntry(id);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-screen">
@@ -91,7 +99,7 @@ const SeedCalendarPage = () => {
         <div className="p-4">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-3xl font-bold tracking-tight">Seed Calendar</h1>
-            <AddVegetableDialog onVegetableAdded={refetch} />
+            <AddVegetableDialog onVegetableAdded={refetch} userId={userId} />
           </div>
           <p className="text-muted-foreground">UK Seeding Guide: What to plant and when</p>
         </div>
@@ -126,7 +134,7 @@ const SeedCalendarPage = () => {
                     <table className="w-full table-fixed">
                       <colgroup>
                         {/* Vegetable column width */}
-                        <col style={{ width: '180px' }} />
+                        <col style={{ width: '220px' }} />
                         {months.map((_, i) => (
                           /* Fixed width for each month */
                           <col key={i} style={{ width: '60px' }} />
@@ -153,7 +161,7 @@ const SeedCalendarPage = () => {
                     <table className="w-full table-fixed">
                       <colgroup>
                         {/* Vegetable column width */}
-                        <col style={{ width: '180px' }} />
+                        <col style={{ width: '220px' }} />
                         {months.map((_, i) => (
                           /* Fixed width for each month */
                           <col key={i} style={{ width: '60px' }} />
@@ -165,8 +173,27 @@ const SeedCalendarPage = () => {
                             key={entry.id} 
                             className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
                           >
-                            <td className="font-medium whitespace-nowrap p-4 border-r border-border">
-                              {entry.vegetable}
+                            <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
+                              <span className={entry.user_id ? "text-primary" : ""}>
+                                {entry.vegetable}
+                              </span>
+                              
+                              {entry.user_id && (
+                                <div className="flex items-center">
+                                  <EditVegetableDialog 
+                                    vegetable={entry} 
+                                    onVegetableUpdated={refetch} 
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => handleDeleteEntry(entry.id, entry.vegetable)}
+                                  >
+                                    <Trash2 size={16} className="text-destructive" />
+                                  </Button>
+                                </div>
+                              )}
                             </td>
                             {months.map((_, monthIdx) => (
                               <td 

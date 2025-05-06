@@ -1,13 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { SeedCalendarEntry } from '@/hooks/useSeedCalendar';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -16,14 +17,14 @@ interface MonthRange {
   end: number;
 }
 
-interface AddVegetableDialogProps {
-  onVegetableAdded: () => void;
-  userId: string | null;
+interface EditVegetableDialogProps {
+  vegetable: SeedCalendarEntry;
+  onVegetableUpdated: () => void;
 }
 
-const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdded, userId }) => {
+const EditVegetableDialog: React.FC<EditVegetableDialogProps> = ({ vegetable, onVegetableUpdated }) => {
   const [open, setOpen] = useState(false);
-  const [vegetable, setVegetable] = useState('');
+  const [vegetableName, setVegetableName] = useState(vegetable.vegetable);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Month selections for each activity
@@ -31,6 +32,50 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
   const [sowOutdoors, setSowOutdoors] = useState<number[]>([]);
   const [transplantOutdoors, setTransplantOutdoors] = useState<number[]>([]);
   const [harvestPeriod, setHarvestPeriod] = useState<number[]>([]);
+
+  // Convert month ranges back to month indices
+  const getMonthIndicesFromRanges = (ranges: string[] = []) => {
+    const indices: number[] = [];
+    
+    ranges.forEach(range => {
+      const pattern = /([A-Za-z]{3})-?([A-Za-z]{3})?/g;
+      const match = pattern.exec(range);
+      
+      if (match) {
+        const startMonthIndex = months.findIndex(m => m === match[1]);
+        const endMonthIndex = match[2] 
+          ? months.findIndex(m => m === match[2])
+          : startMonthIndex;
+        
+        if (startMonthIndex >= 0 && endMonthIndex >= 0) {
+          // Handle case where period crosses year boundary (e.g., Nov-Feb)
+          if (startMonthIndex > endMonthIndex) {
+            // Add months from start to December
+            for (let i = startMonthIndex; i < 12; i++) {
+              indices.push(i);
+            }
+            // Add months from January to end
+            for (let i = 0; i <= endMonthIndex; i++) {
+              indices.push(i);
+            }
+          } else {
+            // Regular case
+            for (let i = startMonthIndex; i <= endMonthIndex; i++) {
+              indices.push(i);
+            }
+          }
+        }
+      } else if (range.length === 3) {
+        // Single month (e.g. "Jan")
+        const monthIndex = months.findIndex(m => m === range);
+        if (monthIndex >= 0) {
+          indices.push(monthIndex);
+        }
+      }
+    });
+    
+    return [...new Set(indices)]; // Remove duplicates
+  };
 
   // Convert selected months to ranges (e.g., "Jan-Mar")
   const monthsToRanges = (selectedMonths: number[]): string[] => {
@@ -68,6 +113,16 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
     });
   };
 
+  useEffect(() => {
+    if (open) {
+      // Initialize month selections from vegetable data
+      setSowIndoors(getMonthIndicesFromRanges(vegetable.sow_indoors));
+      setSowOutdoors(getMonthIndicesFromRanges(vegetable.sow_outdoors));
+      setTransplantOutdoors(getMonthIndicesFromRanges(vegetable.transplant_outdoors));
+      setHarvestPeriod(getMonthIndicesFromRanges(vegetable.harvest_period));
+    }
+  }, [open, vegetable]);
+
   const handleToggleMonth = (
     monthIndex: number, 
     selectedMonths: number[], 
@@ -83,7 +138,7 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!vegetable.trim()) {
+    if (!vegetableName.trim()) {
       toast({
         title: "Validation Error",
         description: "Please enter a vegetable name.",
@@ -92,30 +147,19 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
       return;
     }
 
-    if (!userId) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be logged in to add vegetables to your calendar.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const tableName = 'user_seed_calendar';
-      
       const { error } = await supabase
-        .from(tableName)
-        .insert({
-          vegetable,
-          user_id: userId,
+        .from('user_seed_calendar')
+        .update({
+          vegetable: vegetableName,
           sow_indoors: monthsToRanges(sowIndoors),
           sow_outdoors: monthsToRanges(sowOutdoors),
           transplant_outdoors: monthsToRanges(transplantOutdoors),
           harvest_period: monthsToRanges(harvestPeriod)
-        });
+        })
+        .eq('id', vegetable.id);
 
       if (error) {
         throw error;
@@ -123,26 +167,19 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
 
       toast({
         title: "Success",
-        description: `${vegetable} has been added to the seed calendar.`
+        description: `${vegetableName} has been updated in the seed calendar.`
       });
-      
-      // Reset form
-      setVegetable('');
-      setSowIndoors([]);
-      setSowOutdoors([]);
-      setTransplantOutdoors([]);
-      setHarvestPeriod([]);
       
       // Close dialog
       setOpen(false);
       
       // Refresh data
-      onVegetableAdded();
+      onVegetableUpdated();
 
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to add vegetable",
+        description: error.message || "Failed to update vegetable",
         variant: "destructive"
       });
     } finally {
@@ -153,14 +190,13 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus size={16} />
-          <span>Add Vegetable</span>
+        <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
+          <Pencil size={16} />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl w-full">
         <DialogHeader>
-          <DialogTitle>Add New Vegetable to Seed Calendar</DialogTitle>
+          <DialogTitle>Edit Vegetable in Seed Calendar</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
@@ -168,8 +204,8 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
             <Label htmlFor="vegetable">Vegetable Name</Label>
             <Input 
               id="vegetable" 
-              value={vegetable} 
-              onChange={(e) => setVegetable(e.target.value)} 
+              value={vegetableName} 
+              onChange={(e) => setVegetableName(e.target.value)} 
               placeholder="e.g., Tomatoes" 
               required 
             />
@@ -268,9 +304,9 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={isSubmitting || !vegetable.trim() || !userId}
+            disabled={isSubmitting || !vegetableName.trim()}
           >
-            {isSubmitting ? "Adding..." : (!userId ? "Login to Add" : "Add to Calendar")}
+            {isSubmitting ? "Updating..." : "Update Calendar Entry"}
           </Button>
         </form>
       </DialogContent>
@@ -278,4 +314,4 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
   );
 };
 
-export default AddVegetableDialog;
+export default EditVegetableDialog;

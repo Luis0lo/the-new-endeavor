@@ -341,6 +341,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_seed_calendar: {
+        Row: {
+          created_at: string
+          harvest_period: string[] | null
+          id: string
+          sow_indoors: string[] | null
+          sow_outdoors: string[] | null
+          transplant_outdoors: string[] | null
+          updated_at: string
+          user_id: string
+          vegetable: string
+        }
+        Insert: {
+          created_at?: string
+          harvest_period?: string[] | null
+          id?: string
+          sow_indoors?: string[] | null
+          sow_outdoors?: string[] | null
+          transplant_outdoors?: string[] | null
+          updated_at?: string
+          user_id: string
+          vegetable: string
+        }
+        Update: {
+          created_at?: string
+          harvest_period?: string[] | null
+          id?: string
+          sow_indoors?: string[] | null
+          sow_outdoors?: string[] | null
+          transplant_outdoors?: string[] | null
+          updated_at?: string
+          user_id?: string
+          vegetable?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
