@@ -13,6 +13,13 @@ export interface SeedCalendarEntry {
   user_id?: string | null; // Added to identify user entries
 }
 
+// Helper function to capitalize first letter of each word
+const capitalizeWords = (str: string): string => {
+  return str.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
 export function useSeedCalendar() {
   const [seedData, setSeedData] = useState<SeedCalendarEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +62,7 @@ export function useSeedCalendar() {
         
         userEntries = userData.map((entry: any) => ({
           ...entry,
+          vegetable: capitalizeWords(entry.vegetable), // Capitalize vegetable name
           sow_indoors: entry.sow_indoors?.filter(Boolean) || [],
           sow_outdoors: entry.sow_outdoors?.filter(Boolean) || [],
           transplant_outdoors: entry.transplant_outdoors?.filter(Boolean) || [],
@@ -73,6 +81,7 @@ export function useSeedCalendar() {
       // Process the data to handle empty strings in arrays
       const processedDefaultData = defaultData.map((entry: SeedCalendarEntry) => ({
         ...entry,
+        vegetable: capitalizeWords(entry.vegetable), // Capitalize vegetable name
         sow_indoors: entry.sow_indoors?.filter(Boolean) || [],
         sow_outdoors: entry.sow_outdoors?.filter(Boolean) || [],
         transplant_outdoors: entry.transplant_outdoors?.filter(Boolean) || [],

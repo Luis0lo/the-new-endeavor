@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,13 @@ interface EditVegetableDialogProps {
   vegetable: SeedCalendarEntry;
   onVegetableUpdated: () => void;
 }
+
+// Helper function to capitalize first letter of each word
+const capitalizeWords = (str: string): string => {
+  return str.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
 
 const EditVegetableDialog: React.FC<EditVegetableDialogProps> = ({ vegetable, onVegetableUpdated }) => {
   const [open, setOpen] = useState(false);
@@ -153,7 +159,7 @@ const EditVegetableDialog: React.FC<EditVegetableDialogProps> = ({ vegetable, on
       const { error } = await supabase
         .from('user_seed_calendar')
         .update({
-          vegetable: vegetableName,
+          vegetable: capitalizeWords(vegetableName.trim()), // Capitalize before saving
           sow_indoors: monthsToRanges(sowIndoors),
           sow_outdoors: monthsToRanges(sowOutdoors),
           transplant_outdoors: monthsToRanges(transplantOutdoors),
@@ -167,7 +173,7 @@ const EditVegetableDialog: React.FC<EditVegetableDialogProps> = ({ vegetable, on
 
       toast({
         title: "Success",
-        description: `${vegetableName} has been updated in the seed calendar.`
+        description: `${capitalizeWords(vegetableName)} has been updated in the seed calendar.`
       });
       
       // Close dialog

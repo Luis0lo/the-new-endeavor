@@ -103,6 +103,10 @@ const SeedCalendarPage = () => {
     }
   };
 
+  // Separate user entries from default entries for display
+  const userEntries = seedData.filter(entry => entry.user_id);
+  const defaultEntries = seedData.filter(entry => !entry.user_id);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-screen">
@@ -179,74 +183,137 @@ const SeedCalendarPage = () => {
                         ))}
                       </colgroup>
                       <tbody>
-                        {seedData.map((entry, idx) => (
-                          <tr 
-                            key={entry.id} 
-                            className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
-                          >
-                            <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
-                              <span className={entry.user_id ? "text-primary" : ""}>
-                                {entry.vegetable}
-                              </span>
-                              
-                              {entry.user_id && (
-                                <div className="flex items-center">
-                                  <EditVegetableDialog 
-                                    vegetable={entry} 
-                                    onVegetableUpdated={refetch} 
-                                  />
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
-                                  >
-                                    <Trash2 size={16} className="text-destructive" />
-                                  </Button>
-                                </div>
-                              )}
-                            </td>
-                            {months.map((_, monthIdx) => (
-                              <td 
-                                key={monthIdx} 
-                                className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
-                              >
-                                {/* Activity indicators stacked without gaps */}
-                                {/* Sow Indoors */}
-                                {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                  <div 
-                                    className="absolute inset-x-0 top-0 h-2.5" 
-                                    style={{ backgroundColor: legendItems[0].color }}
-                                  ></div>
-                                )}
-                                
-                                {/* Sow Outdoors */}
-                                {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                  <div 
-                                    className="absolute inset-x-0 top-2.5 h-2.5" 
-                                    style={{ backgroundColor: legendItems[1].color }}
-                                  ></div>
-                                )}
-                                
-                                {/* Transplant/Plant Outdoors */}
-                                {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                  <div 
-                                    className="absolute inset-x-0 top-5 h-2.5" 
-                                    style={{ backgroundColor: legendItems[2].color }}
-                                  ></div>
-                                )}
-                                
-                                {/* Harvest Period */}
-                                {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                  <div 
-                                    className="absolute inset-x-0 top-7.5 h-2.5" 
-                                    style={{ backgroundColor: legendItems[3].color }}
-                                  ></div>
-                                )}
+                        {/* User entries section with header */}
+                        {userEntries.length > 0 && (
+                          <>
+                            <tr className="bg-primary/10">
+                              <td colSpan={13} className="p-2 font-medium text-primary border-b">
+                                Your Custom Vegetables
                               </td>
+                            </tr>
+                            {userEntries.map((entry, idx) => (
+                              <tr 
+                                key={entry.id} 
+                                className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                              >
+                                <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
+                                  <span className="text-primary">
+                                    {entry.vegetable}
+                                  </span>
+                                  
+                                  <div className="flex items-center">
+                                    <EditVegetableDialog 
+                                      vegetable={entry} 
+                                      onVegetableUpdated={refetch} 
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
+                                    >
+                                      <Trash2 size={16} className="text-destructive" />
+                                    </Button>
+                                  </div>
+                                </td>
+                                {months.map((_, monthIdx) => (
+                                  <td 
+                                    key={monthIdx} 
+                                    className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                                  >
+                                    {/* Activity indicators stacked without gaps */}
+                                    {/* Sow Indoors */}
+                                    {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-0 h-2.5" 
+                                        style={{ backgroundColor: legendItems[0].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {/* Sow Outdoors */}
+                                    {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-2.5 h-2.5" 
+                                        style={{ backgroundColor: legendItems[1].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {/* Transplant/Plant Outdoors */}
+                                    {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-5 h-2.5" 
+                                        style={{ backgroundColor: legendItems[2].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {/* Harvest Period */}
+                                    {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-7.5 h-2.5" 
+                                        style={{ backgroundColor: legendItems[3].color }}
+                                      ></div>
+                                    )}
+                                  </td>
+                                ))}
+                              </tr>
                             ))}
-                          </tr>
-                        ))}
+                          </>
+                        )}
+                        
+                        {/* Default entries section with header */}
+                        {defaultEntries.length > 0 && (
+                          <>
+                            <tr className="bg-muted">
+                              <td colSpan={13} className="p-2 font-medium text-muted-foreground border-b">
+                                Standard UK Vegetables
+                              </td>
+                            </tr>
+                            {defaultEntries.map((entry, idx) => (
+                              <tr 
+                                key={entry.id} 
+                                className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                              >
+                                <td className="font-medium whitespace-nowrap p-4 border-r border-border">
+                                  {entry.vegetable}
+                                </td>
+                                {months.map((_, monthIdx) => (
+                                  <td 
+                                    key={monthIdx} 
+                                    className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                                  >
+                                    {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-0 h-2.5" 
+                                        style={{ backgroundColor: legendItems[0].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-2.5 h-2.5" 
+                                        style={{ backgroundColor: legendItems[1].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-5 h-2.5" 
+                                        style={{ backgroundColor: legendItems[2].color }}
+                                      ></div>
+                                    )}
+                                    
+                                    {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                      <div 
+                                        className="absolute inset-x-0 top-7.5 h-2.5" 
+                                        style={{ backgroundColor: legendItems[3].color }}
+                                      ></div>
+                                    )}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </>
+                        )}
                       </tbody>
                     </table>
                   </div>
