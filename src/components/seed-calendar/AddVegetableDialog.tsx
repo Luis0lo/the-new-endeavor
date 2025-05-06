@@ -145,7 +145,7 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
           <span>Add Vegetable</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl w-full">
         <DialogHeader>
           <DialogTitle>Add New Vegetable to Seed Calendar</DialogTitle>
         </DialogHeader>
@@ -162,11 +162,11 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Sow Indoors */}
             <div className="space-y-2">
               <Label className="text-purple-600">Sow Indoors</Label>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="flex flex-row flex-wrap gap-3">
                 {months.map((month, idx) => (
                   <div key={`indoor-${idx}`} className="flex items-center space-x-2">
                     <Checkbox 
@@ -188,7 +188,7 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
             {/* Sow Outdoors */}
             <div className="space-y-2">
               <Label className="text-yellow-500">Sow Outdoors</Label>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="flex flex-row flex-wrap gap-3">
                 {months.map((month, idx) => (
                   <div key={`outdoor-${idx}`} className="flex items-center space-x-2">
                     <Checkbox 
@@ -207,10 +207,10 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
               </div>
             </div>
 
-            {/* Transplant Outdoors */}
+            {/* Plant Outdoors */}
             <div className="space-y-2">
-              <Label className="text-orange-500">Plant Outdoors</Label>
-              <div className="grid grid-cols-6 gap-2">
+              <Label className="text-green-500">Plant Outdoors</Label>
+              <div className="flex flex-row flex-wrap gap-3">
                 {months.map((month, idx) => (
                   <div key={`transplant-${idx}`} className="flex items-center space-x-2">
                     <Checkbox 
@@ -232,7 +232,7 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
             {/* Harvest Period */}
             <div className="space-y-2">
               <Label className="text-red-500">Harvest</Label>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="flex flex-row flex-wrap gap-3">
                 {months.map((month, idx) => (
                   <div key={`harvest-${idx}`} className="flex items-center space-x-2">
                     <Checkbox 
