@@ -1,8 +1,10 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import AddVegetableDialog from '@/components/seed-calendar/AddVegetableDialog';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -15,7 +17,7 @@ const legendItems = [
 ];
 
 const SeedCalendarPage = () => {
-  const { seedData, loading, error } = useSeedCalendar();
+  const { seedData, loading, error, refetch } = useSeedCalendar();
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
 
@@ -87,7 +89,10 @@ const SeedCalendarPage = () => {
       <div className="flex flex-col h-screen">
         {/* Page header */}
         <div className="p-4">
-          <h1 className="text-3xl font-bold tracking-tight">Seed Calendar</h1>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-3xl font-bold tracking-tight">Seed Calendar</h1>
+            <AddVegetableDialog onVegetableAdded={refetch} />
+          </div>
           <p className="text-muted-foreground">UK Seeding Guide: What to plant and when</p>
         </div>
         
