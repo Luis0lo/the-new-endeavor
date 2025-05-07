@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { fabric } from 'fabric';
 import { BackgroundPattern, GardenUnit } from './utils/canvasUtils';
 
 interface GardenCanvasProps {
