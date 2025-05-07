@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 import { toast } from '@/hooks/use-toast';
@@ -389,8 +388,9 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
   };
 
   // Function to load layout
-  const loadLayout = (json: string) => {
-    if (!canvas) return;
+  // Fixed: Update loadLayout to handle an empty string or undefined parameter
+  const loadLayout = (json: string = '') => {
+    if (!canvas || !json) return;
     
     try {
       canvas.loadFromJSON(json, () => {

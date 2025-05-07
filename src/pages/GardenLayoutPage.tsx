@@ -79,7 +79,9 @@ const GardenLayoutPage = () => {
 
   // Wrapper for loadLayout to match the expected function signature (no arguments)
   const handleLoadLayout = () => {
-    loadLayout();
+    // Fix: Call loadLayout with an empty string as a fallback value
+    // This ensures we're passing an argument as expected by the function signature
+    loadLayout('');
   };
 
   return (
