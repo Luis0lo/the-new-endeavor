@@ -1,4 +1,5 @@
 
+import { useCallback } from 'react';
 import { fabric } from 'fabric';
 import { updateShapeSizeLabel } from '../utils/canvasUtils';
 import { GardenUnit, ShapeType } from '../utils/canvasUtils';
@@ -10,7 +11,7 @@ interface UseShapeAdderProps {
 
 export const useShapeAdder = ({ canvas, unit }: UseShapeAdderProps) => {
   // Function to add a shape to the canvas
-  const addShape = (
+  const addShape = useCallback((
     shapeType: ShapeType,
     color: string = '#4CAF50',
     strokeWidth: number = 2,
@@ -18,8 +19,12 @@ export const useShapeAdder = ({ canvas, unit }: UseShapeAdderProps) => {
     textValue: string = 'Your Text',
     fontSize: number = 20
   ) => {
-    if (!canvas) return;
+    if (!canvas) {
+      console.error("Cannot add shape: Canvas is null");
+      return;
+    }
 
+    console.log(`Adding ${shapeType} to canvas with color ${color}`);
     let newShape: fabric.Object | null = null;
 
     switch (shapeType) {
@@ -98,12 +103,14 @@ export const useShapeAdder = ({ canvas, unit }: UseShapeAdderProps) => {
     }
 
     if (newShape) {
+      console.log("Shape created, adding to canvas");
       canvas.add(newShape);
       canvas.setActiveObject(newShape);
       updateShapeSizeLabel(newShape, canvas, unit);
       canvas.renderAll();
+      console.log("Shape added and canvas rendered");
     }
-  };
+  }, [canvas, unit]);
 
   return { addShape };
 };

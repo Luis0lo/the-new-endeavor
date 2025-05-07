@@ -14,6 +14,20 @@ const GardenCanvas: React.FC<GardenCanvasProps> = ({
   canvas,
   activeTab
 }) => {
+  // Debug logs to track canvas initialization
+  useEffect(() => {
+    console.log("GardenCanvas mounted, canvas instance:", canvas ? "exists" : "null");
+    
+    // Initialize canvas if it doesn't exist
+    if (!canvas && canvasRef.current) {
+      console.log("Canvas reference exists but no fabric canvas instance");
+    }
+    
+    return () => {
+      console.log("GardenCanvas unmounted");
+    };
+  }, [canvas]);
+
   // Control object resizability based on active tab
   useEffect(() => {
     if (!canvas) return;
@@ -36,7 +50,7 @@ const GardenCanvas: React.FC<GardenCanvasProps> = ({
 
   return (
     <div className="border rounded-lg overflow-hidden bg-white">
-      <canvas ref={canvasRef} className="w-full" />
+      <canvas id="gardenCanvas" ref={canvasRef} className="w-full" />
     </div>
   );
 };

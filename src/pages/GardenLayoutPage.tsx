@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import GardenCanvas from '@/components/garden-layout/GardenCanvas';
 import GardenLayoutTabs from '@/components/garden-layout/GardenLayoutTabs';
@@ -72,9 +72,20 @@ const GardenLayoutPage = () => {
     backgroundPattern
   });
 
+  // Debug log to track the canvas initialization
+  useEffect(() => {
+    console.log("GardenLayoutPage: Canvas initialized:", canvas ? "exists" : "null");
+    console.log("Canvas element ref:", canvasRef?.current ? "exists" : "null");
+  }, [canvas, canvasRef]);
+
   // Handler for adding a shape
   const handleAddShape = () => {
-    addShape(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
+    console.log("handleAddShape called with:", selectedShape, color, strokeWidth, opacity, textValue, fontSize);
+    if (addShape) {
+      addShape(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
+    } else {
+      console.error("addShape function is not defined");
+    }
   };
 
   // Wrapper for loadLayout to match the expected function signature (no arguments)

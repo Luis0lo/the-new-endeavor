@@ -1,4 +1,5 @@
 
+import { useRef, useEffect } from 'react';
 import { useGardenCanvas } from './useGardenCanvas';
 import { useShapeAdder } from './useShapeAdder';
 import { useSavedShapes } from './useSavedShapes';
@@ -19,6 +20,9 @@ export const useGardenLayoutCanvas = ({
   backgroundPattern
 }: UseGardenLayoutCanvasProps) => {
   // Initialize the canvas with hooks
+  const gardenCanvas = useGardenCanvas({ unit });
+  
+  // Get all properties from useGardenCanvas
   const { 
     canvas, 
     canvasRef,
@@ -36,8 +40,37 @@ export const useGardenLayoutCanvas = ({
     bringToFront, 
     sendToBack,
     getCanvasJson,
-    loadFromJson
-  } = useGardenCanvas({ unit });
+    loadFromJson,
+    addGrid,
+    setBackground
+  } = gardenCanvas;
+
+  // Debug effect to track canvas initialization
+  useEffect(() => {
+    console.log("useGardenLayoutCanvas: Canvas instance:", canvas ? "exists" : "null");
+    console.log("useGardenLayoutCanvas: Canvas ref element:", canvasRef?.current ? "exists" : "null");
+    
+    if (canvas) {
+      console.log("Canvas dimensions:", canvas.getWidth(), "x", canvas.getHeight());
+    }
+    
+    // Apply grid and background on initial load
+    if (canvas) {
+      // Clear any existing grid first
+      const gridObjects = canvas.getObjects().filter(obj => obj.data?.isGrid);
+      gridObjects.forEach(obj => canvas.remove(obj));
+      
+      // Add new grid
+      if (snapToGrid) {
+        addGrid(gridSize);
+      }
+      
+      // Set background pattern
+      setBackground(backgroundPattern);
+      
+      canvas.renderAll();
+    }
+  }, [canvas, gridSize, snapToGrid, backgroundPattern]);
 
   // Hook for saved shapes management
   const {
@@ -62,8 +95,7 @@ export const useGardenLayoutCanvas = ({
     setSavedShapes
   });
 
-  // Hook for adding shapes
-  // Fixed: Get the actual object instead of void
+  // Hook for adding shapes - get the shapeAdder object first
   const shapeAdder = useShapeAdder({ canvas, unit });
 
   // Handler for adding a shape
@@ -75,8 +107,9 @@ export const useGardenLayoutCanvas = ({
     textValue: string, 
     fontSize: number
   ) => {
-    // Fixed: Use shapeAdder.addShape instead of addShapeToCanvas
-    if (shapeAdder && shapeAdder.addShape) {
+    console.log("Adding shape:", selectedShape, "Canvas:", canvas ? "exists" : "null");
+    // Use the addShape function from shapeAdder
+    if (shapeAdder && typeof shapeAdder.addShape === 'function') {
       shapeAdder.addShape(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
     }
   };

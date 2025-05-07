@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 import { toast } from '@/hooks/use-toast';
@@ -14,45 +15,75 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
   const [objectsCount, setObjectsCount] = useState(0);
+  const canvasInitialized = useRef(false);
 
   useEffect(() => {
-    const newCanvas = new fabric.Canvas('gardenCanvas', {
-      height: 800,
-      width: 1200,
-      backgroundColor: '#f0f0f0',
-      selection: true,
-      preserveObjectStacking: true,
-    });
+    // Don't initialize if we've already done so
+    if (canvasInitialized.current) return;
 
-    setCanvas(newCanvas);
+    console.log("useGardenCanvas: Attempting to initialize canvas");
+    
+    // Wait for the next frame to ensure the DOM is ready
+    const initTimer = setTimeout(() => {
+      const canvasElement = document.getElementById('gardenCanvas') as HTMLCanvasElement;
+      
+      if (!canvasElement) {
+        console.error("Canvas element 'gardenCanvas' not found in the DOM");
+        return;
+      }
+      
+      console.log("Canvas element found, creating fabric.Canvas instance");
+      
+      try {
+        const newCanvas = new fabric.Canvas('gardenCanvas', {
+          height: 800,
+          width: 1200,
+          backgroundColor: '#f0f0f0',
+          selection: true,
+          preserveObjectStacking: true,
+        });
+        
+        console.log("Canvas created successfully:", newCanvas);
+        setCanvas(newCanvas);
+        canvasInitialized.current = true;
 
-    // Initial state to history
-    saveState(newCanvas, [], -1);
+        // Initial state to history
+        const json = newCanvas.toJSON(['id', 'type', 'shapeName', 'isGrid', 'isLabel']);
+        setHistory([JSON.stringify(json)]);
+        setHistoryIndex(0);
+        
+        // Update objects count when objects are added or removed
+        newCanvas.on('object:added', () => {
+          setObjectsCount(newCanvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
+        });
+        
+        newCanvas.on('object:removed', () => {
+          setObjectsCount(newCanvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
+        });
+        
+        // Selection events
+        newCanvas.on('selection:created', (e) => {
+          setSelectedObject(e.selected?.[0] || null);
+        });
+        
+        newCanvas.on('selection:updated', (e) => {
+          setSelectedObject(e.selected?.[0] || null);
+        });
+        
+        newCanvas.on('selection:cleared', () => {
+          setSelectedObject(null);
+        });
+      } catch (error) {
+        console.error("Error initializing canvas:", error);
+      }
+    }, 100);  // Short delay to ensure DOM is ready
     
-    // Update objects count when objects are added or removed
-    newCanvas.on('object:added', () => {
-      setObjectsCount(newCanvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
-    });
-    
-    newCanvas.on('object:removed', () => {
-      setObjectsCount(newCanvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
-    });
-    
-    // Selection events
-    newCanvas.on('selection:created', (e) => {
-      setSelectedObject(e.selected?.[0] || null);
-    });
-    
-    newCanvas.on('selection:updated', (e) => {
-      setSelectedObject(e.selected?.[0] || null);
-    });
-    
-    newCanvas.on('selection:cleared', () => {
-      setSelectedObject(null);
-    });
-
     return () => {
-      newCanvas.dispose();
+      clearTimeout(initTimer);
+      if (canvas) {
+        console.log("Disposing canvas");
+        canvas.dispose();
+      }
     };
   }, []);
 
