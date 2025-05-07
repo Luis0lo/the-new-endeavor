@@ -130,13 +130,10 @@ export const updateShapeSizeLabel = (
       dimensionText = `${Math.round(width)} ${unit}`;
     }
     
-    // Create the label that shows the name and dimensions
-    const labelText = `${displayName}\n${dimensionText}`;
-    
-    const label = new fabric.Text(labelText, {
+    // Create the size label that shows ONLY the dimensions (at the top)
+    const sizeLabel = new fabric.Text(dimensionText, {
       left: obj.left,
-      // Position the label BELOW the object instead of above it
-      top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5,
+      top: (obj.top || 0) - 20, // Position ABOVE the object
       fontSize: 12,
       fill: '#333',
       textAlign: 'center',
@@ -146,17 +143,41 @@ export const updateShapeSizeLabel = (
     });
     
     // Mark as a label and connect to parent object
-    if (!label.data) label.data = {};
-    label.data.isLabel = true;
-    label.data.parentId = obj.data.id;
+    if (!sizeLabel.data) sizeLabel.data = {};
+    sizeLabel.data.isLabel = true;
+    sizeLabel.data.parentId = obj.data.id;
     
-    canvas.add(label);
+    canvas.add(sizeLabel);
     
-    // Update label position when object is modified or moved
+    // Create a separate label for the name (at the bottom)
+    const nameLabel = new fabric.Text(displayName, {
+      left: obj.left,
+      top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5, // Position BELOW the object
+      fontSize: 12,
+      fill: '#333',
+      textAlign: 'center',
+      selectable: false,
+      evented: false,
+      originX: 'center'
+    });
+    
+    // Mark as a label and connect to parent object
+    if (!nameLabel.data) nameLabel.data = {};
+    nameLabel.data.isLabel = true;
+    nameLabel.data.parentId = obj.data.id;
+    
+    canvas.add(nameLabel);
+    
+    // Update label positions when object is modified or moved
     obj.on('moving', () => {
-      label.set({
+      sizeLabel.set({
         left: obj.left,
-        top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5
+        top: (obj.top || 0) - 20 // Keep ABOVE the object
+      });
+      
+      nameLabel.set({
+        left: obj.left,
+        top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5 // Keep BELOW the object
       });
     });
     
@@ -176,10 +197,15 @@ export const updateShapeSizeLabel = (
         dimensionText = `${Math.round(width)} ${unit}`;
       }
       
-      label.set({
-        text: `${displayName}\n${dimensionText}`,
+      sizeLabel.set({
+        text: dimensionText,
         left: obj.left,
-        top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5
+        top: (obj.top || 0) - 20 // Keep ABOVE the object
+      });
+      
+      nameLabel.set({
+        left: obj.left,
+        top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5 // Keep BELOW the object
       });
     });
   }
