@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { toast } from '@/hooks/use-toast';
@@ -210,8 +209,8 @@ const GardenLayoutPage = () => {
         
         // If it's not a text object, add size label
         if (!(obj instanceof fabric.IText)) {
-          // Use the directly imported updateShapeSizeLabel
-          updateShapeSizeLabel(obj, canvas, unit);
+          // Pass the saved shape name to the updateShapeSizeLabel function
+          updateShapeSizeLabel(obj, canvas, unit, shape.name);
         }
         
         canvas.renderAll();
