@@ -17,6 +17,7 @@ import StylingControls from '@/components/garden-layout/StylingControls';
 import SettingsControls from '@/components/garden-layout/SettingsControls';
 import SavedShapesTab from '@/components/garden-layout/SavedShapesTab';
 import SaveShapeDialog from '@/components/garden-layout/SaveShapeDialog';
+import GardenLayouts from '@/components/garden-layout/GardenLayouts';
 // Import canvasUtils for direct access to updateShapeSizeLabel
 import { updateShapeSizeLabel } from '@/components/garden-layout/utils/canvasUtils';
 
@@ -53,7 +54,9 @@ const GardenLayoutPage = () => {
     loadLayout, 
     clearCanvas, 
     bringToFront, 
-    sendToBack 
+    sendToBack,
+    getCanvasJson,
+    loadFromJson
   } = useGardenCanvas(gridSize, unit, snapToGrid, backgroundPattern);
 
   // Load saved shapes from localStorage on component mount
@@ -284,6 +287,17 @@ const GardenLayoutPage = () => {
     }
   };
 
+  // Generate preview image for garden layout
+  const generatePreview = () => {
+    if (!canvas) return '';
+    return canvas.toDataURL({
+      format: 'png',
+      quality: 0.5,
+      width: 300,
+      height: 200
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="flex-1 p-4 md:p-8 space-y-4">
@@ -294,11 +308,12 @@ const GardenLayoutPage = () => {
           </p>
           
           <Tabs defaultValue="shapes" className="w-full">
-            <TabsList className="grid grid-cols-4 mb-4">
+            <TabsList className="grid grid-cols-5 mb-4">
               <TabsTrigger value="shapes">Shapes & Tools</TabsTrigger>
               <TabsTrigger value="styling">Styling</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
               <TabsTrigger value="saved">Saved Shapes</TabsTrigger>
+              <TabsTrigger value="gardens">Gardens</TabsTrigger>
             </TabsList>
             
             <TabsContent value="shapes" className="space-y-4">
@@ -357,6 +372,14 @@ const GardenLayoutPage = () => {
                 loadSavedShape={loadSavedShape}
                 deleteSavedShape={deleteSavedShape}
                 loadAllShapes={loadAllShapes}
+              />
+            </TabsContent>
+
+            <TabsContent value="gardens" className="space-y-4">
+              <GardenLayouts 
+                canvasJson={getCanvasJson()}
+                loadGardenLayout={loadFromJson}
+                generatePreview={generatePreview}
               />
             </TabsContent>
           </Tabs>

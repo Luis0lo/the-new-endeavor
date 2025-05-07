@@ -165,6 +165,42 @@ export const useGardenCanvas = (
     setHistoryIndex(prev => prev + 1);
   };
 
+  // Get canvas JSON for saving to database
+  const getCanvasJson = () => {
+    if (!canvas) return '';
+    
+    return JSON.stringify(canvas.toJSON(['data']));
+  };
+
+  // Load canvas from JSON string
+  const loadFromJson = (jsonString: string) => {
+    if (!canvas || !jsonString) return;
+    
+    try {
+      canvas.loadFromJSON(jsonString, () => {
+        canvas.renderAll();
+        setObjectsCount(
+          canvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length
+        );
+        
+        // Update history after loading
+        saveCanvasState(canvas);
+        
+        toast({
+          title: "Garden layout loaded",
+          description: "Your garden layout has been loaded successfully.",
+        });
+      });
+    } catch (error: any) {
+      console.error('Error loading from JSON:', error);
+      toast({
+        title: "Load failed",
+        description: error.message || "There was a problem loading your garden layout.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Add shape to canvas
   const addShape = (
     selectedShape: ShapeType, 
@@ -500,6 +536,8 @@ export const useGardenCanvas = (
     loadLayout,
     clearCanvas,
     bringToFront,
-    sendToBack
+    sendToBack,
+    getCanvasJson,
+    loadFromJson
   };
 };
