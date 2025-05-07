@@ -157,6 +157,22 @@ const GardenLayoutPage = () => {
       setShapeName('');
       setSaveDialogOpen(false);
       
+      // Remove the selected shape(s) from the canvas after saving
+      selectedObjects.forEach(obj => {
+        // Also remove any associated labels
+        if (obj.data?.id) {
+          const labels = canvas.getObjects().filter(item => 
+            item instanceof fabric.Text && item.data?.parentId === obj.data.id
+          );
+          
+          labels.forEach(label => canvas.remove(label));
+        }
+        canvas.remove(obj);
+      });
+      
+      canvas.discardActiveObject();
+      canvas.renderAll();
+      
       toast({
         title: "Shape saved",
         description: `"${shapeName}" has been saved to your collection.`,

@@ -309,7 +309,17 @@ export const useGardenCanvas = (
           
           // If it's not a text object, add size label
           if (!(obj instanceof fabric.IText)) {
-            updateShapeSizeLabel(clone, canvas, unit);
+            // Try to determine the shape name from the object type
+            let shapeName = '';
+            if (obj instanceof fabric.Rect) {
+              shapeName = 'Garden Bed';
+            } else if (obj instanceof fabric.Circle) {
+              shapeName = 'Container';
+            } else if (obj instanceof fabric.Line) {
+              shapeName = 'Path';
+            }
+            
+            updateShapeSizeLabel(clone, canvas, unit, shapeName);
           }
           
           canvas.renderAll();

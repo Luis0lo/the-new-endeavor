@@ -2,221 +2,249 @@
 import { fabric } from 'fabric';
 
 export type ShapeType = 'rect' | 'circle' | 'line' | 'text';
-export type GardenUnit = 'cm' | 'in' | 'ft' | 'm';
-export type BackgroundPattern = 'none' | 'soil' | 'grass' | 'concrete' | 'wood';
+export type GardenUnit = 'cm' | 'm' | 'inch' | 'ft';
+export type BackgroundPattern = 'none' | 'grid' | 'dots';
 
+// Interface for saved shapes
 export interface SavedShape {
   id: string;
   name: string;
-  data: string; // JSON string of the shape
+  data: string;
   createdAt: number;
-  preview?: string; // Optional base64 thumbnail
+  preview?: string;
 }
 
-// Draw grid on canvas
-export const drawGrid = (canvas: fabric.Canvas, size: number, unit: GardenUnit) => {
-  // Clear existing grid lines
-  canvas.getObjects().forEach(obj => {
-    if (obj.data?.isGrid) {
-      canvas.remove(obj);
-    }
-  });
-
-  // Draw new grid lines
+// Draw a grid on the canvas
+export const drawGrid = (canvas: fabric.Canvas, gridSize: number, unit: GardenUnit) => {
+  // Remove existing grid
+  const existingGrids = canvas.getObjects().filter(obj => obj.data?.isGrid);
+  existingGrids.forEach(grid => canvas.remove(grid));
+  
   const width = canvas.width || 800;
   const height = canvas.height || 600;
-  const gridColor = '#cccccc';
-
-  // Draw vertical lines
-  for (let i = 0; i <= width; i += size) {
-    const line = new fabric.Line([i, 0, i, height], {
-      stroke: gridColor,
-      selectable: false,
-      evented: false,
-      strokeWidth: 0.5
-    });
-    line.data = { isGrid: true };
-    canvas.add(line);
-    canvas.sendToBack(line);
+  
+  // Create grid
+  for (let i = 0; i < (width || 0) / gridSize; i++) {
+    const xLine = new fabric.Line(
+      [i * gridSize, 0, i * gridSize, height],
+      { 
+        stroke: '#e0e0e0', 
+        selectable: false,
+        strokeWidth: i % 5 === 0 ? 1 : 0.5,
+        evented: false
+      }
+    );
+    
+    // Mark this as a grid line so we can easily identify it
+    if (!xLine.data) xLine.data = {};
+    xLine.data.isGrid = true;
+    
+    canvas.add(xLine);
+    xLine.sendToBack();
   }
-
-  // Draw horizontal lines
-  for (let i = 0; i <= height; i += size) {
-    const line = new fabric.Line([0, i, width, i], {
-      stroke: gridColor,
-      selectable: false,
-      evented: false,
-      strokeWidth: 0.5
-    });
-    line.data = { isGrid: true };
-    canvas.add(line);
-    canvas.sendToBack(line);
+  
+  for (let i = 0; i < (height || 0) / gridSize; i++) {
+    const yLine = new fabric.Line(
+      [0, i * gridSize, width, i * gridSize],
+      { 
+        stroke: '#e0e0e0', 
+        selectable: false,
+        strokeWidth: i % 5 === 0 ? 1 : 0.5,
+        evented: false
+      }
+    );
+    
+    // Mark this as a grid line
+    if (!yLine.data) yLine.data = {};
+    yLine.data.isGrid = true;
+    
+    canvas.add(yLine);
+    yLine.sendToBack();
   }
-
-  // Add scale indicators
-  const scaleText = new fabric.Text(`Grid: ${size} ${unit}`, {
+  
+  // Add unit labels at the corner
+  const unitLabel = new fabric.Text(`Grid: ${gridSize} ${unit}`, {
     left: 10,
-    top: height - 20,
-    fontSize: 14,
-    fontFamily: 'Arial',
-    fill: '#333333',
+    top: 10,
+    fontSize: 12,
+    fill: '#666',
     selectable: false,
     evented: false
   });
-  scaleText.data = { isGrid: true };
-  canvas.add(scaleText);
+  
+  // Mark this as a grid element
+  if (!unitLabel.data) unitLabel.data = {};
+  unitLabel.data.isGrid = true;
+  
+  canvas.add(unitLabel);
+  canvas.renderAll();
+};
+
+// Update the size label for a shape
+export const updateShapeSizeLabel = (
+  obj: fabric.Object, 
+  canvas: fabric.Canvas, 
+  unit: GardenUnit,
+  name?: string
+) => {
+  // Remove any existing labels for this object
+  if (obj.data?.id) {
+    const existingLabels = canvas.getObjects().filter(
+      item => item instanceof fabric.Text && item.data?.parentId === obj.data?.id
+    );
+    
+    existingLabels.forEach(label => canvas.remove(label));
+  }
+  
+  // Ensure the object has an ID
+  if (!obj.data) obj.data = {};
+  if (!obj.data.id) obj.data.id = Date.now().toString();
+  
+  // Calculate dimensions based on object type
+  let width: number | undefined;
+  let height: number | undefined;
+  let displayName = name || '';
+  
+  // Get dimensions for different object types
+  if (obj instanceof fabric.Rect) {
+    width = obj.width! * obj.scaleX!;
+    height = obj.height! * obj.scaleY!;
+    displayName = displayName || 'Rectangle';
+  } else if (obj instanceof fabric.Circle) {
+    width = obj.radius! * 2 * obj.scaleX!;
+    height = width;
+    displayName = displayName || 'Circle';
+  } else if (obj instanceof fabric.Line) {
+    const dx = (obj.x2! - obj.x1!) * obj.scaleX!;
+    const dy = (obj.y2! - obj.y1!) * obj.scaleY!;
+    width = Math.sqrt(dx * dx + dy * dy);
+    displayName = displayName || 'Line';
+  }
+  
+  if (width !== undefined) {
+    let dimensionText = '';
+    
+    if (height !== undefined && obj instanceof fabric.Rect) {
+      dimensionText = `${Math.round(width)}×${Math.round(height)} ${unit}`;
+    } else {
+      dimensionText = `${Math.round(width)} ${unit}`;
+    }
+    
+    // Create the label that shows the name and dimensions
+    const labelText = `${displayName}\n${dimensionText}`;
+    
+    const label = new fabric.Text(labelText, {
+      left: obj.left,
+      // Position the label BELOW the object instead of above it
+      top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5,
+      fontSize: 12,
+      fill: '#333',
+      textAlign: 'center',
+      selectable: false,
+      evented: false,
+      originX: 'center'
+    });
+    
+    // Mark as a label and connect to parent object
+    if (!label.data) label.data = {};
+    label.data.isLabel = true;
+    label.data.parentId = obj.data.id;
+    
+    canvas.add(label);
+    
+    // Update label position when object is modified or moved
+    obj.on('moving', () => {
+      label.set({
+        left: obj.left,
+        top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5
+      });
+    });
+    
+    obj.on('scaling', () => {
+      // Update dimensions text when object is scaled
+      if (obj instanceof fabric.Rect) {
+        width = obj.width! * obj.scaleX!;
+        height = obj.height! * obj.scaleY!;
+        dimensionText = `${Math.round(width)}×${Math.round(height)} ${unit}`;
+      } else if (obj instanceof fabric.Circle) {
+        width = obj.radius! * 2 * obj.scaleX!;
+        dimensionText = `${Math.round(width)} ${unit}`;
+      } else if (obj instanceof fabric.Line) {
+        const dx = (obj.x2! - obj.x1!) * obj.scaleX!;
+        const dy = (obj.y2! - obj.y1!) * obj.scaleY!;
+        width = Math.sqrt(dx * dx + dy * dy);
+        dimensionText = `${Math.round(width)} ${unit}`;
+      }
+      
+      label.set({
+        text: `${displayName}\n${dimensionText}`,
+        left: obj.left,
+        top: (obj.top || 0) + (obj.getScaledHeight ? obj.getScaledHeight() : 0) + 5
+      });
+    });
+  }
   
   canvas.renderAll();
 };
 
-// Apply background pattern to canvas
+// Apply background pattern to the canvas
 export const applyBackgroundPattern = (canvas: fabric.Canvas, pattern: BackgroundPattern) => {
-  if (pattern === 'none') {
-    canvas.setBackgroundColor('#E6EFC8', canvas.renderAll.bind(canvas));
-    return;
-  }
-  
-  let fillPattern;
-  
   switch (pattern) {
-    case 'soil':
-      fillPattern = '#8B4513';
+    case 'grid':
+      canvas.setBackgroundColor('#E6EFC8', canvas.renderAll.bind(canvas));
       break;
-    case 'grass':
-      fillPattern = '#7CFC00';
-      break;
-    case 'concrete':
-      fillPattern = '#C0C0C0';
-      break;
-    case 'wood':
-      fillPattern = '#DEB887';
-      break;
-    default:
-      fillPattern = '#E6EFC8';
-  }
-  
-  canvas.setBackgroundColor(fillPattern, canvas.renderAll.bind(canvas));
-};
-
-// Update size label on shape movement or resize
-export const updateShapeSizeLabel = (shape: fabric.Object, canvas: fabric.Canvas, unit: GardenUnit) => {
-  const updateLabel = () => {
-    let width = 0;
-    let height = 0;
-    
-    if (shape instanceof fabric.Rect) {
-      width = (shape.width || 0) * (shape.scaleX || 1);
-      height = (shape.height || 0) * (shape.scaleY || 1);
-    } else if (shape instanceof fabric.Circle) {
-      width = (shape.radius || 0) * 2 * (shape.scaleX || 1);
-      height = (shape.radius || 0) * 2 * (shape.scaleY || 1);
-    } else if (shape instanceof fabric.Line) {
-      const x1 = shape.x1 || 0;
-      const y1 = shape.y1 || 0;
-      const x2 = shape.x2 || 0;
-      const y2 = shape.y2 || 0;
+    case 'dots':
+      // Create a pattern with dots
+      const patternCanvas = document.createElement('canvas');
+      patternCanvas.width = 20;
+      patternCanvas.height = 20;
+      const patternCtx = patternCanvas.getContext('2d');
       
-      width = Math.abs(x2 - x1) * (shape.scaleX || 1);
-      height = Math.abs(y2 - y1) * (shape.scaleY || 1);
-    }
-    
-    // Round dimensions for display
-    width = Math.round(width);
-    height = Math.round(height);
-    
-    // Find existing label or create new one
-    let label = canvas?.getObjects().find(obj => 
-      obj instanceof fabric.Text && obj.data?.parentId === shape.data?.id
-    );
-    
-    if (label) {
-      canvas?.remove(label);
-    }
-    
-    let dimensionText = '';
-    if (shape instanceof fabric.Rect) {
-      dimensionText = `${width} × ${height} ${unit}`;
-    } else if (shape instanceof fabric.Circle) {
-      dimensionText = `⌀ ${width} ${unit}`;
-    } else {
-      dimensionText = `${width} ${unit}`;
-    }
-    
-    const newLabel = new fabric.Text(dimensionText, {
-      fontSize: 12,
-      fontFamily: 'Arial',
-      fill: '#000000',
-      left: (shape.left || 0) + 5,
-      top: (shape.top || 0) - 15,
-      selectable: false,
-      evented: false
-    });
-    
-    if (!shape.data) shape.data = {};
-    if (!shape.data.id) shape.data.id = Date.now().toString();
-    newLabel.data = { parentId: shape.data.id, isLabel: true };
-    
-    canvas?.add(newLabel);
-    canvas?.renderAll();
-  };
-  
-  shape.on('moving', updateLabel);
-  shape.on('scaling', updateLabel);
-  shape.on('modified', updateLabel);
-  
-  // Initial label
-  updateLabel();
-};
-
-// Create a fabric.js path from custom shape data
-export const createCustomShapePath = (shapeData: any, canvas: fabric.Canvas) => {
-  try {
-    const points = shapeData.points;
-    const curves = shapeData.curves || [];
-    const color = shapeData.color;
-    
-    if (!points || points.length < 3) return null;
-    
-    // Generate SVG path data
-    let pathData = `M ${points[0].x} ${points[0].y}`;
-    
-    for (let i = 1; i <= points.length; i++) {
-      const nextIndex = i % points.length;
-      const prevIndex = i - 1;
-      
-      const curveData = curves.find((c: any) => 
-        (c.startIndex === prevIndex && c.endIndex === nextIndex) || 
-        (c.startIndex === nextIndex && c.endIndex === prevIndex)
-      );
-      
-      if (curveData) {
-        // Quadratic curve
-        pathData += ` Q ${curveData.controlPoint.x},${curveData.controlPoint.y} ${points[nextIndex].x},${points[nextIndex].y}`;
-      } else {
-        // Straight line
-        pathData += ` L ${points[nextIndex].x} ${points[nextIndex].y}`;
+      if (patternCtx) {
+        patternCtx.fillStyle = '#E6EFC8';
+        patternCtx.fillRect(0, 0, 20, 20);
+        patternCtx.beginPath();
+        patternCtx.fillStyle = '#C9DCA2';
+        patternCtx.arc(10, 10, 1.5, 0, Math.PI * 2);
+        patternCtx.fill();
       }
-    }
-    
-    pathData += ' Z'; // Close path
-    
-    // Create the fabric path
-    const path = new fabric.Path(pathData, {
-      fill: color + '40',
-      stroke: color,
-      strokeWidth: 2,
-      opacity: 0.9,
-      objectCaching: false,
-      transparentCorners: false,
-      cornerColor: 'rgba(102,153,255,0.8)',
-    });
-    
-    // Add data attribute to identify this as a custom shape
-    path.data = { isCustomShape: true };
-    
-    return path;
-  } catch (error) {
-    console.error("Error creating custom shape path:", error);
-    return null;
+      
+      const dotPattern = new fabric.Pattern({
+        source: patternCanvas,
+        repeat: 'repeat'
+      });
+      
+      canvas.setBackgroundColor(dotPattern, canvas.renderAll.bind(canvas));
+      break;
+    case 'none':
+    default:
+      canvas.setBackgroundColor('#F8F9FD', canvas.renderAll.bind(canvas));
+      break;
   }
+};
+
+// Create a path from custom shape data
+export const createCustomShapePath = (
+  shapeData: {
+    type: string;
+    pathData: string;
+    width: number;
+    height: number;
+    stroke: string;
+    fill: string;
+  }, 
+  canvas: fabric.Canvas
+) => {
+  const path = new fabric.Path(shapeData.pathData, {
+    width: shapeData.width,
+    height: shapeData.height,
+    stroke: shapeData.stroke || '#000',
+    fill: shapeData.fill || '#4CAF50',
+    strokeWidth: 2,
+    objectCaching: false,
+    transparentCorners: false,
+    cornerColor: 'black'
+  });
+  
+  return path;
 };
