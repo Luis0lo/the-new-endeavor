@@ -1,8 +1,7 @@
 
-import { useEffect } from 'react';
 import { fabric } from 'fabric';
-import { GardenUnit, updateShapeSizeLabel } from '../utils/canvasUtils';
-import { toast } from '@/hooks/use-toast';
+import { updateShapeSizeLabel } from '../utils/canvasUtils';
+import { GardenUnit, ShapeType } from '../utils/canvasUtils';
 
 interface UseShapeAdderProps {
   canvas: fabric.Canvas | null;
@@ -10,76 +9,101 @@ interface UseShapeAdderProps {
 }
 
 export const useShapeAdder = ({ canvas, unit }: UseShapeAdderProps) => {
-  // Check for custom shapes in localStorage
-  useEffect(() => {
+  // Function to add a shape to the canvas
+  const addShape = (
+    shapeType: ShapeType,
+    color: string = '#4CAF50',
+    strokeWidth: number = 2,
+    opacity: number = 1,
+    textValue: string = 'Your Text',
+    fontSize: number = 20
+  ) => {
     if (!canvas) return;
 
-    const customShapesJson = localStorage.getItem('customShapes');
-    if (!customShapesJson) return;
+    let newShape: fabric.Object | null = null;
 
-    try {
-      const customShapesData = JSON.parse(customShapesJson);
-      const shapes = Array.isArray(customShapesData) ? customShapesData : customShapesData.shapes;
-      const shapesName = customShapesData.name || 'Custom Shapes';
-      
-      if (shapes && shapes.length > 0) {
-        let offsetX = 0;
-        let offsetY = 0;
-        
-        shapes.forEach((shapeData: any, index: number) => {
-          const points = shapeData.points;
-          const color = shapeData.color;
-          const curves = shapeData.curves || [];
-          
-          if (points && points.length >= 3) {
-            // Create a polygon from the points
-            const polygonPoints: fabric.Point[] = points.map((p: any) => new fabric.Point(p.x, p.y));
-            
-            const polygon = new fabric.Polygon(polygonPoints, {
-              left: 100 + offsetX,
-              top: 100 + offsetY,
-              fill: color + '40', // Add transparency
-              stroke: color,
-              strokeWidth: 2,
-              objectCaching: true,
-              selectable: true,
-              data: {
-                id: `custom-${Date.now()}-${index}`,
-                type: 'customShape',
-                shapeName: shapesName
-              }
-            });
-            
-            // Add to canvas
-            canvas.add(polygon);
-            
-            // Add a size label
-            updateShapeSizeLabel(polygon, canvas, unit, shapesName);
-            
-            // Update offset for next shape
-            offsetX += 30;
-            offsetY += 30;
-            
-            // Wrap to next "row" after a few shapes
-            if (index % 3 === 2) {
-              offsetX = 0;
-              offsetY += 30;
-            }
+    switch (shapeType) {
+      case 'rect':
+        newShape = new fabric.Rect({
+          left: 100,
+          top: 100,
+          fill: color,
+          stroke: color.replace(/[^#\d]/g, ''),
+          width: 50,
+          height: 50,
+          strokeWidth,
+          opacity,
+          objectCaching: false,
+          transparentCorners: false,
+          cornerColor: 'black',
+          data: {
+            id: Date.now(),
+            type: 'rect',
+            shapeName: 'Rectangle'
           }
         });
-        
-        canvas.renderAll();
-        
-        // Clear localStorage after adding
-        localStorage.removeItem('customShapes');
-        
-        toast({
-          title: "Custom shapes added",
-          description: `Added ${shapes.length} custom shape${shapes.length > 1 ? 's' : ''} to your garden layout`,
+        break;
+      case 'circle':
+        newShape = new fabric.Circle({
+          left: 100,
+          top: 100,
+          radius: 25,
+          fill: color,
+          stroke: color.replace(/[^#\d]/g, ''),
+          strokeWidth,
+          opacity,
+          objectCaching: false,
+          transparentCorners: false,
+          cornerColor: 'black',
+          data: {
+            id: Date.now(),
+            type: 'circle',
+            shapeName: 'Circle'
+          }
         });
-      }
-    } catch (error) {
-      console.error("Error loading custom shapes:", error);
+        break;
+      case 'line':
+        newShape = new fabric.Line([50, 100, 150, 100], {
+          stroke: color,
+          strokeWidth,
+          opacity,
+          objectCaching: false,
+          transparentCorners: false,
+          cornerColor: 'black',
+          data: {
+            id: Date.now(),
+            type: 'line',
+            shapeName: 'Line'
+          }
+        });
+        break;
+      case 'text':
+        newShape = new fabric.Textbox(textValue, {
+          left: 100,
+          top: 100,
+          fill: color,
+          fontSize,
+          opacity,
+          width: 150,
+          objectCaching: false,
+          transparentCorners: false,
+          cornerColor: 'black',
+          data: {
+            id: Date.now(),
+            type: 'text',
+            shapeName: 'Text'
+          }
+        });
+        break;
     }
-  }, [canvas, unit]);
+
+    if (newShape) {
+      canvas.add(newShape);
+      canvas.setActiveObject(newShape);
+      updateShapeSizeLabel(newShape, canvas, unit);
+      canvas.renderAll();
+    }
+  };
+
+  return { addShape };
 };

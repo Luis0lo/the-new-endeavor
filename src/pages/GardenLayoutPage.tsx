@@ -77,6 +77,11 @@ const GardenLayoutPage = () => {
     addShape(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
   };
 
+  // Wrapper for loadLayout to match the expected function signature (no arguments)
+  const handleLoadLayout = () => {
+    loadLayout();
+  };
+
   return (
     <DashboardLayout>
       <div className="flex-1 p-4 md:p-8 space-y-4">
@@ -122,7 +127,7 @@ const GardenLayoutPage = () => {
             addShape={handleAddShape}
             handleSaveSelectedShape={handleSaveSelectedShape}
             saveLayout={saveLayout}
-            loadLayout={loadLayout}
+            loadLayout={handleLoadLayout}
             clearCanvas={clearCanvas}
             savedShapes={savedShapes}
             loadSavedShape={loadSavedShape}

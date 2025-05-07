@@ -63,7 +63,8 @@ export const useGardenLayoutCanvas = ({
   });
 
   // Hook for adding shapes
-  const { addShape: addShapeToCanvas } = useShapeAdder({ canvas, unit });
+  // Fixed: Get the actual object instead of void
+  const shapeAdder = useShapeAdder({ canvas, unit });
 
   // Handler for adding a shape
   const addShape = (
@@ -74,7 +75,10 @@ export const useGardenLayoutCanvas = ({
     textValue: string, 
     fontSize: number
   ) => {
-    addShapeToCanvas(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
+    // Fixed: Use shapeAdder.addShape instead of addShapeToCanvas
+    if (shapeAdder && shapeAdder.addShape) {
+      shapeAdder.addShape(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
+    }
   };
 
   // Generate preview image for garden layout
