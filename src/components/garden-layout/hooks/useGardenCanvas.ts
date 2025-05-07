@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { fabric } from 'fabric';
 import { toast } from '@/hooks/use-toast';
@@ -147,7 +148,7 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
     }
 
     fabric.Image.fromURL(imageUrl, (img) => {
-      canvas वोsetBackgroundImage(img, canvas.renderAll.bind(canvas), {
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
         originX: 'left',
         originY: 'top',
         scaleX: 0.5,
