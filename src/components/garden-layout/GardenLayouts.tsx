@@ -33,6 +33,7 @@ interface GardenLayout {
   layout_data: string;
   description?: string;
   preview?: string;
+  user_id: string;
 }
 
 interface GardenLayoutsProps {
@@ -97,11 +98,13 @@ const GardenLayouts: React.FC<GardenLayoutsProps> = ({
     try {
       setLoading(true);
       
+      // Use a type assertion to work around TypeScript limitation
+      // until the types are updated to include the new garden_layouts table
       const { data, error } = await supabase
         .from('garden_layouts')
         .select('*')
         .eq('user_id', userId)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false }) as any;
       
       if (error) throw error;
       
@@ -141,6 +144,7 @@ const GardenLayouts: React.FC<GardenLayoutsProps> = ({
       // Generate preview
       const preview = generatePreview();
       
+      // Use a type assertion to work around TypeScript limitation
       const { data, error } = await supabase
         .from('garden_layouts')
         .insert({
@@ -150,7 +154,7 @@ const GardenLayouts: React.FC<GardenLayoutsProps> = ({
           layout_data: canvasJson,
           preview
         })
-        .select();
+        .select() as any;
       
       if (error) throw error;
       
@@ -181,10 +185,11 @@ const GardenLayouts: React.FC<GardenLayoutsProps> = ({
     if (!selectedLayoutId) return;
     
     try {
+      // Use a type assertion to work around TypeScript limitation
       const { error } = await supabase
         .from('garden_layouts')
         .delete()
-        .eq('id', selectedLayoutId);
+        .eq('id', selectedLayoutId) as any;
       
       if (error) throw error;
       

@@ -144,6 +144,39 @@ export type Database = {
           },
         ]
       }
+      garden_layouts: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          layout_data: string
+          name: string
+          preview: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          layout_data: string
+          name: string
+          preview?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          layout_data?: string
+          name?: string
+          preview?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory_items: {
         Row: {
           brand: string | null
