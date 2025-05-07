@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import SaveCustomShapesDialog from '@/components/garden-layout/SaveCustomShapesDialog';
 
 export default function CustomShapeDrawerPage() {
   const navigate = useNavigate();
@@ -19,6 +20,11 @@ export default function CustomShapeDrawerPage() {
   const [isMovingShape, setIsMovingShape] = useState(false);
   const [moveStartPos, setMoveStartPos] = useState({ x: 0, y: 0 });
   const [curvePoint, setCurvePoint] = useState({ x: 0, y: 0 });
+  
+  // State for save dialog
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [shapesName, setShapesName] = useState('');
+  const [shapesDescription, setShapesDescription] = useState('');
 
   // Initialize canvas context
   useEffect(() => {
@@ -479,14 +485,9 @@ export default function CustomShapeDrawerPage() {
   
   // Add shape to garden layout and return to the layout designer
   const addShapeToLayout = () => {
-    // Save shape data to localStorage to pass between pages
+    // If there are shapes to save, open the save dialog
     if (shapes.length > 0) {
-      localStorage.setItem('customShapes', JSON.stringify(shapes));
-      toast({
-        title: "Custom shapes saved",
-        description: `${shapes.length} shape(s) added to layout`,
-      });
-      navigate('/dashboard/garden-layout');
+      setSaveDialogOpen(true);
     } else {
       toast({
         title: "No shapes to add",
@@ -494,6 +495,30 @@ export default function CustomShapeDrawerPage() {
         variant: "destructive"
       });
     }
+  };
+  
+  // Complete the save and use action after dialog
+  const completeSaveAndUse = () => {
+    if (!shapesName.trim()) return;
+    
+    // Save shape data to localStorage to pass between pages
+    const shapesData = {
+      shapes: shapes,
+      name: shapesName,
+      description: shapesDescription,
+      createdAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('customShapes', JSON.stringify(shapesData));
+    
+    toast({
+      title: "Custom shapes saved",
+      description: `${shapes.length} shape(s) added to layout as "${shapesName}"`,
+    });
+    
+    // Close dialog and navigate back
+    setSaveDialogOpen(false);
+    navigate('/dashboard/garden-layout');
   };
 
   return (
@@ -599,6 +624,18 @@ export default function CustomShapeDrawerPage() {
           </div>
         </div>
       </div>
+      
+      {/* Add the save dialog */}
+      <SaveCustomShapesDialog
+        open={saveDialogOpen}
+        setOpen={setSaveDialogOpen}
+        shapesName={shapesName}
+        setShapesName={setShapesName}
+        shapesDescription={shapesDescription}
+        setShapesDescription={setShapesDescription}
+        onSave={completeSaveAndUse}
+        shapeCount={shapes.length}
+      />
     </DashboardLayout>
   );
 }
