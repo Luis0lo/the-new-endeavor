@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 import { toast } from '@/hooks/use-toast';
-import { GardenUnit, BackgroundPattern } from '../utils/canvasUtils';
+import { GardenUnit, BackgroundPattern, ShapeType } from '../utils/canvasUtils';
 
 interface UseGardenCanvasProps {
   unit: GardenUnit;
@@ -10,9 +10,11 @@ interface UseGardenCanvasProps {
 
 export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
+  const [objectsCount, setObjectsCount] = useState(0);
 
   useEffect(() => {
     const newCanvas = new fabric.Canvas('gardenCanvas', {
@@ -27,6 +29,28 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
 
     // Initial state to history
     saveState(newCanvas, [], -1);
+    
+    // Update objects count when objects are added or removed
+    newCanvas.on('object:added', () => {
+      setObjectsCount(newCanvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
+    });
+    
+    newCanvas.on('object:removed', () => {
+      setObjectsCount(newCanvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
+    });
+    
+    // Selection events
+    newCanvas.on('selection:created', (e) => {
+      setSelectedObject(e.selected?.[0] || null);
+    });
+    
+    newCanvas.on('selection:updated', (e) => {
+      setSelectedObject(e.selected?.[0] || null);
+    });
+    
+    newCanvas.on('selection:cleared', () => {
+      setSelectedObject(null);
+    });
 
     return () => {
       newCanvas.dispose();
@@ -51,11 +75,10 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
 
     try {
       const json = history[index];
-      const newCanvas = new fabric.Canvas('gardenCanvas');
-      newCanvas.loadFromJSON(json, () => {
-        newCanvas.renderAll();
-        setCanvas(newCanvas);
+      canvas.loadFromJSON(json, () => {
+        canvas.renderAll();
         setHistoryIndex(index);
+        setObjectsCount(canvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
       });
     } catch (error) {
       console.error("Error loading state:", error);
@@ -158,7 +181,8 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
     });
   };
 
-  const addShape = () => {
+  // Functions for adding shapes
+  const addShapeToCanvas = () => {
     if (!canvas) return;
 
     // Function to add a rectangle
@@ -166,8 +190,8 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
       const rect = new fabric.Rect({
         left: 100,
         top: 100,
-        fill: '#4CAF5040', // Transparent green
-        stroke: '#4CAF50', // Green border
+        fill: '#4CAF5040',
+        stroke: '#4CAF50',
         width: 50,
         height: 50,
         objectCaching: false,
@@ -179,6 +203,8 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
         }
       });
       canvas.add(rect);
+      canvas.setActiveObject(rect);
+      saveState(canvas, history, historyIndex);
       return rect;
     };
 
@@ -188,8 +214,8 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
         left: 100,
         top: 100,
         radius: 25,
-        fill: '#2196F340', // Transparent blue
-        stroke: '#2196F3', // Blue border
+        fill: '#2196F340',
+        stroke: '#2196F3',
         objectCaching: false,
         strokeWidth: 2,
         data: {
@@ -199,13 +225,15 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
         }
       });
       canvas.add(circle);
+      canvas.setActiveObject(circle);
+      saveState(canvas, history, historyIndex);
       return circle;
     };
 
     // Function to add a line
     const addLine = () => {
       const line = new fabric.Line([50, 100, 150, 100], {
-        stroke: '#9C27B0', // Purple
+        stroke: '#9C27B0',
         strokeWidth: 3,
         objectCaching: false,
         data: {
@@ -215,6 +243,8 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
         }
       });
       canvas.add(line);
+      canvas.setActiveObject(line);
+      saveState(canvas, history, historyIndex);
       return line;
     };
 
@@ -224,7 +254,7 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
         left: 100,
         top: 100,
         fontSize: 20,
-        fill: '#795548', // Brown
+        fill: '#795548',
         objectCaching: false,
         width: 150,
         data: {
@@ -234,6 +264,8 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
         }
       });
       canvas.add(text);
+      canvas.setActiveObject(text);
+      saveState(canvas, history, historyIndex);
       return text;
     };
 
@@ -245,18 +277,160 @@ export const useGardenCanvas = ({ unit }: UseGardenCanvasProps) => {
     };
   };
 
+  // Function to duplicate selected object
+  const duplicateSelected = () => {
+    if (!canvas || !canvas.getActiveObject()) return;
+    
+    const activeObject = canvas.getActiveObject();
+    activeObject.clone((cloned: fabric.Object) => {
+      cloned.set({
+        left: (cloned.left || 0) + 20,
+        top: (cloned.top || 0) + 20,
+        evented: true,
+      });
+      
+      if (!cloned.data) cloned.data = {};
+      cloned.data.id = Date.now();
+      
+      canvas.add(cloned);
+      canvas.setActiveObject(cloned);
+      canvas.requestRenderAll();
+      saveState(canvas, history, historyIndex);
+    });
+  };
+
+  // Function to remove selected object
+  const removeSelected = () => {
+    if (!canvas || !canvas.getActiveObject()) return;
+    
+    // Also remove associated labels
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.data?.id) {
+      const labels = canvas.getObjects().filter(
+        obj => obj.data?.parentId === activeObject.data.id
+      );
+      
+      labels.forEach(label => {
+        canvas.remove(label);
+      });
+    }
+    
+    canvas.remove(canvas.getActiveObject());
+    canvas.requestRenderAll();
+    saveState(canvas, history, historyIndex);
+  };
+
+  // Function to bring selected object to front
+  const bringToFront = () => {
+    if (!canvas || !canvas.getActiveObject()) return;
+    
+    const activeObject = canvas.getActiveObject();
+    activeObject.bringToFront();
+    canvas.requestRenderAll();
+  };
+
+  // Function to send selected object to back
+  const sendToBack = () => {
+    if (!canvas || !canvas.getActiveObject()) return;
+    
+    const activeObject = canvas.getActiveObject();
+    activeObject.sendToBack();
+    
+    // Make sure grid lines stay at the back
+    const gridLines = canvas.getObjects().filter(obj => obj.data?.isGrid);
+    gridLines.forEach(line => line.sendToBack());
+    
+    canvas.requestRenderAll();
+  };
+
+  // Function to clear the canvas
+  const clearCanvas = () => {
+    if (!canvas) return;
+    
+    const objects = canvas.getObjects().filter(obj => !obj.data?.isGrid);
+    objects.forEach(obj => canvas.remove(obj));
+    
+    canvas.requestRenderAll();
+    saveState(canvas, history, historyIndex);
+  };
+
+  // Function to get canvas JSON
+  const getCanvasJson = () => {
+    if (!canvas) return '';
+    return JSON.stringify(canvas.toJSON(['id', 'type', 'shapeName', 'isGrid', 'isLabel']));
+  };
+
+  // Function to load from JSON
+  const loadFromJson = (json: string) => {
+    if (!canvas || !json) return;
+    
+    try {
+      canvas.loadFromJSON(json, () => {
+        canvas.renderAll();
+        saveState(canvas, history, historyIndex);
+        setObjectsCount(canvas.getObjects().filter(obj => !obj.data?.isGrid && !obj.data?.isLabel).length);
+      });
+    } catch (error) {
+      console.error("Error loading JSON:", error);
+      toast({
+        title: "Error",
+        description: "Could not load garden layout.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Function to save layout
+  const saveLayout = () => {
+    if (!canvas) return null;
+    
+    const json = canvas.toJSON(['id', 'type', 'shapeName', 'isGrid', 'isLabel']);
+    return JSON.stringify(json);
+  };
+
+  // Function to load layout
+  const loadLayout = (json: string) => {
+    if (!canvas) return;
+    
+    try {
+      canvas.loadFromJSON(json, () => {
+        canvas.renderAll();
+        saveState(canvas, history, historyIndex);
+      });
+    } catch (error) {
+      console.error("Error loading layout:", error);
+    }
+  };
+
+  // Check if there is a selection
+  const hasSelection = !!selectedObject;
+
   return {
     canvas,
+    canvasRef,
     setCanvas,
     addGrid,
     setBackground,
-    addShape,
+    addShape: addShapeToCanvas,
     history,
     historyIndex,
     undo,
+    handleUndo: undo, // Alias for undo
     redo,
+    handleRedo: redo, // Alias for redo
     saveState,
     selectedObject,
-    setSelectedObject
+    setSelectedObject,
+    objectsCount,
+    hasSelection,
+    duplicateSelected,
+    removeSelected,
+    bringToFront,
+    sendToBack,
+    clearCanvas,
+    getCanvasJson,
+    loadFromJson,
+    saveLayout,
+    loadLayout
   };
 };

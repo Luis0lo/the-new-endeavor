@@ -3,7 +3,7 @@ import { fabric } from 'fabric';
 
 export type ShapeType = 'rect' | 'circle' | 'line' | 'text';
 export type GardenUnit = 'cm' | 'm' | 'inch' | 'ft';
-export type BackgroundPattern = 'none' | 'grid' | 'dots';
+export type BackgroundPattern = 'none' | 'grid' | 'dots' | 'soil' | 'grass' | 'concrete' | 'wood';
 
 // Interface for saved shapes
 export interface SavedShape {

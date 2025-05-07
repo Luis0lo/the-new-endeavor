@@ -3,7 +3,7 @@ import { useGardenCanvas } from './useGardenCanvas';
 import { useShapeAdder } from './useShapeAdder';
 import { useSavedShapes } from './useSavedShapes';
 import { useSaveShapeDialog } from './useSaveShapeDialog';
-import { GardenUnit, BackgroundPattern } from '../utils/canvasUtils';
+import { GardenUnit, BackgroundPattern, ShapeType } from '../utils/canvasUtils';
 
 interface UseGardenLayoutCanvasProps {
   gridSize: number;
@@ -21,15 +21,15 @@ export const useGardenLayoutCanvas = ({
   // Initialize the canvas with hooks
   const { 
     canvas, 
-    canvasRef = { current: null },
+    canvasRef,
     objectsCount, 
     hasSelection, 
     historyIndex, 
     history, 
     duplicateSelected, 
     removeSelected, 
-    handleUndo: undo, 
-    handleRedo: redo, 
+    handleUndo, 
+    handleRedo, 
     saveLayout, 
     loadLayout, 
     clearCanvas, 
@@ -97,8 +97,8 @@ export const useGardenLayoutCanvas = ({
     history,
     duplicateSelected,
     removeSelected,
-    handleUndo: undo,
-    handleRedo: redo,
+    handleUndo,
+    handleRedo,
     saveLayout,
     loadLayout,
     clearCanvas,
