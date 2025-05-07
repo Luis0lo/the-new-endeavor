@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { toast } from '@/hooks/use-toast';
@@ -34,6 +35,7 @@ const GardenLayoutPage = () => {
   const [savedShapes, setSavedShapes] = useState<SavedShape[]>([]);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [shapeName, setShapeName] = useState('');
+  const [activeTab, setActiveTab] = useState('shapes');
 
   const navigate = useNavigate();
 
@@ -69,6 +71,26 @@ const GardenLayoutPage = () => {
       }
     }
   }, []);
+
+  // Control object resizability based on active tab
+  useEffect(() => {
+    if (!canvas) return;
+    
+    // Only allow resizing on the Shapes & Tools tab
+    const canResize = activeTab === 'shapes';
+    
+    canvas.getObjects().forEach(obj => {
+      if (!obj.data?.isGrid && !obj.data?.isLabel) {
+        obj.set({
+          lockScalingX: !canResize,
+          lockScalingY: !canResize,
+          hasControls: canResize,
+        });
+      }
+    });
+    
+    canvas.renderAll();
+  }, [canvas, activeTab]);
 
   const addShape = () => {
     addShapeToCanvas(selectedShape, color, strokeWidth, opacity, textValue, fontSize);
@@ -322,7 +344,12 @@ const GardenLayoutPage = () => {
             Design your garden beds, plots, and containers with accurate measurements.
           </p>
           
-          <Tabs defaultValue="shapes" className="w-full">
+          <Tabs 
+            defaultValue="shapes" 
+            className="w-full"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
             <TabsList className="grid grid-cols-5 mb-4">
               <TabsTrigger value="shapes">Shapes & Tools</TabsTrigger>
               <TabsTrigger value="styling">Styling</TabsTrigger>
