@@ -39,21 +39,25 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
             ))}
           </div>
 
-          {/* Calendar grid for this vegetable */}
+          {/* Calendar grid with months as rows and actions as columns */}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Action</TableHead>
-                {months.map((month) => (
-                  <TableHead key={month} className="text-center p-1">{month}</TableHead>
+                <TableHead>Month</TableHead>
+                {legendItems.map((item, index) => (
+                  <TableHead key={index} className="text-center">
+                    {item.label}
+                  </TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Sow Indoors</TableCell>
-                {months.map((_, monthIdx) => (
-                  <TableCell key={monthIdx} className="p-2 text-center">
+              {months.map((month, monthIdx) => (
+                <TableRow key={monthIdx}>
+                  <TableCell className="font-medium">{month}</TableCell>
+                  
+                  {/* Sow Indoors */}
+                  <TableCell className="p-2 text-center">
                     {isMonthInPeriods(vegetable.sow_indoors, monthIdx) ? (
                       <div 
                         className="mx-auto w-4 h-4 rounded-full" 
@@ -61,12 +65,9 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
                       ></div>
                     ) : null}
                   </TableCell>
-                ))}
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Sow Outdoors</TableCell>
-                {months.map((_, monthIdx) => (
-                  <TableCell key={monthIdx} className="p-2 text-center">
+                  
+                  {/* Sow Outdoors */}
+                  <TableCell className="p-2 text-center">
                     {isMonthInPeriods(vegetable.sow_outdoors, monthIdx) ? (
                       <div 
                         className="mx-auto w-4 h-4 rounded-full" 
@@ -74,12 +75,9 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
                       ></div>
                     ) : null}
                   </TableCell>
-                ))}
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Plant Outdoors</TableCell>
-                {months.map((_, monthIdx) => (
-                  <TableCell key={monthIdx} className="p-2 text-center">
+                  
+                  {/* Plant Outdoors */}
+                  <TableCell className="p-2 text-center">
                     {isMonthInPeriods(vegetable.transplant_outdoors, monthIdx) ? (
                       <div 
                         className="mx-auto w-4 h-4 rounded-full" 
@@ -87,12 +85,9 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
                       ></div>
                     ) : null}
                   </TableCell>
-                ))}
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Harvest</TableCell>
-                {months.map((_, monthIdx) => (
-                  <TableCell key={monthIdx} className="p-2 text-center">
+                  
+                  {/* Harvest */}
+                  <TableCell className="p-2 text-center">
                     {isMonthInPeriods(vegetable.harvest_period, monthIdx) ? (
                       <div 
                         className="mx-auto w-4 h-4 rounded-full" 
@@ -100,8 +95,8 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
                       ></div>
                     ) : null}
                   </TableCell>
-                ))}
-              </TableRow>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>
