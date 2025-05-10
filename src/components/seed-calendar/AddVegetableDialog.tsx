@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +18,33 @@ interface MonthRange {
 interface AddVegetableDialogProps {
   onVegetableAdded: () => void;
   userId: string | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  initialVegetableName?: string;
 }
 
-const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdded, userId }) => {
-  const [open, setOpen] = useState(false);
-  const [vegetable, setVegetable] = useState('');
+const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ 
+  onVegetableAdded, 
+  userId,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+  initialVegetableName = ""
+}) => {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const [vegetable, setVegetable] = useState(initialVegetableName);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Determine if this is a controlled or uncontrolled component
+  const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled ? setControlledOpen : setUncontrolledOpen;
+  
+  // Update vegetable state when initialVegetableName changes
+  useEffect(() => {
+    if (initialVegetableName) {
+      setVegetable(initialVegetableName);
+    }
+  }, [initialVegetableName]);
   
   // Month selections for each activity
   const [sowIndoors, setSowIndoors] = useState<number[]>([]);
@@ -152,12 +172,14 @@ const AddVegetableDialog: React.FC<AddVegetableDialogProps> = ({ onVegetableAdde
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus size={16} />
-          <span>Add Vegetable</span>
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button className="gap-2">
+            <Plus size={16} />
+            <span>Add Vegetable</span>
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-4xl w-full">
         <DialogHeader>
           <DialogTitle>Add New Vegetable to Seed Calendar</DialogTitle>

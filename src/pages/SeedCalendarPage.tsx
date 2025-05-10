@@ -9,6 +9,7 @@ import EditVegetableDialog from '@/components/seed-calendar/EditVegetableDialog'
 import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import VegetableDetailsDialog from '@/components/seed-calendar/VegetableDetailsDialog';
+import SeedSearch from '@/components/seed-calendar/SeedSearch';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -146,6 +147,16 @@ const SeedCalendarPage = () => {
               </div>
             ) : (
               <div className="flex flex-col space-y-4 h-full">
+                {/* New Search Component */}
+                <SeedSearch 
+                  seedData={seedData}
+                  months={months}
+                  legendItems={legendItems}
+                  isMonthInPeriods={isMonthInPeriods}
+                  userId={userId}
+                  onVegetableAdded={refetch}
+                />
+                
                 {/* Legend - hide on mobile */}
                 {!isMobile && (
                   <div className="flex flex-wrap gap-4 mb-2">
