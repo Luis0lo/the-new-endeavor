@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Archive, Leaf, Wrench, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,10 +41,17 @@ export const SortableShelfCard: React.FC<SortableShelfCardProps> = ({
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: shelf.id });
+  } = useSortable({
+    id: shelf.id,
+    // Add required configurations with default values
+    data: {
+      type: 'shelf',
+      shelf
+    }
+  });
 
   const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    transform: CSS.Transform.toString(transform),
     transition
   } : undefined;
 
