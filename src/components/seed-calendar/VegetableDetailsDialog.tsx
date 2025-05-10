@@ -29,7 +29,7 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
         </DialogHeader>
         
         <div className="py-4">
-          {/* Legend for mobile */}
+          {/* Legend */}
           <div className="flex flex-wrap gap-2 mb-4">
             {legendItems.map((item, i) => (
               <div key={i} className="flex items-center">
@@ -45,18 +45,23 @@ const VegetableDetailsDialog: React.FC<VegetableDetailsDialogProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-1/5">Month</TableHead>
-                  {legendItems.map((item, index) => (
-                    <TableHead 
-                      key={index} 
-                      className="text-center w-1/5 px-1" 
-                      title={item.label} /* Full label visible on hover */
-                    >
-                      <span className="hidden sm:inline">{item.label}</span>
-                      <span className="sm:hidden">
-                        {item.label.split(' ')[0].substring(0, 3)} {/* Shortened label for mobile */}
-                      </span>
-                    </TableHead>
-                  ))}
+                  {/* Updated column headers to be more specific */}
+                  <TableHead className="text-center w-1/5 px-1" title={legendItems[0].label}>
+                    <span className="hidden sm:inline">Sow In</span>
+                    <span className="sm:hidden">In</span>
+                  </TableHead>
+                  <TableHead className="text-center w-1/5 px-1" title={legendItems[1].label}>
+                    <span className="hidden sm:inline">Sow Out</span>
+                    <span className="sm:hidden">Out</span>
+                  </TableHead>
+                  <TableHead className="text-center w-1/5 px-1" title={legendItems[2].label}>
+                    <span className="hidden sm:inline">Plant</span>
+                    <span className="sm:hidden">Plant</span>
+                  </TableHead>
+                  <TableHead className="text-center w-1/5 px-1" title={legendItems[3].label}>
+                    <span className="hidden sm:inline">Harvest</span>
+                    <span className="sm:hidden">Harv</span>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
