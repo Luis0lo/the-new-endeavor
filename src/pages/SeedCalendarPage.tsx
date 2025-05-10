@@ -7,6 +7,8 @@ import { Loader2, Trash2 } from 'lucide-react';
 import AddVegetableDialog from '@/components/seed-calendar/AddVegetableDialog';
 import EditVegetableDialog from '@/components/seed-calendar/EditVegetableDialog';
 import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
+import VegetableDetailsDialog from '@/components/seed-calendar/VegetableDetailsDialog';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -22,10 +24,15 @@ const SeedCalendarPage = () => {
   const { seedData, loading, error, refetch, deleteEntry, userId } = useSeedCalendar();
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [vegetableToDelete, setVegetableToDelete] = useState<{ id: string, name: string } | null>(null);
+  
+  // State for vegetable details dialog on mobile
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedVegetable, setSelectedVegetable] = useState<SeedCalendarEntry | null>(null);
 
   // Calculate scrollbar width on mount and when data loads
   useEffect(() => {
@@ -103,6 +110,13 @@ const SeedCalendarPage = () => {
     }
   };
 
+  const handleVegetableClick = (vegetable: SeedCalendarEntry) => {
+    if (isMobile) {
+      setSelectedVegetable(vegetable);
+      setDetailsDialogOpen(true);
+    }
+  };
+
   // Separate user entries from default entries for display
   const userEntries = seedData.filter(entry => entry.user_id);
   const defaultEntries = seedData.filter(entry => !entry.user_id);
@@ -132,192 +146,252 @@ const SeedCalendarPage = () => {
               </div>
             ) : (
               <div className="flex flex-col space-y-4 h-full">
-                {/* Legend */}
-                <div className="flex flex-wrap gap-4 mb-2">
-                  {legendItems.map((item, i) => (
-                    <div key={i} className="flex items-center">
-                      <div className="w-4 h-4 mr-2" style={{ backgroundColor: item.color }}></div>
-                      <span className="text-sm">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
+                {/* Legend - hide on mobile */}
+                {!isMobile && (
+                  <div className="flex flex-wrap gap-4 mb-2">
+                    {legendItems.map((item, i) => (
+                      <div key={i} className="flex items-center">
+                        <div className="w-4 h-4 mr-2" style={{ backgroundColor: item.color }}></div>
+                        <span className="text-sm">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 
-                {/* Main calendar table with fixed column widths */}
-                <div className="flex flex-col overflow-hidden h-full">
-                  {/* Fixed header with defined column widths */}
-                  <div className="bg-muted/50 border-b" style={{ paddingRight: `${scrollbarWidth}px` }}>
-                    <table className="w-full table-fixed">
-                      <colgroup>
-                        {/* Vegetable column width */}
-                        <col style={{ width: '220px' }} />
-                        {months.map((_, i) => (
-                          /* Fixed width for each month */
-                          <col key={i} style={{ width: '60px' }} />
+                {/* Mobile view */}
+                {isMobile ? (
+                  <div className="flex flex-col overflow-auto h-full">
+                    {/* User entries section */}
+                    {userEntries.length > 0 && (
+                      <>
+                        <div className="bg-primary/10 p-2 font-medium text-primary border-b">
+                          Your Custom Vegetables
+                        </div>
+                        {userEntries.map((entry, idx) => (
+                          <div 
+                            key={entry.id} 
+                            className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200 p-4 flex justify-between items-center`}
+                            onClick={() => handleVegetableClick(entry)}
+                          >
+                            <span className="text-primary font-medium">{entry.vegetable}</span>
+                            <div className="flex items-center">
+                              <EditVegetableDialog 
+                                vegetable={entry} 
+                                onVegetableUpdated={refetch} 
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(entry.id, entry.vegetable)
+                                }}
+                              >
+                                <Trash2 size={16} className="text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
                         ))}
-                      </colgroup>
-                      <thead>
-                        <tr>
-                          <th className="whitespace-nowrap font-medium p-4 text-left border-r border-border">Vegetable</th>
-                          {months.map((month, index) => (
-                            <th 
-                              key={month} 
-                              className={`text-center p-4 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
-                            >
-                              {month}
-                            </th>
+                      </>
+                    )}
+                    
+                    {/* Default entries section */}
+                    {defaultEntries.length > 0 && (
+                      <>
+                        <div className="bg-muted p-2 font-medium text-muted-foreground border-b">
+                          Standard UK Vegetables
+                        </div>
+                        {defaultEntries.map((entry, idx) => (
+                          <div 
+                            key={entry.id} 
+                            className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200 p-4`}
+                            onClick={() => handleVegetableClick(entry)}
+                          >
+                            <span className="font-medium">{entry.vegetable}</span>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  // Desktop view - existing table layout
+                  <div className="flex flex-col overflow-hidden h-full">
+                    {/* Fixed header with defined column widths */}
+                    <div className="bg-muted/50 border-b" style={{ paddingRight: `${scrollbarWidth}px` }}>
+                      <table className="w-full table-fixed">
+                        <colgroup>
+                          {/* Vegetable column width */}
+                          <col style={{ width: '220px' }} />
+                          {months.map((_, i) => (
+                            /* Fixed width for each month */
+                            <col key={i} style={{ width: '60px' }} />
                           ))}
-                        </tr>
-                      </thead>
-                    </table>
-                  </div>
-                  
-                  {/* Scrollable body with same column structure */}
-                  <div ref={scrollBodyRef} className="overflow-y-auto flex-1">
-                    <table className="w-full table-fixed">
-                      <colgroup>
-                        {/* Vegetable column width */}
-                        <col style={{ width: '220px' }} />
-                        {months.map((_, i) => (
-                          /* Fixed width for each month */
-                          <col key={i} style={{ width: '60px' }} />
-                        ))}
-                      </colgroup>
-                      <tbody>
-                        {/* User entries section with header */}
-                        {userEntries.length > 0 && (
-                          <>
-                            <tr className="bg-primary/10">
-                              <td colSpan={13} className="p-2 font-medium text-primary border-b">
-                                Your Custom Vegetables
-                              </td>
-                            </tr>
-                            {userEntries.map((entry, idx) => (
-                              <tr 
-                                key={entry.id} 
-                                className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                        </colgroup>
+                        <thead>
+                          <tr>
+                            <th className="whitespace-nowrap font-medium p-4 text-left border-r border-border">Vegetable</th>
+                            {months.map((month, index) => (
+                              <th 
+                                key={month} 
+                                className={`text-center p-4 ${index < months.length - 1 ? 'border-r border-border' : ''}`}
                               >
-                                <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
-                                  <span className="text-primary">
-                                    {entry.vegetable}
-                                  </span>
-                                  
-                                  <div className="flex items-center">
-                                    <EditVegetableDialog 
-                                      vegetable={entry} 
-                                      onVegetableUpdated={refetch} 
-                                    />
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                      onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
+                                {month}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
+                    
+                    {/* Scrollable body with same column structure */}
+                    <div ref={scrollBodyRef} className="overflow-y-auto flex-1">
+                      <table className="w-full table-fixed">
+                        <colgroup>
+                          {/* Vegetable column width */}
+                          <col style={{ width: '220px' }} />
+                          {months.map((_, i) => (
+                            /* Fixed width for each month */
+                            <col key={i} style={{ width: '60px' }} />
+                          ))}
+                        </colgroup>
+                        <tbody>
+                          {/* User entries section with header */}
+                          {userEntries.length > 0 && (
+                            <>
+                              <tr className="bg-primary/10">
+                                <td colSpan={13} className="p-2 font-medium text-primary border-b">
+                                  Your Custom Vegetables
+                                </td>
+                              </tr>
+                              {userEntries.map((entry, idx) => (
+                                <tr 
+                                  key={entry.id} 
+                                  className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                                >
+                                  <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
+                                    <span className="text-primary">
+                                      {entry.vegetable}
+                                    </span>
+                                    
+                                    <div className="flex items-center">
+                                      <EditVegetableDialog 
+                                        vegetable={entry} 
+                                        onVegetableUpdated={refetch} 
+                                      />
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
+                                      >
+                                        <Trash2 size={16} className="text-destructive" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                  {months.map((_, monthIdx) => (
+                                    <td 
+                                      key={monthIdx} 
+                                      className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
                                     >
-                                      <Trash2 size={16} className="text-destructive" />
-                                    </Button>
-                                  </div>
+                                      {/* Activity indicators stacked without gaps */}
+                                      {/* Sow Indoors */}
+                                      {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-0 h-2.5" 
+                                          style={{ backgroundColor: legendItems[0].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {/* Sow Outdoors */}
+                                      {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-2.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[1].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {/* Transplant/Plant Outdoors */}
+                                      {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[2].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {/* Harvest Period */}
+                                      {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-7.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[3].color }}
+                                        ></div>
+                                      )}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </>
+                          )}
+                          
+                          {/* Default entries section with header */}
+                          {defaultEntries.length > 0 && (
+                            <>
+                              <tr className="bg-muted">
+                                <td colSpan={13} className="p-2 font-medium text-muted-foreground border-b">
+                                  Standard UK Vegetables
                                 </td>
-                                {months.map((_, monthIdx) => (
-                                  <td 
-                                    key={monthIdx} 
-                                    className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
-                                  >
-                                    {/* Activity indicators stacked without gaps */}
-                                    {/* Sow Indoors */}
-                                    {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-0 h-2.5" 
-                                        style={{ backgroundColor: legendItems[0].color }}
-                                      ></div>
-                                    )}
-                                    
-                                    {/* Sow Outdoors */}
-                                    {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-2.5 h-2.5" 
-                                        style={{ backgroundColor: legendItems[1].color }}
-                                      ></div>
-                                    )}
-                                    
-                                    {/* Transplant/Plant Outdoors */}
-                                    {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-5 h-2.5" 
-                                        style={{ backgroundColor: legendItems[2].color }}
-                                      ></div>
-                                    )}
-                                    
-                                    {/* Harvest Period */}
-                                    {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-7.5 h-2.5" 
-                                        style={{ backgroundColor: legendItems[3].color }}
-                                      ></div>
-                                    )}
-                                  </td>
-                                ))}
                               </tr>
-                            ))}
-                          </>
-                        )}
-                        
-                        {/* Default entries section with header */}
-                        {defaultEntries.length > 0 && (
-                          <>
-                            <tr className="bg-muted">
-                              <td colSpan={13} className="p-2 font-medium text-muted-foreground border-b">
-                                Standard UK Vegetables
-                              </td>
-                            </tr>
-                            {defaultEntries.map((entry, idx) => (
-                              <tr 
-                                key={entry.id} 
-                                className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
-                              >
-                                <td className="font-medium whitespace-nowrap p-4 border-r border-border">
-                                  {entry.vegetable}
-                                </td>
-                                {months.map((_, monthIdx) => (
-                                  <td 
-                                    key={monthIdx} 
-                                    className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
-                                  >
-                                    {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-0 h-2.5" 
-                                        style={{ backgroundColor: legendItems[0].color }}
-                                      ></div>
-                                    )}
-                                    
-                                    {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-2.5 h-2.5" 
-                                        style={{ backgroundColor: legendItems[1].color }}
-                                      ></div>
-                                    )}
-                                    
-                                    {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-5 h-2.5" 
-                                        style={{ backgroundColor: legendItems[2].color }}
-                                      ></div>
-                                    )}
-                                    
-                                    {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                      <div 
-                                        className="absolute inset-x-0 top-7.5 h-2.5" 
-                                        style={{ backgroundColor: legendItems[3].color }}
-                                      ></div>
-                                    )}
+                              {defaultEntries.map((entry, idx) => (
+                                <tr 
+                                  key={entry.id} 
+                                  className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                                >
+                                  <td className="font-medium whitespace-nowrap p-4 border-r border-border">
+                                    {entry.vegetable}
                                   </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </>
-                        )}
-                      </tbody>
-                    </table>
+                                  {months.map((_, monthIdx) => (
+                                    <td 
+                                      key={monthIdx} 
+                                      className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                                    >
+                                      {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-0 h-2.5" 
+                                          style={{ backgroundColor: legendItems[0].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-2.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[1].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[2].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-7.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[3].color }}
+                                        ></div>
+                                      )}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </Card>
@@ -332,6 +406,18 @@ const SeedCalendarPage = () => {
         description={`Are you sure you want to delete ${vegetableToDelete?.name || ''}? This action cannot be undone.`}
         onConfirm={confirmDelete}
       />
+
+      {/* Vegetable details dialog for mobile */}
+      {selectedVegetable && (
+        <VegetableDetailsDialog
+          open={detailsDialogOpen}
+          onOpenChange={setDetailsDialogOpen}
+          vegetable={selectedVegetable}
+          months={months}
+          legendItems={legendItems}
+          isMonthInPeriods={isMonthInPeriods}
+        />
+      )}
     </DashboardLayout>
   );
 };
