@@ -12,6 +12,7 @@ import WeekView from "./WeekView";
 import MonthView from "./MonthView";
 import YearView from "./YearView";
 import ActivityForm from "./activity-form/ActivityForm";
+import { useDefaultCalendarView } from '@/hooks/use-default-calendar-view';
 
 interface GardenCalendarProps {
   sampleData?: GardenActivity[] | null;
@@ -71,7 +72,8 @@ const sampleGuestActivities: GardenActivity[] = [
 ];
 
 const GardenCalendar: React.FC<GardenCalendarProps> = ({ sampleData = null, readOnly = false }) => {
-  const [view, setView] = useState<ViewType>("month");
+  const { defaultCalendarView } = useDefaultCalendarView();
+  const [view, setView] = useState<ViewType>(defaultCalendarView);
   const [date, setDate] = useState<Date>(new Date());
   const [activities, setActivities] = useState<GardenActivity[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -82,6 +84,13 @@ const GardenCalendar: React.FC<GardenCalendarProps> = ({ sampleData = null, read
   const [currentActivity, setCurrentActivity] = useState<GardenActivity | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+
+  // Use the default calendar view when it loads
+  useEffect(() => {
+    if (defaultCalendarView) {
+      setView(defaultCalendarView);
+    }
+  }, [defaultCalendarView]);
 
   // Check for user session
   useEffect(() => {

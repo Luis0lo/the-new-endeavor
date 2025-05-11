@@ -33,6 +33,7 @@ import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/use-theme';
 import { useDefaultLandingPage } from '@/hooks/use-default-landing-page';
 import { DefaultLandingPage } from '@/hooks/auth/types';
+import { useDefaultCalendarView, DefaultCalendarView } from '@/hooks/use-default-calendar-view';
 
 // Keep profile as the active tab and add preferences tab
 type SettingsTab = 'profile' | 'preferences';
@@ -49,6 +50,7 @@ const AccountSettings = () => {
   const [loading, setLoading] = useState(true);
   const { theme, setTheme } = useTheme();
   const { defaultLandingPage, setDefaultLandingPage } = useDefaultLandingPage();
+  const { defaultCalendarView, setDefaultCalendarView } = useDefaultCalendarView();
   
   // Navigation items to display in the dropdown
   const navigationItems: NavigationItem[] = [
@@ -313,6 +315,45 @@ const AccountSettings = () => {
                     </Select>
                   </div>
                 </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="default-calendar-view">Default Calendar View</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Choose the default view for your garden calendar
+                    </p>
+                  </div>
+                  <div className="w-[200px]">
+                    <Select 
+                      value={defaultCalendarView} 
+                      onValueChange={(value) => setDefaultCalendarView(value as DefaultCalendarView)}
+                    >
+                      <SelectTrigger id="default-calendar-view">
+                        <SelectValue placeholder="Select a view" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="day">
+                          <div className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>Day</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="week">
+                          <div className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>Week</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="month">
+                          <div className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>Month</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -321,6 +362,7 @@ const AccountSettings = () => {
         return null;
     }
   };
+  
   
   return (
     <DashboardLayout>

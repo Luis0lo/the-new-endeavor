@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -13,16 +14,23 @@ import { runSeedData } from '@/seed';
 import WeekView from '@/components/garden/WeekView';
 import DayView from '@/components/garden/DayView';
 import MonthView from '@/components/garden/MonthView';
+import { useDefaultCalendarView, DefaultCalendarView } from '@/hooks/use-default-calendar-view';
 
 const CalendarPage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [date, setDate] = useState<Date>(new Date());
-  const [view, setView] = useState<'month' | 'week' | 'day'>('week');
+  const { defaultCalendarView } = useDefaultCalendarView();
+  const [view, setView] = useState<DefaultCalendarView>(defaultCalendarView);
   const [activities, setActivities] = useState<GardenActivity[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState<GardenActivity | null>(null);
   const [formDate, setFormDate] = useState<Date>(new Date());
   const [dataSeeded, setDataSeeded] = useState(false);
+  
+  // Use the default calendar view when it loads
+  useEffect(() => {
+    setView(defaultCalendarView);
+  }, [defaultCalendarView]);
   
   // Check if user is logged in
   useEffect(() => {
@@ -414,7 +422,7 @@ const CalendarPage = () => {
           </div>
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Select value={view} onValueChange={(v: 'month' | 'week' | 'day') => setView(v)}>
+            <Select value={view} onValueChange={(v: DefaultCalendarView) => setView(v)}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="View" />
               </SelectTrigger>
