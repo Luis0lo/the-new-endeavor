@@ -7,11 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   User, Settings, Home, Lock, 
   CreditCard, Bell, UserCircle, 
   MapPin, Mail, LogOut,
-  Moon, Sun
+  Moon, Sun, Calendar, Archive,
+  Flower2, LayoutGrid, Sprout
 } from 'lucide-react';
 import { 
   Card, 
@@ -23,15 +31,58 @@ import {
 } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/use-theme';
+import { useDefaultLandingPage } from '@/hooks/use-default-landing-page';
+import { DefaultLandingPage } from '@/hooks/auth/types';
 
 // Keep profile as the active tab and add preferences tab
 type SettingsTab = 'profile' | 'preferences';
+
+interface NavigationItem {
+  title: string;
+  path: DefaultLandingPage;
+  icon: React.ElementType;
+}
 
 const AccountSettings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const { theme, setTheme } = useTheme();
+  const { defaultLandingPage, setDefaultLandingPage } = useDefaultLandingPage();
+  
+  // Navigation items to display in the dropdown
+  const navigationItems: NavigationItem[] = [
+    {
+      title: 'Dashboard',
+      icon: Home,
+      path: '/dashboard'
+    },
+    {
+      title: 'Calendar',
+      icon: Calendar,
+      path: '/dashboard/calendar'
+    },
+    {
+      title: 'Seed Calendar',
+      icon: Sprout,
+      path: '/dashboard/seed-calendar'
+    },
+    {
+      title: 'Inventory',
+      icon: Archive,
+      path: '/dashboard/inventory'
+    },
+    {
+      title: 'Garden Layout',
+      icon: LayoutGrid,
+      path: '/dashboard/garden-layout'
+    },
+    {
+      title: 'Companion Plants',
+      icon: Flower2,
+      path: '/dashboard/companions'
+    }
+  ];
   
   // Real user data from Supabase
   const [userData, setUserData] = useState({
@@ -231,7 +282,38 @@ const AccountSettings = () => {
                 </div>
               </div>
               
-              {/* Can add more preference sections here in the future */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Navigation</h3>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="default-page">Default Landing Page</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Choose which page to load after login
+                    </p>
+                  </div>
+                  <div className="w-[200px]">
+                    <Select 
+                      value={defaultLandingPage} 
+                      onValueChange={(value) => setDefaultLandingPage(value as DefaultLandingPage)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a page" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {navigationItems.map((item) => (
+                          <SelectItem key={item.path} value={item.path}>
+                            <div className="flex items-center">
+                              <item.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{item.title}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         );
@@ -280,66 +362,6 @@ const AccountSettings = () => {
                     <Settings className="h-5 w-5" />
                     <span>Preferences</span>
                   </button>
-                  
-                  {/* Commented out Address option */}
-                  {/* 
-                  <button
-                    className={`flex items-center space-x-2 p-3 ${
-                      activeTab === 'address' 
-                        ? 'bg-primary/10 text-primary border-l-4 border-primary' 
-                        : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setActiveTab('address')}
-                  >
-                    <MapPin className="h-5 w-5" />
-                    <span>Address</span>
-                  </button>
-                  */}
-                  
-                  {/* Commented out Notifications option */}
-                  {/* 
-                  <button
-                    className={`flex items-center space-x-2 p-3 ${
-                      activeTab === 'notifications' 
-                        ? 'bg-primary/10 text-primary border-l-4 border-primary' 
-                        : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setActiveTab('notifications')}
-                  >
-                    <Bell className="h-5 w-5" />
-                    <span>Notifications</span>
-                  </button>
-                  */}
-                  
-                  {/* Commented out Password option */}
-                  {/* 
-                  <button
-                    className={`flex items-center space-x-2 p-3 ${
-                      activeTab === 'password' 
-                        ? 'bg-primary/10 text-primary border-l-4 border-primary' 
-                        : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setActiveTab('password')}
-                  >
-                    <Lock className="h-5 w-5" />
-                    <span>Password & Security</span>
-                  </button>
-                  */}
-                  
-                  {/* Commented out Billing option */}
-                  {/* 
-                  <button
-                    className={`flex items-center space-x-2 p-3 ${
-                      activeTab === 'billing' 
-                        ? 'bg-primary/10 text-primary border-l-4 border-primary' 
-                        : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setActiveTab('billing')}
-                  >
-                    <CreditCard className="h-5 w-5" />
-                    <span>Billing</span>
-                  </button>
-                  */}
                 </div>
               </CardContent>
             </Card>

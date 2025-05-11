@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
+import { DefaultLandingPage } from '@/hooks/auth/types';
 
 export const useSignIn = () => {
   const [email, setEmail] = useState('');
@@ -24,7 +25,9 @@ export const useSignIn = () => {
         description: "Successfully logged in.",
       });
       
-      navigate('/dashboard');
+      // Get user's default landing page preference from localStorage or use dashboard as fallback
+      const defaultPage = localStorage.getItem('defaultLandingPage') as DefaultLandingPage || '/dashboard';
+      navigate(defaultPage);
     } catch (error: any) {
       toast({
         title: "Error",

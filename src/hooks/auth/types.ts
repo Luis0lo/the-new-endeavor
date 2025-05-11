@@ -1,8 +1,16 @@
-
-export type AuthViewType = 
-  | 'login' 
-  | 'verifying' 
-  | 'verificationError' 
-  | 'passwordReset' 
+export type AuthViewType =
+  | 'default'
+  | 'signUp'
+  | 'signIn'
+  | 'passwordReset'
   | 'newPassword'
-  | 'default';
+  | 'verifying'
+  | 'verificationError';
+
+export type DefaultLandingPage = 
+  | '/dashboard'
+  | '/dashboard/calendar'
+  | '/dashboard/seed-calendar'
+  | '/dashboard/inventory'
+  | '/dashboard/garden-layout'
+  | '/dashboard/companions';

@@ -3,9 +3,9 @@ import { useAuthCheck } from '@/hooks/auth/useAuthCheck';
 import { useSignIn } from '@/hooks/auth/useSignIn';
 import { useSignUp } from '@/hooks/auth/useSignUp';
 import { useVerification } from '@/hooks/auth/useVerification';
-import type { AuthViewType } from '@/hooks/auth/types';
+import type { AuthViewType, DefaultLandingPage } from '@/hooks/auth/types';
 
-export type { AuthViewType };
+export type { AuthViewType, DefaultLandingPage };
 
 export const useAuthFlow = () => {
   const { currentView, setCurrentView } = useAuthCheck();
