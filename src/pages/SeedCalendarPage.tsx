@@ -1,16 +1,15 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useSeedCalendar, SeedCalendarEntry } from '@/hooks/useSeedCalendar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import AddVegetableDialog from '@/components/seed-calendar/AddVegetableDialog';
 import EditVegetableDialog from '@/components/seed-calendar/EditVegetableDialog';
 import DeleteConfirmDialog from '@/components/inventory/DeleteConfirmDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import VegetableDetailsDialog from '@/components/seed-calendar/VegetableDetailsDialog';
 import SeedSearch from '@/components/seed-calendar/SeedSearch';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -35,10 +34,6 @@ const SeedCalendarPage = () => {
   // State for vegetable details dialog on mobile
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedVegetable, setSelectedVegetable] = useState<SeedCalendarEntry | null>(null);
-
-  // State for collapsible sections
-  const [userSectionOpen, setUserSectionOpen] = useState(true);
-  const [defaultSectionOpen, setDefaultSectionOpen] = useState(true);
 
   // Calculate scrollbar width on mount and when data loads
   useEffect(() => {
@@ -179,80 +174,59 @@ const SeedCalendarPage = () => {
                   <div className="flex flex-col overflow-auto h-full">
                     {/* User entries section */}
                     {userEntries.length > 0 && (
-                      <Collapsible 
-                        open={userSectionOpen} 
-                        onOpenChange={setUserSectionOpen} 
-                        className="mb-2"
-                      >
-                        <div className="bg-primary/10 p-2 font-medium text-primary border-b flex items-center justify-between">
-                          <span>Your Custom Vegetables</span>
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              {userSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            </Button>
-                          </CollapsibleTrigger>
+                      <>
+                        <div className="bg-primary/10 p-2 font-medium text-primary border-b">
+                          Your Custom Vegetables
                         </div>
-                        <CollapsibleContent>
-                          {userEntries.map((entry, idx) => (
-                            <div 
-                              key={entry.id} 
-                              className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200 p-4 flex justify-between items-center`}
-                              onClick={() => handleVegetableClick(entry)}
-                            >
-                              <span className="text-primary font-medium">{entry.vegetable}</span>
-                              <div className="flex items-center">
-                                <EditVegetableDialog 
-                                  vegetable={entry} 
-                                  onVegetableUpdated={refetch} 
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(entry.id, entry.vegetable)
-                                  }}
-                                >
-                                  <Trash2 size={16} className="text-destructive" />
-                                </Button>
-                              </div>
+                        {userEntries.map((entry, idx) => (
+                          <div 
+                            key={entry.id} 
+                            className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200 p-4 flex justify-between items-center`}
+                            onClick={() => handleVegetableClick(entry)}
+                          >
+                            <span className="text-primary font-medium">{entry.vegetable}</span>
+                            <div className="flex items-center">
+                              <EditVegetableDialog 
+                                vegetable={entry} 
+                                onVegetableUpdated={refetch} 
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(entry.id, entry.vegetable)
+                                }}
+                              >
+                                <Trash2 size={16} className="text-destructive" />
+                              </Button>
                             </div>
-                          ))}
-                        </CollapsibleContent>
-                      </Collapsible>
+                          </div>
+                        ))}
+                      </>
                     )}
                     
                     {/* Default entries section */}
                     {defaultEntries.length > 0 && (
-                      <Collapsible 
-                        open={defaultSectionOpen} 
-                        onOpenChange={setDefaultSectionOpen}
-                      >
-                        <div className="bg-muted p-2 font-medium text-muted-foreground border-b flex items-center justify-between">
-                          <span>Standard UK Vegetables</span>
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              {defaultSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            </Button>
-                          </CollapsibleTrigger>
+                      <>
+                        <div className="bg-muted p-2 font-medium text-muted-foreground border-b">
+                          Standard UK Vegetables
                         </div>
-                        <CollapsibleContent>
-                          {defaultEntries.map((entry, idx) => (
-                            <div 
-                              key={entry.id} 
-                              className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200 p-4`}
-                              onClick={() => handleVegetableClick(entry)}
-                            >
-                              <span className="font-medium">{entry.vegetable}</span>
-                            </div>
-                          ))}
-                        </CollapsibleContent>
-                      </Collapsible>
+                        {defaultEntries.map((entry, idx) => (
+                          <div 
+                            key={entry.id} 
+                            className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200 p-4`}
+                            onClick={() => handleVegetableClick(entry)}
+                          >
+                            <span className="font-medium">{entry.vegetable}</span>
+                          </div>
+                        ))}
+                      </>
                     )}
                   </div>
                 ) : (
-                  // Desktop view - existing table layout with collapsible sections
+                  // Desktop view - existing table layout
                   <div className="flex flex-col overflow-hidden h-full">
                     {/* Fixed header with defined column widths */}
                     <div className="bg-muted/50 border-b" style={{ paddingRight: `${scrollbarWidth}px` }}>
@@ -295,148 +269,134 @@ const SeedCalendarPage = () => {
                         <tbody>
                           {/* User entries section with header */}
                           {userEntries.length > 0 && (
-                            <Collapsible open={userSectionOpen} onOpenChange={setUserSectionOpen}>
+                            <>
                               <tr className="bg-primary/10">
-                                <td colSpan={13} className="p-2 font-medium text-primary border-b flex items-center justify-between">
-                                  <span>Your Custom Vegetables</span>
-                                  <CollapsibleTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      {userSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    </Button>
-                                  </CollapsibleTrigger>
+                                <td colSpan={13} className="p-2 font-medium text-primary border-b">
+                                  Your Custom Vegetables
                                 </td>
                               </tr>
-                              <CollapsibleContent>
-                                {userEntries.map((entry, idx) => (
-                                  <tr 
-                                    key={entry.id} 
-                                    className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
-                                  >
-                                    <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
-                                      <span className="text-primary">
-                                        {entry.vegetable}
-                                      </span>
-                                      
-                                      <div className="flex items-center">
-                                        <EditVegetableDialog 
-                                          vegetable={entry} 
-                                          onVegetableUpdated={refetch} 
-                                        />
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-8 w-8"
-                                          onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
-                                        >
-                                          <Trash2 size={16} className="text-destructive" />
-                                        </Button>
-                                      </div>
-                                    </td>
-                                    {months.map((_, monthIdx) => (
-                                      <td 
-                                        key={monthIdx} 
-                                        className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                              {userEntries.map((entry, idx) => (
+                                <tr 
+                                  key={entry.id} 
+                                  className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                                >
+                                  <td className="font-medium whitespace-nowrap p-4 border-r border-border flex items-center justify-between">
+                                    <span className="text-primary">
+                                      {entry.vegetable}
+                                    </span>
+                                    
+                                    <div className="flex items-center">
+                                      <EditVegetableDialog 
+                                        vegetable={entry} 
+                                        onVegetableUpdated={refetch} 
+                                      />
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => handleDeleteClick(entry.id, entry.vegetable)}
                                       >
-                                        {/* Activity indicators stacked without gaps */}
-                                        {/* Sow Indoors */}
-                                        {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-0 h-2.5" 
-                                            style={{ backgroundColor: legendItems[0].color }}
-                                          ></div>
-                                        )}
-                                        
-                                        {/* Sow Outdoors */}
-                                        {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-2.5 h-2.5" 
-                                            style={{ backgroundColor: legendItems[1].color }}
-                                          ></div>
-                                        )}
-                                        
-                                        {/* Transplant/Plant Outdoors */}
-                                        {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-5 h-2.5" 
-                                            style={{ backgroundColor: legendItems[2].color }}
-                                          ></div>
-                                        )}
-                                        
-                                        {/* Harvest Period */}
-                                        {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-7.5 h-2.5" 
-                                            style={{ backgroundColor: legendItems[3].color }}
-                                          ></div>
-                                        )}
-                                      </td>
-                                    ))}
-                                  </tr>
-                                ))}
-                              </CollapsibleContent>
-                            </Collapsible>
+                                        <Trash2 size={16} className="text-destructive" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                  {months.map((_, monthIdx) => (
+                                    <td 
+                                      key={monthIdx} 
+                                      className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                                    >
+                                      {/* Activity indicators stacked without gaps */}
+                                      {/* Sow Indoors */}
+                                      {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-0 h-2.5" 
+                                          style={{ backgroundColor: legendItems[0].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {/* Sow Outdoors */}
+                                      {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-2.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[1].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {/* Transplant/Plant Outdoors */}
+                                      {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[2].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {/* Harvest Period */}
+                                      {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-7.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[3].color }}
+                                        ></div>
+                                      )}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </>
                           )}
                           
                           {/* Default entries section with header */}
                           {defaultEntries.length > 0 && (
-                            <Collapsible open={defaultSectionOpen} onOpenChange={setDefaultSectionOpen}>
+                            <>
                               <tr className="bg-muted">
-                                <td colSpan={13} className="p-2 font-medium text-muted-foreground border-b flex items-center justify-between">
-                                  <span>Standard UK Vegetables</span>
-                                  <CollapsibleTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      {defaultSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    </Button>
-                                  </CollapsibleTrigger>
+                                <td colSpan={13} className="p-2 font-medium text-muted-foreground border-b">
+                                  Standard UK Vegetables
                                 </td>
                               </tr>
-                              <CollapsibleContent>
-                                {defaultEntries.map((entry, idx) => (
-                                  <tr 
-                                    key={entry.id} 
-                                    className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
-                                  >
-                                    <td className="font-medium whitespace-nowrap p-4 border-r border-border">
-                                      {entry.vegetable}
+                              {defaultEntries.map((entry, idx) => (
+                                <tr 
+                                  key={entry.id} 
+                                  className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} border-b border-gray-200`}
+                                >
+                                  <td className="font-medium whitespace-nowrap p-4 border-r border-border">
+                                    {entry.vegetable}
+                                  </td>
+                                  {months.map((_, monthIdx) => (
+                                    <td 
+                                      key={monthIdx} 
+                                      className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
+                                    >
+                                      {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-0 h-2.5" 
+                                          style={{ backgroundColor: legendItems[0].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-2.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[1].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[2].color }}
+                                        ></div>
+                                      )}
+                                      
+                                      {isMonthInPeriods(entry.harvest_period, monthIdx) && (
+                                        <div 
+                                          className="absolute inset-x-0 top-7.5 h-2.5" 
+                                          style={{ backgroundColor: legendItems[3].color }}
+                                        ></div>
+                                      )}
                                     </td>
-                                    {months.map((_, monthIdx) => (
-                                      <td 
-                                        key={monthIdx} 
-                                        className={`p-0 h-10 relative ${monthIdx < months.length - 1 ? 'border-r border-border' : ''}`}
-                                      >
-                                        {isMonthInPeriods(entry.sow_indoors, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-0 h-2.5" 
-                                            style={{ backgroundColor: legendItems[0].color }}
-                                          ></div>
-                                        )}
-                                        
-                                        {isMonthInPeriods(entry.sow_outdoors, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-2.5 h-2.5" 
-                                            style={{ backgroundColor: legendItems[1].color }}
-                                          ></div>
-                                        )}
-                                        
-                                        {isMonthInPeriods(entry.transplant_outdoors, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-5 h-2.5" 
-                                            style={{ backgroundColor: legendItems[2].color }}
-                                          ></div>
-                                        )}
-                                        
-                                        {isMonthInPeriods(entry.harvest_period, monthIdx) && (
-                                          <div 
-                                            className="absolute inset-x-0 top-7.5 h-2.5" 
-                                            style={{ backgroundColor: legendItems[3].color }}
-                                          ></div>
-                                        )}
-                                      </td>
-                                    ))}
-                                  </tr>
-                                ))}
-                              </CollapsibleContent>
-                            </Collapsible>
+                                  ))}
+                                </tr>
+                              ))}
+                            </>
                           )}
                         </tbody>
                       </table>
