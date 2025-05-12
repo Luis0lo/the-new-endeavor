@@ -1,30 +1,26 @@
-
 import React, { useState, useCallback } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import ActivityList from '@/components/dashboard/ActivityList';
 import PastWeekActivities from '@/components/dashboard/PastWeekActivities';
 import ActivityForm from '@/components/garden/activity-form/ActivityForm';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { useDashboardActivities } from "@/hooks/useDashboardActivities";
 import { startOfWeek, addDays } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const Dashboard = () => {
   const {
     activities,
     date,
     setDate,
-    title,
-    setTitle,
-    description,
-    setDescription,
     loading,
-    dialogOpen,
-    setDialogOpen,
-    createActivity,
     toggleActivityStatus,
     getPastActivitiesByDay,
     handlePastActivityClick,
     editModalProps,
+    addActivityModalProps,
+    handleAddActivity,
+    handleCloseAddActivity
   } = useDashboardActivities();
 
   // Add state for week offset (0 = this week, -1 = previous, +1 = next, etc)
@@ -51,17 +47,16 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-4 p-4 md:p-8">
-        <DashboardHeader
-          date={date}
-          dialogOpen={dialogOpen}
-          setDialogOpen={setDialogOpen}
-          title={title}
-          setTitle={setTitle}
-          description={description}
-          setDescription={setDescription}
-          setDate={setDate}
-          onSubmit={createActivity}
-        />
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight">Garden Dashboard</h2>
+          <Button 
+            onClick={handleAddActivity} 
+            className="gap-2"
+          >
+            <Plus size={16} />
+            <span>Add Activity</span>
+          </Button>
+        </div>
 
         <div className="grid gap-4">
           <ActivityList 
@@ -80,8 +75,15 @@ const Dashboard = () => {
           />
         </div>
       </div>
+      
+      {/* Edit activity modal */}
       {editModalProps && (
         <ActivityForm {...editModalProps} />
+      )}
+      
+      {/* Add activity modal */}
+      {addActivityModalProps && (
+        <ActivityForm {...addActivityModalProps} />
       )}
     </DashboardLayout>
   );

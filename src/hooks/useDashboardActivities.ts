@@ -1,8 +1,10 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, getYear } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { GardenActivity as GlobalGardenActivity } from "@/types/garden";
+import { ActivityFormValues } from '@/components/garden/activity-form/activity-form-schema';
 
 type GardenActivity = Omit<GlobalGardenActivity, "date"> & { date: string };
 interface Activity {
@@ -18,13 +20,11 @@ interface Activity {
 export function useDashboardActivities() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [date, setDate] = useState<Date>(new Date());
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [pastWeekActivities, setPastWeekActivities] = useState<GardenActivity[]>([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editActivity, setEditActivity] = useState<GardenActivity | null>(null);
+  const [addActivityModalOpen, setAddActivityModalOpen] = useState(false);
 
   // Session/initial load
   useEffect(() => {
@@ -127,9 +127,17 @@ export function useDashboardActivities() {
     }
   }, [date]);
 
-  // Create activity
-  const createActivity = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle add activity with new modal
+  const handleAddActivity = () => {
+    setAddActivityModalOpen(true);
+  };
+
+  const handleCloseAddActivity = () => {
+    setAddActivityModalOpen(false);
+  };
+
+  // Handle save of new activity
+  const handleSaveActivity = async (values: ActivityFormValues) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -140,23 +148,59 @@ export function useDashboardActivities() {
         });
         return;
       }
+      
       const { error } = await supabase
         .from('garden_activities')
         .insert({
-          title,
-          description,
-          scheduled_date: format(date, 'yyyy-MM-dd'),
+          title: values.title,
+          description: values.description,
+          scheduled_date: format(values.date, 'yyyy-MM-dd'),
+          activity_time: values.time,
+          priority: values.priority,
+          status: values.status,
+          outcome_rating: values.status === "done" ? values.outcome_rating : null,
+          outcome_log: values.status === "done" ? values.outcome_log : null,
           user_id: session.user.id,
-          completed: false
-        } as any);
+          track: values.track,
+          completed: values.status === "done"
+        });
+        
       if (error) throw error;
+      
+      // Handle inventory items if any
+      if (values.inventory_items && values.inventory_items.length > 0) {
+        // We need the ID of the newly created activity
+        const { data: newActivity } = await supabase
+          .from('garden_activities')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('title', values.title)
+          .eq('scheduled_date', format(values.date, 'yyyy-MM-dd'))
+          .order('created_at', { ascending: false })
+          .limit(1);
+          
+        if (newActivity && newActivity.length > 0) {
+          const activityId = newActivity[0].id;
+          
+          // Insert inventory items
+          const inventoryItems = values.inventory_items.map(item => ({
+            activity_id: activityId,
+            inventory_item_id: item.item_id,
+            quantity: item.quantity
+          }));
+          
+          await supabase
+            .from('activity_inventory_items')
+            .insert(inventoryItems);
+        }
+      }
+      
       toast({
         title: "Activity created",
         description: "Your garden activity has been scheduled.",
       });
-      setTitle('');
-      setDescription('');
-      setDialogOpen(false);
+      
+      setAddActivityModalOpen(false);
       fetchActivities();
     } catch (error: any) {
       toast({
@@ -235,14 +279,63 @@ export function useDashboardActivities() {
     setEditModalOpen(true);
   };
 
-  const handleEditActivitySave = async (updated: any) => {
-    setEditModalOpen(false);
-    setEditActivity(null);
-    toast({
-      title: "Edit saved",
-      description: "Activity updated. Please refresh to see changes.",
-    });
-    fetchPastWeekActivities();
+  const handleEditActivitySave = async (updated: ActivityFormValues) => {
+    if (!editActivity) return;
+    
+    try {
+      const { error } = await supabase
+        .from('garden_activities')
+        .update({
+          title: updated.title,
+          description: updated.description || "",
+          scheduled_date: format(updated.date, 'yyyy-MM-dd'),
+          activity_time: updated.time || null,
+          priority: updated.priority,
+          status: updated.status,
+          outcome_rating: updated.status === "done" ? updated.outcome_rating : null,
+          outcome_log: updated.status === "done" ? updated.outcome_log : null,
+          track: updated.track,
+          completed: updated.status === "done"
+        })
+        .eq('id', editActivity.id);
+        
+      if (error) throw error;
+      
+      // First delete existing inventory items
+      await supabase
+        .from('activity_inventory_items')
+        .delete()
+        .eq('activity_id', editActivity.id);
+        
+      // Then add new inventory items if any
+      if (updated.inventory_items && updated.inventory_items.length > 0) {
+        const inventoryItems = updated.inventory_items.map(item => ({
+          activity_id: editActivity.id,
+          inventory_item_id: item.item_id,
+          quantity: item.quantity
+        }));
+        
+        await supabase
+          .from('activity_inventory_items')
+          .insert(inventoryItems);
+      }
+      
+      toast({
+        title: "Activity updated",
+        description: "Your garden activity has been updated.",
+      });
+      
+      setEditModalOpen(false);
+      setEditActivity(null);
+      fetchActivities();
+      fetchPastWeekActivities();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update activity",
+        variant: "destructive"
+      });
+    }
   };
 
   // Edit modal props
@@ -259,22 +352,26 @@ export function useDashboardActivities() {
         },
       }
     : null;
+    
+  // Add activity modal props
+  const addActivityModalProps = {
+    isOpen: addActivityModalOpen,
+    onClose: handleCloseAddActivity,
+    onSave: handleSaveActivity,
+    initialDate: date
+  };
 
   return {
     activities,
     date,
     setDate,
-    title,
-    setTitle,
-    description,
-    setDescription,
     loading,
-    dialogOpen,
-    setDialogOpen,
-    createActivity,
     toggleActivityStatus,
     getPastActivitiesByDay,
     handlePastActivityClick,
     editModalProps,
+    addActivityModalProps,
+    handleAddActivity,
+    handleCloseAddActivity
   };
 }
