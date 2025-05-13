@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { normalizeString } from '@/lib/utils';
 
 export interface SeedCalendarEntry {
   id: string;
@@ -91,9 +92,9 @@ export function useSeedCalendar() {
       
       // Merge user entries with default entries, prioritizing user entries
       // (overwriting default entries with the same vegetable name)
-      const userVegetableNames = new Set(userEntries.map(entry => entry.vegetable.toLowerCase()));
+      const userVegetableNames = new Set(userEntries.map(entry => normalizeString(entry.vegetable)));
       const filteredDefaultData = processedDefaultData.filter(
-        entry => !userVegetableNames.has(entry.vegetable.toLowerCase())
+        entry => !userVegetableNames.has(normalizeString(entry.vegetable))
       );
       
       setSeedData([...userEntries, ...filteredDefaultData]);
