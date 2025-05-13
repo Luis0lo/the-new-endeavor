@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -223,7 +222,7 @@ const CalendarPage = () => {
                 priority: formData.priority as "high" | "normal" | "low" || "normal",
                 status: formData.status as "pending" | "in_progress" | "done" || "pending",
                 track: formData.track,
-                action: formData.action,
+                action: formData.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
                 outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
                 outcome_log: formData.status === "done" ? formData.outcome_log : null
               } 
@@ -458,4 +457,3 @@ const CalendarPage = () => {
 };
 
 export default CalendarPage;
-
