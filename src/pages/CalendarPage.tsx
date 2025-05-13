@@ -88,7 +88,7 @@ const CalendarPage = () => {
             outcome_rating: activity.outcome_rating,
             outcome_log: activity.outcome_log,
             track: activity.track,
-            action: activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other"
+            action: (activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other"
           }));
           
           setActivities(mappedActivities);
@@ -287,7 +287,7 @@ const CalendarPage = () => {
             completed: false,
             priority: data[0].priority as "high" | "normal" | "low",
             status: data[0].status as "pending" | "in_progress" | "done",
-            action: data[0].action,
+            action: data[0].action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
             outcome_rating: data[0].outcome_rating,
             outcome_log: data[0].outcome_log,
             track: data[0].track
@@ -458,3 +458,4 @@ const CalendarPage = () => {
 };
 
 export default CalendarPage;
+
