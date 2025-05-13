@@ -87,7 +87,8 @@ const CalendarPage = () => {
             status: (activity.status as "pending" | "in_progress" | "done") || "pending",
             outcome_rating: activity.outcome_rating,
             outcome_log: activity.outcome_log,
-            track: activity.track
+            track: activity.track,
+            action: activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other"
           }));
           
           setActivities(mappedActivities);
