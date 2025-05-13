@@ -170,7 +170,7 @@ const CalendarPage = () => {
       if (currentActivity) {
         // Update existing activity
         const { error } = await supabase
-          .from('garden_activities')
+          .from("garden_activities")
           .update({
             title: formData.title,
             description: formData.description || "",
@@ -179,6 +179,7 @@ const CalendarPage = () => {
             priority: formData.priority as "high" | "normal" | "low" || "normal",
             status: formData.status as "pending" | "in_progress" | "done" || "pending",
             track: formData.track,
+            action: formData.action,
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
@@ -221,6 +222,7 @@ const CalendarPage = () => {
                 priority: formData.priority as "high" | "normal" | "low" || "normal",
                 status: formData.status as "pending" | "in_progress" | "done" || "pending",
                 track: formData.track,
+                action: formData.action,
                 outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
                 outcome_log: formData.status === "done" ? formData.outcome_log : null
               } 
@@ -246,6 +248,7 @@ const CalendarPage = () => {
             completed: false,
             priority: formData.priority as "high" | "normal" | "low" || "normal",
             status: formData.status as "pending" | "in_progress" | "done" || "pending",
+            action: formData.action,
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null,
             track: formData.track
@@ -283,6 +286,7 @@ const CalendarPage = () => {
             completed: false,
             priority: data[0].priority as "high" | "normal" | "low",
             status: data[0].status as "pending" | "in_progress" | "done",
+            action: data[0].action,
             outcome_rating: data[0].outcome_rating,
             outcome_log: data[0].outcome_log,
             track: data[0].track

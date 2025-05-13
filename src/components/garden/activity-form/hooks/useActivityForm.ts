@@ -32,6 +32,7 @@ export const useActivityForm = (
       track: true,
       outcome_rating: null,
       outcome_log: "",
+      action: "other",
       inventory_items: []
     },
     mode: "onChange"
@@ -102,6 +103,7 @@ export const useActivityForm = (
         outcome_rating: initialActivity.outcome_rating || null,
         outcome_log: initialActivity.outcome_log || "",
         track: initialActivity.track !== undefined ? initialActivity.track : true,
+        action: initialActivity.action || "other",
         inventory_items: activityItems
       });
     } else {
@@ -115,6 +117,7 @@ export const useActivityForm = (
         outcome_rating: null,
         outcome_log: "",
         track: true,
+        action: "other",
         inventory_items: []
       });
     }

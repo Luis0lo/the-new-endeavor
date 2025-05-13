@@ -9,6 +9,7 @@ import { OutcomeFields } from "../OutcomeFields";
 import { Switch } from "@/components/ui/switch";
 import { FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { InventoryItemsField } from "../InventoryItemsField";
+import { ActionField } from "../ActionField";
 
 interface ActivityFormContentProps {
   control: Control<ActivityFormValues>;
@@ -23,7 +24,10 @@ export const ActivityFormContent: React.FC<ActivityFormContentProps> = ({
     <>
       <BasicInfoFields control={control} />
       <DateTimeFields control={control} />
-      <PriorityStatusFields control={control} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ActionField control={control} />
+        <PriorityStatusFields control={control} />
+      </div>
       
       <FormField
         control={control}

@@ -13,6 +13,7 @@ export const activitySchema = z.object({
   track: z.boolean().default(true),
   outcome_rating: z.number().min(1).max(5).optional().nullable(),
   outcome_log: z.string().optional().nullable(),
+  action: z.enum(["plant", "transplant", "seed", "harvest", "water", "fertilize", "prune", "other"]).default("other"),
   inventory_items: z.array(
     z.object({
       item_id: z.string().min(1, "Please select an item"),

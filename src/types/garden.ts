@@ -14,4 +14,5 @@ export interface GardenActivity {
   outcome_rating?: number;
   outcome_log?: string;
   track?: boolean;
+  action?: "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other";
 }

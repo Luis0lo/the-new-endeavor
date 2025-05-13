@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, getYear } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -119,7 +118,8 @@ export function useDashboardActivities() {
         status: activity.status as GlobalGardenActivity["status"],
         outcome_rating: activity.outcome_rating,
         outcome_log: activity.outcome_log,
-        track: activity.track
+        track: activity.track,
+        action: activity.action
       }));
       setPastWeekActivities(past);
     } catch {
@@ -162,6 +162,7 @@ export function useDashboardActivities() {
           outcome_log: values.status === "done" ? values.outcome_log : null,
           user_id: session.user.id,
           track: values.track,
+          action: values.action,
           completed: values.status === "done"
         });
         
@@ -295,6 +296,7 @@ export function useDashboardActivities() {
           outcome_rating: updated.status === "done" ? updated.outcome_rating : null,
           outcome_log: updated.status === "done" ? updated.outcome_log : null,
           track: updated.track,
+          action: updated.action,
           completed: updated.status === "done"
         })
         .eq('id', editActivity.id);
