@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, getYear } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -119,7 +120,7 @@ export function useDashboardActivities() {
         outcome_rating: activity.outcome_rating,
         outcome_log: activity.outcome_log,
         track: activity.track,
-        action: activity.action
+        action: activity.action as GlobalGardenActivity["action"] || "other"
       }));
       setPastWeekActivities(past);
     } catch {

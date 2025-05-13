@@ -77,6 +77,7 @@ export type Database = {
       }
       garden_activities: {
         Row: {
+          action: string | null
           activity_time: string | null
           category_id: string | null
           completed: boolean | null
@@ -94,6 +95,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          action?: string | null
           activity_time?: string | null
           category_id?: string | null
           completed?: boolean | null
@@ -111,6 +113,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          action?: string | null
           activity_time?: string | null
           category_id?: string | null
           completed?: boolean | null

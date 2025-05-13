@@ -179,7 +179,7 @@ const CalendarPage = () => {
             priority: formData.priority as "high" | "normal" | "low" || "normal",
             status: formData.status as "pending" | "in_progress" | "done" || "pending",
             track: formData.track,
-            action: formData.action,
+            action: formData.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null
           })
@@ -248,7 +248,7 @@ const CalendarPage = () => {
             completed: false,
             priority: formData.priority as "high" | "normal" | "low" || "normal",
             status: formData.status as "pending" | "in_progress" | "done" || "pending",
-            action: formData.action,
+            action: formData.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null,
             track: formData.track
