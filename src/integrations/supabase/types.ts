@@ -78,14 +78,18 @@ export type Database = {
       garden_activities: {
         Row: {
           action: string | null
+          activity_order: number | null
           activity_time: string | null
           category_id: string | null
           completed: boolean | null
           created_at: string
+          depth_level: number | null
           description: string | null
+          has_children: boolean | null
           id: string
           outcome_log: string | null
           outcome_rating: number | null
+          parent_activity_id: string | null
           priority: string | null
           scheduled_date: string
           status: string | null
@@ -96,14 +100,18 @@ export type Database = {
         }
         Insert: {
           action?: string | null
+          activity_order?: number | null
           activity_time?: string | null
           category_id?: string | null
           completed?: boolean | null
           created_at?: string
+          depth_level?: number | null
           description?: string | null
+          has_children?: boolean | null
           id?: string
           outcome_log?: string | null
           outcome_rating?: number | null
+          parent_activity_id?: string | null
           priority?: string | null
           scheduled_date: string
           status?: string | null
@@ -114,14 +122,18 @@ export type Database = {
         }
         Update: {
           action?: string | null
+          activity_order?: number | null
           activity_time?: string | null
           category_id?: string | null
           completed?: boolean | null
           created_at?: string
+          depth_level?: number | null
           description?: string | null
+          has_children?: boolean | null
           id?: string
           outcome_log?: string | null
           outcome_rating?: number | null
+          parent_activity_id?: string | null
           priority?: string | null
           scheduled_date?: string
           status?: string | null
@@ -136,6 +148,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "activity_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "garden_activities_parent_activity_id_fkey"
+            columns: ["parent_activity_id"]
+            isOneToOne: false
+            referencedRelation: "garden_activities"
             referencedColumns: ["id"]
           },
           {

@@ -15,4 +15,9 @@ export interface GardenActivity {
   outcome_log?: string;
   track?: boolean;
   action?: "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other";
+  parent_activity_id?: string;
+  has_children?: boolean;
+  activity_order?: number;
+  depth_level?: number;
+  children?: GardenActivity[];
 }

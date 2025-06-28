@@ -87,7 +87,11 @@ const CalendarPage = () => {
             outcome_rating: activity.outcome_rating,
             outcome_log: activity.outcome_log,
             track: activity.track,
-            action: (activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other"
+            action: (activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other",
+            parent_activity_id: activity.parent_activity_id,
+            has_children: activity.has_children,
+            activity_order: activity.activity_order,
+            depth_level: activity.depth_level
           }));
           
           setActivities(mappedActivities);
@@ -182,6 +186,7 @@ const CalendarPage = () => {
             action: formData.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null
+            // Keep existing hierarchy fields unchanged when editing
           })
           .eq('id', currentActivity.id);
 
@@ -251,7 +256,12 @@ const CalendarPage = () => {
             action: formData.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
             outcome_rating: formData.status === "done" ? formData.outcome_rating : null,
             outcome_log: formData.status === "done" ? formData.outcome_log : null,
-            track: formData.track
+            track: formData.track,
+            // Initialize hierarchy fields for new root activities
+            parent_activity_id: null,
+            has_children: false,
+            activity_order: 0,
+            depth_level: 0
           })
           .select();
 
@@ -289,7 +299,11 @@ const CalendarPage = () => {
             action: data[0].action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other",
             outcome_rating: data[0].outcome_rating,
             outcome_log: data[0].outcome_log,
-            track: data[0].track
+            track: data[0].track,
+            parent_activity_id: data[0].parent_activity_id,
+            has_children: data[0].has_children,
+            activity_order: data[0].activity_order,
+            depth_level: data[0].depth_level
           };
           
           setActivities([...activities, newActivity]);

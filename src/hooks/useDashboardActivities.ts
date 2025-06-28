@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, getYear } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +13,10 @@ interface Activity {
   scheduled_date: string;
   completed: boolean | null;
   status: string | null;
+  parent_activity_id?: string | null;
+  has_children?: boolean | null;
+  activity_order?: number | null;
+  depth_level?: number | null;
 }
 
 // Handles all fetching, mutation, edit logic for dashboard activities.
@@ -66,7 +69,11 @@ export function useDashboardActivities() {
             description: activity.description,
             scheduled_date: activity.scheduled_date,
             completed: completed,
-            status: status
+            status: status,
+            parent_activity_id: activity.parent_activity_id,
+            has_children: activity.has_children,
+            activity_order: activity.activity_order,
+            depth_level: activity.depth_level
           };
         });
         
@@ -164,7 +171,12 @@ export function useDashboardActivities() {
           user_id: session.user.id,
           track: values.track,
           action: values.action,
-          completed: values.status === "done"
+          completed: values.status === "done",
+          // Initialize hierarchy fields for new root activities
+          parent_activity_id: null,
+          has_children: false,
+          activity_order: 0,
+          depth_level: 0
         });
         
       if (error) throw error;
@@ -299,6 +311,7 @@ export function useDashboardActivities() {
           track: updated.track,
           action: updated.action,
           completed: updated.status === "done"
+          // Keep existing hierarchy fields unchanged when editing
         })
         .eq('id', editActivity.id);
         
