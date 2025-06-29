@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { GardenActivity } from '@/types/garden';
@@ -63,6 +62,9 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
     }
   };
 
+  // Check if this is a subtask being displayed as standalone (parent on different date)
+  const isStandaloneSubtask = activity.parent_activity_id && !activity.has_children;
+
   const renderActivity = (act: GardenActivity, isChild: boolean = false) => {
     // Validate activity data
     if (!act || !act.id || !act.title) {
@@ -101,6 +103,13 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
                     <h3 className={`font-medium ${act.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                       {act.title}
                     </h3>
+                    
+                    {/* Show subtask indicator when displayed as standalone */}
+                    {isStandaloneSubtask && !isChild && (
+                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                        Subtask
+                      </Badge>
+                    )}
                     
                     {act.has_children && !isChild && (
                       <Badge variant="secondary" className="text-xs">
@@ -155,7 +164,7 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
                     <Edit2 className="h-4 w-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
-                  {!isChild && (
+                  {!isChild && !isStandaloneSubtask && (
                     <DropdownMenuItem onClick={() => onAddChildActivity(act)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Subtask

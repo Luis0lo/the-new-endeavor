@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { GardenActivity } from '@/types/garden';
@@ -64,6 +63,7 @@ const DayView: React.FC<DayViewProps> = ({
     const success = await createChildActivity(parentActivity, {
       title: formData.title,
       description: formData.description,
+      date: format(formData.date, 'yyyy-MM-dd'), // Use the selected date from form
       activity_time: formData.time,
       priority: formData.priority,
       status: formData.status,
@@ -74,7 +74,7 @@ const DayView: React.FC<DayViewProps> = ({
     if (success) {
       setIsChildFormOpen(false);
       setParentActivity(null);
-      // Refresh the activities
+      // Refresh the activities for current date
       const refreshedActivities = await fetchActivitiesWithChildren(date);
       setHierarchicalActivities(refreshedActivities);
     }
@@ -148,7 +148,7 @@ const DayView: React.FC<DayViewProps> = ({
           setParentActivity(null);
         }}
         onSave={handleSaveChildActivity}
-        initialDate={date}
+        initialDate={date} // Start with current date but allow user to change it
         initialActivity={null}
       />
     </div>

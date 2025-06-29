@@ -15,7 +15,7 @@ export const useActivityHierarchy = () => {
       const dateStr = format(date, 'yyyy-MM-dd');
       console.log('useActivityHierarchy - Fetching for date:', dateStr);
       
-      // Fetch all activities for the specific date only
+      // Fetch all activities for the specific date - both parent activities and child activities
       const { data, error } = await supabase
         .from('garden_activities')
         .select('*')
@@ -31,9 +31,28 @@ export const useActivityHierarchy = () => {
         return [];
       }
 
-      // Organize activities into hierarchical structure
+      // For activities on this date, we need to:
+      // 1. Show parent activities with their children (only children on the same date)
+      // 2. Show child activities as standalone if they're on a different date than their parent
+
       const activities: GardenActivity[] = [];
       const childrenMap = new Map<string, GardenActivity[]>();
+
+      // Get all parent activities that have children on this date
+      const parentIds = data
+        .filter(activity => activity.parent_activity_id)
+        .map(activity => activity.parent_activity_id);
+
+      let parentActivitiesOnSameDate: any[] = [];
+      if (parentIds.length > 0) {
+        const { data: parentData } = await supabase
+          .from('garden_activities')
+          .select('*')
+          .in('id', parentIds)
+          .eq('scheduled_date', dateStr);
+        
+        parentActivitiesOnSameDate = parentData || [];
+      }
 
       // First pass: separate parents and children
       data.forEach((activity: any) => {
@@ -66,13 +85,50 @@ export const useActivityHierarchy = () => {
 
         if (activity.parent_activity_id) {
           // This is a child activity
-          if (!childrenMap.has(activity.parent_activity_id)) {
-            childrenMap.set(activity.parent_activity_id, []);
+          // Check if its parent is on the same date
+          const parentOnSameDate = parentActivitiesOnSameDate.find(p => p.id === activity.parent_activity_id);
+          
+          if (parentOnSameDate) {
+            // Parent is on same date, add as child
+            if (!childrenMap.has(activity.parent_activity_id)) {
+              childrenMap.set(activity.parent_activity_id, []);
+            }
+            childrenMap.get(activity.parent_activity_id)!.push(mappedActivity);
+          } else {
+            // Parent is on different date, show as standalone activity
+            activities.push(mappedActivity);
           }
-          childrenMap.get(activity.parent_activity_id)!.push(mappedActivity);
         } else {
           // This is a parent/root activity
           activities.push(mappedActivity);
+        }
+      });
+
+      // Add parent activities that are on the same date
+      parentActivitiesOnSameDate.forEach((parentActivity: any) => {
+        // Check if we already added this parent (it might have been added as a root activity)
+        if (!activities.find(a => a.id === parentActivity.id)) {
+          const mappedParent: GardenActivity = {
+            id: parentActivity.id,
+            title: parentActivity.title || 'Untitled',
+            description: parentActivity.description || '',
+            date: parentActivity.scheduled_date,
+            activity_time: parentActivity.activity_time,
+            completed: Boolean(parentActivity.completed),
+            category_id: parentActivity.category_id,
+            priority: (parentActivity.priority as "high" | "normal" | "low") || "normal",
+            status: (parentActivity.status as "pending" | "in_progress" | "done") || "pending",
+            outcome_rating: parentActivity.outcome_rating,
+            outcome_log: parentActivity.outcome_log,
+            track: Boolean(parentActivity.track),
+            action: (parentActivity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other",
+            parent_activity_id: parentActivity.parent_activity_id,
+            has_children: Boolean(parentActivity.has_children),
+            activity_order: parentActivity.activity_order || 0,
+            depth_level: parentActivity.depth_level || 0,
+            children: []
+          };
+          activities.push(mappedParent);
         }
       });
 
@@ -86,7 +142,7 @@ export const useActivityHierarchy = () => {
       });
 
       console.log('useActivityHierarchy - Final processed activities:', activities);
-      return activities;
+      return activities.sort((a, b) => (a.activity_order || 0) - (b.activity_order || 0));
     } catch (error: any) {
       console.error('Error fetching activities with children:', error);
       toast({
@@ -128,12 +184,15 @@ export const useActivityHierarchy = () => {
         ? (existingChildren[0].activity_order || 0) + 1 
         : 1;
 
+      // Use the provided date or default to parent's date
+      const scheduledDate = childData.date || parentActivity.date;
+
       const { error } = await supabase
         .from('garden_activities')
         .insert({
           title: childData.title || 'Subtask',
           description: childData.description || '',
-          scheduled_date: parentActivity.date,
+          scheduled_date: scheduledDate, // Allow different date from parent
           activity_time: childData.activity_time || parentActivity.activity_time,
           priority: childData.priority || parentActivity.priority || 'normal',
           status: childData.status || 'pending',
