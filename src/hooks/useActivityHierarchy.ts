@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { GardenActivity } from '@/types/garden';
 import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 export const useActivityHierarchy = () => {
   const [loading, setLoading] = useState(false);
@@ -11,9 +12,10 @@ export const useActivityHierarchy = () => {
   const fetchActivitiesWithChildren = useCallback(async (date: Date): Promise<GardenActivity[]> => {
     setLoading(true);
     try {
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = format(date, 'yyyy-MM-dd');
+      console.log('useActivityHierarchy - Fetching for date:', dateStr);
       
-      // Fetch all activities for the date
+      // Fetch all activities for the specific date only
       const { data, error } = await supabase
         .from('garden_activities')
         .select('*')
@@ -22,12 +24,25 @@ export const useActivityHierarchy = () => {
 
       if (error) throw error;
 
+      console.log('useActivityHierarchy - Raw data from DB:', data);
+
+      if (!data || data.length === 0) {
+        console.log('useActivityHierarchy - No activities found for date:', dateStr);
+        return [];
+      }
+
       // Organize activities into hierarchical structure
       const activities: GardenActivity[] = [];
       const childrenMap = new Map<string, GardenActivity[]>();
 
       // First pass: separate parents and children
-      data?.forEach((activity: any) => {
+      data.forEach((activity: any) => {
+        // Double-check that the activity is for the correct date
+        if (activity.scheduled_date !== dateStr) {
+          console.warn('useActivityHierarchy - Activity has wrong date:', activity.scheduled_date, 'expected:', dateStr);
+          return; // Skip this activity
+        }
+
         const mappedActivity: GardenActivity = {
           id: activity.id,
           title: activity.title || 'Untitled',
@@ -70,6 +85,7 @@ export const useActivityHierarchy = () => {
         }
       });
 
+      console.log('useActivityHierarchy - Final processed activities:', activities);
       return activities;
     } catch (error: any) {
       console.error('Error fetching activities with children:', error);
