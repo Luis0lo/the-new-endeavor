@@ -32,15 +32,21 @@ const DayView: React.FC<DayViewProps> = ({
 
   // Load activities with children when date changes
   useEffect(() => {
+    console.log('DayView - Date changed:', format(date, 'yyyy-MM-dd'));
     const loadActivities = async () => {
       try {
         const activitiesWithChildren = await fetchActivitiesWithChildren(date);
+        console.log('DayView - Fetched activities:', activitiesWithChildren);
         setHierarchicalActivities(activitiesWithChildren);
       } catch (error) {
         console.error('Error loading hierarchical activities:', error);
         // Fallback to regular activities if hierarchy fetch fails
         const dateStr = format(date, 'yyyy-MM-dd');
-        const filteredActivities = activities.filter(activity => activity.date === dateStr);
+        const filteredActivities = activities.filter(activity => {
+          console.log('DayView - Comparing:', activity.date, 'vs', dateStr);
+          return activity.date === dateStr;
+        });
+        console.log('DayView - Fallback filtered activities:', filteredActivities);
         setHierarchicalActivities(filteredActivities);
       }
     };
@@ -76,9 +82,16 @@ const DayView: React.FC<DayViewProps> = ({
 
   // Use hierarchical activities if available, otherwise filter regular activities by date
   const dateStr = format(date, 'yyyy-MM-dd');
+  console.log('DayView - Current dateStr:', dateStr);
+  
   const activitiesToShow = hierarchicalActivities.length > 0 
     ? hierarchicalActivities 
-    : activities.filter(activity => activity.date === dateStr);
+    : activities.filter(activity => {
+        console.log('DayView - Activity comparison:', activity.date, '===', dateStr, '?', activity.date === dateStr);
+        return activity.date === dateStr;
+      });
+
+  console.log('DayView - Final activities to show:', activitiesToShow);
 
   return (
     <div className="h-full flex flex-col">

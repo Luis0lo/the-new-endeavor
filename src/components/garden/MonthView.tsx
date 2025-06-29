@@ -37,9 +37,10 @@ const MonthView: React.FC<MonthViewProps> = ({
   };
 
   const getActivitiesForDay = (day: Date) => {
+    const dayString = format(day, 'yyyy-MM-dd');
     return activities.filter(activity => {
-      const activityDate = new Date(activity.date);
-      return isSameDay(activityDate, day);
+      // Ensure we're comparing date strings consistently
+      return activity.date === dayString;
     });
   };
 
@@ -69,6 +70,13 @@ const MonthView: React.FC<MonthViewProps> = ({
 
   const weeks = getDaysInMonth();
   const today = new Date();
+
+  const handleDayClick = (day: Date) => {
+    // Create a new date object to ensure we're passing the correct date
+    const selectedDate = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+    console.log('MonthView - Day clicked:', format(selectedDate, 'yyyy-MM-dd'));
+    onSelectDay(selectedDate);
+  };
 
   return (
     <div className="w-full h-full">
@@ -106,7 +114,7 @@ const MonthView: React.FC<MonthViewProps> = ({
                     ${isToday ? 'ring-2 ring-primary rounded-md' : ''}
                     hover:bg-muted/10 hover:ring-1 hover:ring-primary hover:rounded-md 
                     hover:shadow-sm cursor-pointer transition-all m-0.5`}
-                  onClick={() => onSelectDay(day)}
+                  onClick={() => handleDayClick(day)}
                 >
                   <div className={`text-right p-1 ${
                     isToday ? 'font-bold text-primary' : ''
