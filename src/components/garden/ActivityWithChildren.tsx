@@ -63,111 +63,125 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
     }
   };
 
-  const renderActivity = (act: GardenActivity, isChild: boolean = false) => (
-    <div 
-      key={act.id}
-      className={`${isChild ? 'ml-6 border-l-2 border-gray-200 pl-4' : ''}`}
-    >
-      <Card className={`${act.completed ? 'opacity-60' : ''} ${isChild ? 'bg-gray-50' : ''}`}>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start space-x-3 flex-1">
-              <Checkbox
-                checked={act.completed || false}
-                onCheckedChange={() => onToggleComplete(act)}
-                className="mt-1"
-              />
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2 mb-2">
-                  {act.has_children && !isChild && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleToggleExpanded}
-                      className="p-0 h-6 w-6"
-                    >
-                      {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </Button>
-                  )}
-                  
-                  <h3 className={`font-medium ${act.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                    {act.title}
-                  </h3>
-                  
-                  {act.has_children && !isChild && (
-                    <Badge variant="secondary" className="text-xs">
-                      {act.children?.length || 0} subtasks
-                    </Badge>
-                  )}
-                </div>
+  const renderActivity = (act: GardenActivity, isChild: boolean = false) => {
+    // Validate activity data
+    if (!act || !act.id || !act.title) {
+      console.warn('Invalid activity data:', act);
+      return null;
+    }
+
+    return (
+      <div 
+        key={act.id}
+        className={`${isChild ? 'ml-6 border-l-2 border-gray-200 pl-4' : ''}`}
+      >
+        <Card className={`${act.completed ? 'opacity-60' : ''} ${isChild ? 'bg-gray-50' : ''}`}>
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-3 flex-1">
+                <Checkbox
+                  checked={Boolean(act.completed)}
+                  onCheckedChange={() => onToggleComplete(act)}
+                  className="mt-1"
+                />
                 
-                {act.description && (
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {act.description}
-                  </p>
-                )}
-                
-                <div className="flex items-center space-x-2 text-sm">
-                  {act.activity_time && (
-                    <div className="flex items-center space-x-1 text-gray-500">
-                      <Clock className="h-3 w-3" />
-                      <span>{format(new Date(`2000-01-01T${act.activity_time}`), 'h:mm a')}</span>
-                    </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    {act.has_children && !isChild && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleToggleExpanded}
+                        className="p-0 h-6 w-6"
+                      >
+                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </Button>
+                    )}
+                    
+                    <h3 className={`font-medium ${act.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                      {act.title}
+                    </h3>
+                    
+                    {act.has_children && !isChild && (
+                      <Badge variant="secondary" className="text-xs">
+                        {act.children?.length || 0} subtasks
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  {act.description && (
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {act.description}
+                    </p>
                   )}
                   
-                  {act.priority && (
-                    <Badge variant="outline" className={getPriorityColor(act.priority)}>
-                      {act.priority}
-                    </Badge>
-                  )}
-                  
-                  {act.status && (
-                    <Badge variant="outline" className={getStatusColor(act.status)}>
-                      {act.status}
-                    </Badge>
-                  )}
-                  
-                  {act.action && act.action !== 'other' && (
-                    <Badge variant="outline">
-                      {act.action}
-                    </Badge>
-                  )}
+                  <div className="flex items-center space-x-2 text-sm">
+                    {act.activity_time && (
+                      <div className="flex items-center space-x-1 text-gray-500">
+                        <Clock className="h-3 w-3" />
+                        <span>{format(new Date(`2000-01-01T${act.activity_time}`), 'h:mm a')}</span>
+                      </div>
+                    )}
+                    
+                    {act.priority && (
+                      <Badge variant="outline" className={getPriorityColor(act.priority)}>
+                        {act.priority}
+                      </Badge>
+                    )}
+                    
+                    {act.status && (
+                      <Badge variant="outline" className={getStatusColor(act.status)}>
+                        {act.status}
+                      </Badge>
+                    )}
+                    
+                    {act.action && act.action !== 'other' && (
+                      <Badge variant="outline">
+                        {act.action}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEditActivity(act)}>
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                {!isChild && (
-                  <DropdownMenuItem onClick={() => onAddChildActivity(act)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Subtask
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEditActivity(act)}>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem 
-                  onClick={() => onDeleteActivity(act.id)}
-                  className="text-red-600 focus:text-red-600"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+                  {!isChild && (
+                    <DropdownMenuItem onClick={() => onAddChildActivity(act)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Subtask
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem 
+                    onClick={() => onDeleteActivity(act.id)}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  // Validate main activity
+  if (!activity || !activity.id || !activity.title) {
+    console.warn('Invalid main activity data:', activity);
+    return null;
+  }
 
   return (
     <div className="space-y-2">
@@ -176,6 +190,7 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
       {activity.has_children && isExpanded && activity.children && (
         <div className="space-y-2">
           {activity.children
+            .filter(child => child && child.id && child.title) // Filter out invalid children
             .sort((a, b) => (a.activity_order || 0) - (b.activity_order || 0))
             .map(child => renderActivity(child, true))}
         </div>

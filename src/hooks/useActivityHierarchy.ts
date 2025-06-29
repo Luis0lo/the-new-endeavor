@@ -30,22 +30,22 @@ export const useActivityHierarchy = () => {
       data?.forEach((activity: any) => {
         const mappedActivity: GardenActivity = {
           id: activity.id,
-          title: activity.title,
-          description: activity.description || "",
+          title: activity.title || 'Untitled',
+          description: activity.description || '',
           date: activity.scheduled_date,
           activity_time: activity.activity_time,
-          completed: activity.completed || false,
+          completed: Boolean(activity.completed),
           category_id: activity.category_id,
-          priority: activity.priority as "high" | "normal" | "low" || "normal",
-          status: activity.status as "pending" | "in_progress" | "done" || "pending",
+          priority: (activity.priority as "high" | "normal" | "low") || "normal",
+          status: (activity.status as "pending" | "in_progress" | "done") || "pending",
           outcome_rating: activity.outcome_rating,
           outcome_log: activity.outcome_log,
-          track: activity.track,
-          action: activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other" || "other",
+          track: Boolean(activity.track),
+          action: (activity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other",
           parent_activity_id: activity.parent_activity_id,
-          has_children: activity.has_children,
-          activity_order: activity.activity_order,
-          depth_level: activity.depth_level,
+          has_children: Boolean(activity.has_children),
+          activity_order: activity.activity_order || 0,
+          depth_level: activity.depth_level || 0,
           children: []
         };
 
@@ -72,6 +72,7 @@ export const useActivityHierarchy = () => {
 
       return activities;
     } catch (error: any) {
+      console.error('Error fetching activities with children:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to fetch activities",
@@ -126,7 +127,8 @@ export const useActivityHierarchy = () => {
           parent_activity_id: parentActivity.id,
           activity_order: nextOrder,
           depth_level: (parentActivity.depth_level || 0) + 1,
-          completed: false
+          completed: false,
+          has_children: false
         });
 
       if (error) throw error;
@@ -138,6 +140,7 @@ export const useActivityHierarchy = () => {
 
       return true;
     } catch (error: any) {
+      console.error('Error creating child activity:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create subtask",
