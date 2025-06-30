@@ -15,53 +15,28 @@ export const useActivityHierarchy = () => {
       const dateStr = format(date, 'yyyy-MM-dd');
       console.log('useActivityHierarchy - Fetching for date:', dateStr);
       
-      // Fetch all activities for the specific date - both parent activities and child activities
-      const { data, error } = await supabase
+      // First, get all activities for the specific date
+      const { data: activitiesForDate, error: activitiesError } = await supabase
         .from('garden_activities')
         .select('*')
         .eq('scheduled_date', dateStr)
         .order('activity_order', { ascending: true });
 
-      if (error) throw error;
+      if (activitiesError) throw activitiesError;
 
-      console.log('useActivityHierarchy - Raw data from DB:', data);
+      console.log('useActivityHierarchy - Activities for date:', activitiesForDate);
 
-      if (!data || data.length === 0) {
+      if (!activitiesForDate || activitiesForDate.length === 0) {
         console.log('useActivityHierarchy - No activities found for date:', dateStr);
         return [];
       }
 
-      // For activities on this date, we need to:
-      // 1. Show parent activities with their children (only children on the same date)
-      // 2. Show child activities as standalone if they're on a different date than their parent
-
       const activities: GardenActivity[] = [];
-      const childrenMap = new Map<string, GardenActivity[]>();
+      const parentIdsOnThisDate = new Set();
+      const childActivitiesOnThisDate = new Map<string, GardenActivity[]>();
 
-      // Get all parent activities that have children on this date
-      const parentIds = data
-        .filter(activity => activity.parent_activity_id)
-        .map(activity => activity.parent_activity_id);
-
-      let parentActivitiesOnSameDate: any[] = [];
-      if (parentIds.length > 0) {
-        const { data: parentData } = await supabase
-          .from('garden_activities')
-          .select('*')
-          .in('id', parentIds)
-          .eq('scheduled_date', dateStr);
-        
-        parentActivitiesOnSameDate = parentData || [];
-      }
-
-      // First pass: separate parents and children
-      data.forEach((activity: any) => {
-        // Double-check that the activity is for the correct date
-        if (activity.scheduled_date !== dateStr) {
-          console.warn('useActivityHierarchy - Activity has wrong date:', activity.scheduled_date, 'expected:', dateStr);
-          return; // Skip this activity
-        }
-
+      // Process activities for this date
+      for (const activity of activitiesForDate) {
         const mappedActivity: GardenActivity = {
           id: activity.id,
           title: activity.title || 'Untitled',
@@ -84,60 +59,81 @@ export const useActivityHierarchy = () => {
         };
 
         if (activity.parent_activity_id) {
-          // This is a child activity
-          // Check if its parent is on the same date
-          const parentOnSameDate = parentActivitiesOnSameDate.find(p => p.id === activity.parent_activity_id);
+          // This is a child activity - check if parent is on the same date
+          const parentOnSameDate = activitiesForDate.find(p => p.id === activity.parent_activity_id);
           
           if (parentOnSameDate) {
             // Parent is on same date, add as child
-            if (!childrenMap.has(activity.parent_activity_id)) {
-              childrenMap.set(activity.parent_activity_id, []);
+            if (!childActivitiesOnThisDate.has(activity.parent_activity_id)) {
+              childActivitiesOnThisDate.set(activity.parent_activity_id, []);
             }
-            childrenMap.get(activity.parent_activity_id)!.push(mappedActivity);
+            childActivitiesOnThisDate.get(activity.parent_activity_id)!.push(mappedActivity);
+            parentIdsOnThisDate.add(activity.parent_activity_id);
           } else {
             // Parent is on different date, show as standalone activity
             activities.push(mappedActivity);
           }
         } else {
-          // This is a parent/root activity
+          // This is a root activity
           activities.push(mappedActivity);
         }
-      });
+      }
 
-      // Add parent activities that are on the same date
-      parentActivitiesOnSameDate.forEach((parentActivity: any) => {
-        // Check if we already added this parent (it might have been added as a root activity)
-        if (!activities.find(a => a.id === parentActivity.id)) {
-          const mappedParent: GardenActivity = {
-            id: parentActivity.id,
-            title: parentActivity.title || 'Untitled',
-            description: parentActivity.description || '',
-            date: parentActivity.scheduled_date,
-            activity_time: parentActivity.activity_time,
-            completed: Boolean(parentActivity.completed),
-            category_id: parentActivity.category_id,
-            priority: (parentActivity.priority as "high" | "normal" | "low") || "normal",
-            status: (parentActivity.status as "pending" | "in_progress" | "done") || "pending",
-            outcome_rating: parentActivity.outcome_rating,
-            outcome_log: parentActivity.outcome_log,
-            track: Boolean(parentActivity.track),
-            action: (parentActivity.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other",
-            parent_activity_id: parentActivity.parent_activity_id,
-            has_children: Boolean(parentActivity.has_children),
-            activity_order: parentActivity.activity_order || 0,
-            depth_level: parentActivity.depth_level || 0,
-            children: []
-          };
-          activities.push(mappedParent);
+      // Now fetch children for parent activities that are on this date
+      if (parentIdsOnThisDate.size > 0) {
+        const parentIds = Array.from(parentIdsOnThisDate);
+        console.log('useActivityHierarchy - Fetching children for parents:', parentIds);
+        
+        const { data: childrenData, error: childrenError } = await supabase
+          .from('garden_activities')
+          .select('*')
+          .in('parent_activity_id', parentIds)
+          .order('activity_order', { ascending: true });
+
+        if (childrenError) {
+          console.error('Error fetching children:', childrenError);
+        } else if (childrenData) {
+          console.log('useActivityHierarchy - Found children:', childrenData);
+          
+          // Group children by parent
+          for (const child of childrenData) {
+            if (!childActivitiesOnThisDate.has(child.parent_activity_id)) {
+              childActivitiesOnThisDate.set(child.parent_activity_id, []);
+            }
+            
+            const mappedChild: GardenActivity = {
+              id: child.id,
+              title: child.title || 'Untitled',
+              description: child.description || '',
+              date: child.scheduled_date,
+              activity_time: child.activity_time,
+              completed: Boolean(child.completed),
+              category_id: child.category_id,
+              priority: (child.priority as "high" | "normal" | "low") || "normal",
+              status: (child.status as "pending" | "in_progress" | "done") || "pending",
+              outcome_rating: child.outcome_rating,
+              outcome_log: child.outcome_log,
+              track: Boolean(child.track),
+              action: (child.action as "plant" | "transplant" | "seed" | "harvest" | "water" | "fertilize" | "prune" | "other") || "other",
+              parent_activity_id: child.parent_activity_id,
+              has_children: Boolean(child.has_children),
+              activity_order: child.activity_order || 0,
+              depth_level: child.depth_level || 0,
+              children: []
+            };
+            
+            childActivitiesOnThisDate.get(child.parent_activity_id)!.push(mappedChild);
+          }
         }
-      });
+      }
 
-      // Second pass: attach children to parents
+      // Attach children to their parents
       activities.forEach(activity => {
-        if (activity.has_children && childrenMap.has(activity.id)) {
-          activity.children = childrenMap.get(activity.id)!.sort(
+        if (activity.has_children && childActivitiesOnThisDate.has(activity.id)) {
+          activity.children = childActivitiesOnThisDate.get(activity.id)!.sort(
             (a, b) => (a.activity_order || 0) - (b.activity_order || 0)
           );
+          console.log(`useActivityHierarchy - Attached ${activity.children.length} children to activity:`, activity.title);
         }
       });
 
@@ -192,7 +188,7 @@ export const useActivityHierarchy = () => {
         .insert({
           title: childData.title || 'Subtask',
           description: childData.description || '',
-          scheduled_date: scheduledDate, // Allow different date from parent
+          scheduled_date: scheduledDate,
           activity_time: childData.activity_time || parentActivity.activity_time,
           priority: childData.priority || parentActivity.priority || 'normal',
           status: childData.status || 'pending',
@@ -207,6 +203,14 @@ export const useActivityHierarchy = () => {
         });
 
       if (error) throw error;
+
+      // Update parent to mark it has children if it doesn't already
+      if (!parentActivity.has_children) {
+        await supabase
+          .from('garden_activities')
+          .update({ has_children: true })
+          .eq('id', parentActivity.id);
+      }
 
       toast({
         title: "Subtask created",
