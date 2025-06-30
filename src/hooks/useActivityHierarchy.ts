@@ -32,7 +32,7 @@ export const useActivityHierarchy = () => {
       }
 
       const activities: GardenActivity[] = [];
-      const parentIdsOnThisDate = new Set();
+      const parentIdsOnThisDate = new Set<string>();
       const childActivitiesOnThisDate = new Map<string, GardenActivity[]>();
 
       // Process activities for this date
@@ -73,15 +73,19 @@ export const useActivityHierarchy = () => {
             // Parent is on different date, show as standalone activity
             activities.push(mappedActivity);
           }
+        } else if (activity.has_children) {
+          // This is a parent activity with children
+          parentIdsOnThisDate.add(activity.id);
+          activities.push(mappedActivity);
         } else {
-          // This is a root activity
+          // This is a regular standalone activity
           activities.push(mappedActivity);
         }
       }
 
-      // Now fetch children for parent activities that are on this date
+      // Now fetch children for parent activities
       if (parentIdsOnThisDate.size > 0) {
-        const parentIds = Array.from(parentIdsOnThisDate);
+        const parentIds = Array.from(parentIdsOnThisDate) as string[];
         console.log('useActivityHierarchy - Fetching children for parents:', parentIds);
         
         const { data: childrenData, error: childrenError } = await supabase
