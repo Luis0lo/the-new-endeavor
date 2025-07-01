@@ -27,6 +27,7 @@ import {
 import { User } from '@supabase/supabase-js';
 import { useTheme } from '@/hooks/use-theme';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { isDevelopment } from '@/utils/environment';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -107,7 +108,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: Archive,
       path: '/dashboard/inventory'
     },
-    // Garden Layout item removed - can still be accessed via URL: /dashboard/garden-layout
+    // Conditionally add Garden Layout only in development
+    ...(isDevelopment() ? [{
+      title: 'Garden Layout',
+      icon: LayoutGrid,
+      path: '/dashboard/garden-layout'
+    }] : []),
     {
       title: 'Companion Plants',
       icon: Flower2,
@@ -243,14 +249,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         <span>{item.title}</span>
                       </Link>
                     ))}
-                    {user && (
-                      <Link to="/dashboard" className="transition-colors hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
-                        Dashboard
-                      </Link>
-                    )}
-                    <Link to="/cookie-policy" className="transition-colors hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
-                      Cookie Policy
-                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-3 px-4 py-3 text-foreground hover:bg-accent mt-auto"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Log Out</span>
+                    </button>
                   </div>
                 </SheetContent>
             </Sheet>
