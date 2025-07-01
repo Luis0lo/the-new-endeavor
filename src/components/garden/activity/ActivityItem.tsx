@@ -38,8 +38,17 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
   }
 
   const handleOpenInDayView = (act: GardenActivity) => {
-    const dateParam = act.date;
-    navigate(`/dashboard/calendar?date=${dateParam}&view=day`);
+    console.log('Opening day view for activity:', act);
+    console.log('Activity date:', act.date);
+    
+    // Ensure we have a valid date
+    if (!act.date) {
+      console.error('Activity has no date:', act);
+      return;
+    }
+    
+    // Navigate to the calendar page with the specific date and day view
+    navigate(`/dashboard/calendar?date=${act.date}&view=day`);
   };
 
   const handleToggleExpanded = () => {
