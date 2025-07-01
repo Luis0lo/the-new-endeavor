@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { GardenActivity } from '@/types/garden';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +14,8 @@ import {
   ChevronDown, 
   ChevronRight,
   Plus,
-  MoreVertical
+  MoreVertical,
+  Calendar
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -37,6 +40,7 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
   onAddChildActivity
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
@@ -60,6 +64,11 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
     if (activity.has_children) {
       setIsExpanded(!isExpanded);
     }
+  };
+
+  const handleOpenInDayView = (act: GardenActivity) => {
+    const dateParam = act.date;
+    navigate(`/dashboard/calendar?date=${dateParam}&view=day`);
   };
 
   // Check if this is a subtask being displayed as standalone (parent on different date)
@@ -103,6 +112,19 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
                     <h3 className={`font-medium ${act.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                       {act.title}
                     </h3>
+                    
+                    {/* Show day view button for child activities */}
+                    {isChild && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenInDayView(act)}
+                        className="p-0 h-6 w-6 text-gray-500 hover:text-gray-700"
+                        title="Open in day view"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </Button>
+                    )}
                     
                     {/* Show subtask indicator when displayed as standalone */}
                     {isStandaloneSubtask && !isChild && (
