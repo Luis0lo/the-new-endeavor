@@ -67,7 +67,7 @@ const ActivityWithChildren: React.FC<ActivityWithChildrenProps> = ({
   };
 
   const handleOpenInDayView = (act: GardenActivity) => {
-    const dateParam = act.date;
+    const dateParam = act.scheduled_date;
     navigate(`/dashboard/calendar?date=${dateParam}&view=day`);
   };
 
