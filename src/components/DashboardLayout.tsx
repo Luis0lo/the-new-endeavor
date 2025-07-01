@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,11 +107,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: Archive,
       path: '/dashboard/inventory'
     },
-    {
-      title: 'Garden Layout',
-      icon: LayoutGrid,
-      path: '/dashboard/garden-layout'
-    },
+    // Garden Layout item removed - can still be accessed via URL: /dashboard/garden-layout
     {
       title: 'Companion Plants',
       icon: Flower2,
@@ -248,13 +243,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         <span>{item.title}</span>
                       </Link>
                     ))}
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center gap-3 px-4 py-3 text-foreground hover:bg-accent mt-auto"
-                    >
-                      <LogOut className="h-5 w-5" />
-                      <span>Log Out</span>
-                    </button>
+                    {user && (
+                      <Link to="/dashboard" className="transition-colors hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
+                        Dashboard
+                      </Link>
+                    )}
+                    <Link to="/cookie-policy" className="transition-colors hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
+                      Cookie Policy
+                    </Link>
                   </div>
                 </SheetContent>
             </Sheet>
