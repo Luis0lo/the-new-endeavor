@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 /**
  * Utility functions for environment detection
  */
@@ -38,5 +40,5 @@ export const DevOnly: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (!isDevelopment()) {
     return null;
   }
-  return <>{children}</>;
+  return React.createElement(React.Fragment, null, children);
 };
