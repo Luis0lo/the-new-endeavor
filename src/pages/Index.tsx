@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/MainLayout';
-import { Flower2, Calendar, Book, ArrowRight } from 'lucide-react';
+import { Flower2, Calendar, Book, ArrowRight, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { SEO } from '@/components/SEO';
@@ -63,6 +63,18 @@ const Index = () => {
                 className="rounded-xl object-cover aspect-square sm:aspect-video lg:aspect-square"
                 style={{ objectFit: 'cover', maxHeight: '500px', width: '100%' }}
               />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Beta Disclaimer Section */}
+      <section className="bg-amber-50 border-y border-amber-200 py-6">
+        <div className="container px-4 md:px-6">
+          <div className="flex items-center justify-center gap-3 text-center">
+            <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div className="text-amber-800">
+              <span className="font-semibold">Beta Version:</span> This is a development version intended for building and testing the final product. Features may be incomplete or subject to change.
             </div>
           </div>
         </div>
