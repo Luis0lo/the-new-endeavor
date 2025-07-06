@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +15,8 @@ import {
   ChevronRight,
   Sprout,
   LayoutGrid,
-  BookOpen
+  BookOpen,
+  Shield
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -28,6 +30,7 @@ import { User } from '@supabase/supabase-js';
 import { useTheme } from '@/hooks/use-theme';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { isDevelopment } from '@/utils/environment';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -44,6 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAdmin } = useAdminCheck();
   
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -124,6 +128,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: BookOpen,
       path: '/dashboard/resources'
     },
+    // Add admin link for admin users
+    ...(isAdmin ? [{
+      title: 'Admin',
+      icon: Shield,
+      path: '/admin'
+    }] : []),
     {
       title: 'Account Settings',
       icon: Settings,
