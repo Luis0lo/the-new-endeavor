@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import Footer from '@/components/Footer';
 import { User } from '@supabase/supabase-js';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/ui/theme-provider';
 
 interface MainLayoutProps {
   children: React.ReactNode;
