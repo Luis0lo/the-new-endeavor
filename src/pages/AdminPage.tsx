@@ -15,10 +15,7 @@ interface UserRole {
   user_id: string;
   role: string;
   created_at: string;
-  profiles?: {
-    username: string;
-    id: string;
-  };
+  username: string;
 }
 
 const AdminPage = () => {
@@ -47,27 +44,44 @@ const AdminPage = () => {
   const fetchUserRoles = async () => {
     try {
       setLoadingRoles(true);
-      const { data, error } = await supabase
+      
+      // Get user roles
+      const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
-        .select(`
-          *,
-          profiles (
-            username,
-            id
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching user roles:', error);
+      if (rolesError) {
+        console.error('Error fetching user roles:', rolesError);
         toast({
           title: "Error",
           description: "Failed to load user roles.",
           variant: "destructive"
         });
-      } else {
-        setUserRoles(data || []);
+        return;
       }
+
+      // Get profiles for each user_id
+      const userIds = rolesData?.map(role => role.user_id) || [];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+      }
+
+      // Combine the data
+      const combinedData = rolesData?.map(role => {
+        const profile = profilesData?.find(p => p.id === role.user_id);
+        return {
+          ...role,
+          username: profile?.username || 'Unknown User'
+        };
+      }) || [];
+
+      setUserRoles(combinedData);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -192,7 +206,7 @@ const AdminPage = () => {
                       <div className="flex items-center gap-4">
                         <div>
                           <p className="font-medium">
-                            {userRole.profiles?.username || 'Unknown User'}
+                            {userRole.username}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             ID: {userRole.user_id.slice(0, 8)}...
