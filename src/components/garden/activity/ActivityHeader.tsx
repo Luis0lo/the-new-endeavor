@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GardenActivity } from '@/types/garden';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,22 @@ const ActivityHeader: React.FC<ActivityHeaderProps> = ({
   onToggleExpanded,
   onOpenInDayView
 }) => {
+  const navigate = useNavigate();
+
+  const handleCalendarClick = () => {
+    console.log('Calendar icon clicked for activity:', activity);
+    console.log('Activity date:', activity.date);
+    
+    // Ensure we have a valid date
+    if (!activity.date) {
+      console.error('Activity has no date:', activity);
+      return;
+    }
+    
+    // Navigate directly to the calendar page with the activity's specific date and day view
+    navigate(`/dashboard/calendar?date=${activity.date}&view=day`);
+  };
+
   return (
     <div className="flex items-center space-x-2 mb-2">
       {activity.has_children && !isChild && (
@@ -48,7 +65,7 @@ const ActivityHeader: React.FC<ActivityHeaderProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onOpenInDayView(activity)}
+          onClick={handleCalendarClick}
           className="p-0 h-6 w-6 text-gray-500 hover:text-gray-700"
           title="Open in day view"
         >
