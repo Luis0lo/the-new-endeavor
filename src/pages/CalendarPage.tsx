@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import DashboardLayout from '@/components/DashboardLayout';
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
+import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, parseISO } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +17,7 @@ import MonthView from '@/components/garden/MonthView';
 import { useDefaultCalendarView, DefaultCalendarView } from '@/hooks/use-default-calendar-view';
 
 const CalendarPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [date, setDate] = useState<Date>(new Date());
   const { defaultCalendarView } = useDefaultCalendarView();
@@ -26,10 +28,35 @@ const CalendarPage = () => {
   const [formDate, setFormDate] = useState<Date>(new Date());
   const [dataSeeded, setDataSeeded] = useState(false);
   
-  // Use the default calendar view when it loads
+  // Initialize date and view from URL parameters
   useEffect(() => {
-    setView(defaultCalendarView);
-  }, [defaultCalendarView]);
+    const urlDate = searchParams.get('date');
+    const urlView = searchParams.get('view') as DefaultCalendarView;
+    
+    if (urlDate) {
+      try {
+        const parsedDate = parseISO(urlDate);
+        if (!isNaN(parsedDate.getTime())) {
+          setDate(parsedDate);
+        }
+      } catch (error) {
+        console.error('Error parsing date from URL:', error);
+      }
+    }
+    
+    if (urlView && ['month', 'week', 'day'].includes(urlView)) {
+      setView(urlView);
+    } else {
+      setView(defaultCalendarView);
+    }
+  }, [searchParams, defaultCalendarView]);
+  
+  // Use the default calendar view when it loads (only if no URL view is specified)
+  useEffect(() => {
+    if (!searchParams.get('view')) {
+      setView(defaultCalendarView);
+    }
+  }, [defaultCalendarView, searchParams]);
   
   // Check if user is logged in
   useEffect(() => {
