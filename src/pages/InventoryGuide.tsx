@@ -3,7 +3,7 @@ import React from 'react';
 import MainLayout from '@/components/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Seedling, Wrench, ArrowRight } from 'lucide-react';
+import { Package, Sprout, Wrench, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 
@@ -28,7 +28,7 @@ const InventoryGuide = () => {
           <Card>
             <CardHeader>
               <div className="rounded-full bg-primary/10 p-2 w-fit">
-                <Seedling className="h-6 w-6 text-primary" />
+                <Sprout className="h-6 w-6 text-primary" />
               </div>
               <CardTitle>Seeds & Plants</CardTitle>
             </CardHeader>
