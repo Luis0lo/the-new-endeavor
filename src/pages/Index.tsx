@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/MainLayout';
-import { Flower2, Calendar, Book, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Calendar, Package, ArrowRight, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { SEO } from '@/components/SEO';
@@ -93,16 +93,21 @@ const Index = () => {
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-3">
-            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-6">
+            <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6">
               <div className="rounded-full border bg-background p-3">
-                <Flower2 className="h-6 w-6" />
+                <Calendar className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold">Plant Database</h3>
+              <h3 className="text-xl font-bold">Seed Calendar</h3>
               <p className="text-center text-gray-500 dark:text-gray-400">
-                Explore our extensive database of plants with growing tips and care instructions.
+                Plan when to sow, transplant, and harvest your vegetables with our comprehensive seed calendar.
               </p>
+              <Link to="/seed-calendar-guide">
+                <Button variant="outline" size="sm">
+                  Learn More
+                </Button>
+              </Link>
             </div>
-            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-6">
+            <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6">
               <div className="rounded-full border bg-background p-3">
                 <Calendar className="h-6 w-6" />
               </div>
@@ -110,15 +115,25 @@ const Index = () => {
               <p className="text-center text-gray-500 dark:text-gray-400">
                 Plan your garden activities with our smart calendar and get reminders.
               </p>
+              <Link to="/garden-calendar-guide">
+                <Button variant="outline" size="sm">
+                  Learn More
+                </Button>
+              </Link>
             </div>
-            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-6">
+            <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6">
               <div className="rounded-full border bg-background p-3">
-                <Book className="h-6 w-6" />
+                <Package className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold">Gardening Guide</h3>
+              <h3 className="text-xl font-bold">Inventory</h3>
               <p className="text-center text-gray-500 dark:text-gray-400">
-                Access helpful gardening guides and tips from our plant care experts.
+                Keep track of your seeds, plants, and gardening tools with our inventory management system.
               </p>
+              <Link to="/inventory-guide">
+                <Button variant="outline" size="sm">
+                  Learn More
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -26,6 +26,9 @@ import TermsOfService from "./pages/TermsOfService";
 import Sitemap from "./pages/Sitemap";
 import NotFound from "./pages/NotFound";
 import Greenlink from "./pages/Greenlink";
+import SeedCalendarGuide from "./pages/SeedCalendarGuide";
+import GardenCalendarGuide from "./pages/GardenCalendarGuide";
+import InventoryGuide from "./pages/InventoryGuide";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +56,9 @@ const App = () => (
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/greenlink" element={<Greenlink />} />
+              <Route path="/seed-calendar-guide" element={<SeedCalendarGuide />} />
+              <Route path="/garden-calendar-guide" element={<GardenCalendarGuide />} />
+              <Route path="/inventory-guide" element={<InventoryGuide />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
