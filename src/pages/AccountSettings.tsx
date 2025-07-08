@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,7 +31,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/ui/theme-provider';
 import { useDefaultLandingPage } from '@/hooks/use-default-landing-page';
 import { DefaultLandingPage } from '@/hooks/auth/types';
 import { useDefaultCalendarView, DefaultCalendarView } from '@/hooks/use-default-calendar-view';
