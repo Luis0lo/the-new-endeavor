@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Footer from '@/components/Footer';
 import { User } from '@supabase/supabase-js';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Leaf } from 'lucide-react';
 import { useTheme } from '@/components/ui/theme-provider';
 
 interface MainLayoutProps {
@@ -51,11 +51,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="container flex h-16 items-center">
           <div className="mr-4 hidden md:flex">
             <Link to="/" className="mr-6 flex items-center space-x-2">
-              <img 
-                src="/lovable-uploads/cd6396a1-0ff4-4b6f-80a6-c4bb67137f91.png" 
-                alt="2day garden" 
-                className="h-6 w-6"
-              />
+              <Leaf className="h-6 w-6 text-green-600" />
               <span className="text-xl font-bold">2day garden</span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">

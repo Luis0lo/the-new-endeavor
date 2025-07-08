@@ -16,7 +16,8 @@ import {
   Sprout,
   LayoutGrid,
   BookOpen,
-  Shield
+  Shield,
+  Leaf
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -167,9 +168,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               to="/" 
               className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
             >
-              <span className="text-primary text-xl font-bold">
-                {sidebarCollapsed ? "GA" : "2day Garden"}
-              </span>
+              {sidebarCollapsed ? (
+                <Leaf className="text-green-600 text-xl font-bold h-6 w-6" />
+              ) : (
+                <>
+                  <Leaf className="text-green-600 h-6 w-6" />
+                  <span className="text-primary text-xl font-bold">2day Garden</span>
+                </>
+              )}
             </Link>
             <Button
               variant="ghost"
@@ -233,6 +239,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="fixed top-0 left-0 right-0 z-40 h-14 border-b bg-background px-4">
           <div className="flex h-full items-center justify-between">
             <div className="flex items-center gap-2">
+              <Leaf className="text-green-600 h-6 w-6" />
               <span className="font-semibold">2day Garden</span>
             </div>
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -243,7 +250,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </SheetTrigger>
               <SheetContent side="left" className="w-[80%] max-w-[300px] p-0">
                   <SheetHeader className="p-4 border-b">
-                    <SheetTitle>2day Garden</SheetTitle>
+                    <SheetTitle className="flex items-center gap-2">
+                      <Leaf className="text-green-600 h-6 w-6" />
+                      2day Garden
+                    </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col py-2">
                     {navigationItems.map((item) => (
