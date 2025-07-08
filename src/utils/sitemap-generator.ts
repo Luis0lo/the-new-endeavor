@@ -18,6 +18,36 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
       priority: 1.0
     },
     {
+      loc: `${baseUrl}/about`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: 0.8
+    },
+    {
+      loc: `${baseUrl}/greenlink`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'weekly',
+      priority: 0.9
+    },
+    {
+      loc: `${baseUrl}/seed-calendar-guide`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: 0.7
+    },
+    {
+      loc: `${baseUrl}/garden-calendar-guide`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: 0.7
+    },
+    {
+      loc: `${baseUrl}/inventory-guide`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: 0.7
+    },
+    {
       loc: `${baseUrl}/sitemap`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'monthly',
@@ -27,19 +57,19 @@ export const generateSitemapXml = async (baseUrl: string): Promise<string> => {
       loc: `${baseUrl}/cookie-policy`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
-      priority: 0.5
+      priority: 0.3
     },
     {
       loc: `${baseUrl}/privacy-policy`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
-      priority: 0.5
+      priority: 0.3
     },
     {
       loc: `${baseUrl}/terms-of-service`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
-      priority: 0.5
+      priority: 0.3
     }
   ];
 
