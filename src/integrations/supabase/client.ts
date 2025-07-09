@@ -9,12 +9,14 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Get the current URL from the browser
 const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
-    // Get the site URL from the browser
-    const protocol = window.location.protocol;
-    const host = window.location.host;
-    return `${protocol}//${host}`;
+    // In production, use the production domain
+    if (window.location.hostname === '2daygarden.com') {
+      return 'https://2daygarden.com';
+    }
+    // For other environments, use the current origin
+    return window.location.origin;
   }
-  return 'http://localhost:3000'; // Default fallback for server-side
+  return 'https://2daygarden.com'; // Default to production URL for server-side
 };
 
 // Import the supabase client like this:
