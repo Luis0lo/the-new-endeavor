@@ -51,7 +51,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="container flex h-16 items-center">
           <div className="mr-4 hidden md:flex">
             <Link to="/" className="mr-6 flex items-center space-x-2">
-              <img src="/lovable-uploads/81741003-66f2-4950-a1f0-3860bf5a74cf.png" alt="2day garden" className="h-6 w-6" />
+              <img src="/lovable-uploads/8c01ede7-f70b-4f1d-ae07-ed4216e7a715.png" alt="2day garden" className="h-6 w-6" />
               <span className="text-xl font-bold">2day garden</span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
