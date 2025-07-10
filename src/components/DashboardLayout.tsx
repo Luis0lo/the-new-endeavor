@@ -168,10 +168,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2"}`}
             >
               {sidebarCollapsed ? (
-                <img src="/lovable-uploads/043b1c5e-6fd8-4ca5-973a-c2af90ca084c.png" alt="2day garden" className="h-6 w-6" />
+                <img src="/lovable-uploads/cd6396a1-0ff4-4b6f-80a6-c4bb67137f91.png" alt="2day garden" className="h-6 w-6" />
               ) : (
                 <>
-                  <img src="/lovable-uploads/043b1c5e-6fd8-4ca5-973a-c2af90ca084c.png" alt="2day garden" className="h-6 w-6" />
+                  <img src="/lovable-uploads/cd6396a1-0ff4-4b6f-80a6-c4bb67137f91.png" alt="2day garden" className="h-6 w-6" />
                   <span className="text-primary text-xl font-bold">2day Garden</span>
                 </>
               )}
@@ -238,7 +238,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="fixed top-0 left-0 right-0 z-40 h-14 border-b bg-background px-4">
           <div className="flex h-full items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/lovable-uploads/043b1c5e-6fd8-4ca5-973a-c2af90ca084c.png" alt="2day garden" className="h-6 w-6" />
+              <img src="/lovable-uploads/cd6396a1-0ff4-4b6f-80a6-c4bb67137f91.png" alt="2day garden" className="h-6 w-6" />
               <span className="font-semibold">2day Garden</span>
             </div>
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -250,7 +250,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <SheetContent side="left" className="w-[80%] max-w-[300px] p-0">
                   <SheetHeader className="p-4 border-b">
                     <SheetTitle className="flex items-center gap-2">
-                      <img src="/lovable-uploads/043b1c5e-6fd8-4ca5-973a-c2af90ca084c.png" alt="2day garden" className="h-6 w-6" />
+                      <img src="/lovable-uploads/cd6396a1-0ff4-4b6f-80a6-c4bb67137f91.png" alt="2day garden" className="h-6 w-6" />
                       2day Garden
                     </SheetTitle>
                   </SheetHeader>
