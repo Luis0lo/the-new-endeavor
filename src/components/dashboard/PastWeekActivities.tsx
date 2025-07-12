@@ -51,7 +51,7 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
         </Button>
       </div>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 w-full">
       {days.map((day) => {
         const key = format(day, "MM-dd");
         const activities = activitiesByDay[key] || [];
@@ -59,7 +59,7 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
         return (
           <div
             key={key}
-            className={`rounded-md p-2 min-h-[120px] border ${
+            className={`rounded-md p-2 min-h-[120px] border flex-1 ${
               hasActivities ? 'border-green-400 dark:border-green-500' : 'border-gray-300 dark:border-[#555555]'
             } bg-white dark:bg-[#333333]`}
           >
@@ -100,4 +100,3 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
 );
 
 export default PastWeekActivities;
-
