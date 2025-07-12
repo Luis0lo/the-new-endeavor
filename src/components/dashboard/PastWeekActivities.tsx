@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format, getYear } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
   onNextWeek,
   weekOffset = 0
 }) => (
-  <div className="bg-white dark:bg-[#221F26] rounded-lg shadow-sm border border-gray-200 dark:border-[#403E43] p-4 mt-2">
+  <div className="w-full bg-white dark:bg-[#221F26] rounded-lg shadow-sm border border-gray-200 dark:border-[#403E43] p-4 mt-2">
     <div className="flex items-center justify-between mb-2">
       <h3 className="text-xl font-semibold text-gray-900 dark:text-[#F1F1F1]">
         This week in past years {`(${Object.values(activitiesByDay).flat().length})`}
@@ -51,7 +50,7 @@ export const PastWeekActivities: React.FC<PastWeekActivitiesProps> = ({
         </Button>
       </div>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 w-full">
+    <div className="w-full grid grid-cols-1 md:grid-cols-7 gap-4">
       {days.map((day) => {
         const key = format(day, "MM-dd");
         const activities = activitiesByDay[key] || [];
